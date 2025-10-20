@@ -81,7 +81,14 @@ const LoginForm = () => {
 
       // Redirigir después de 2 segundos
       setTimeout(() => {
-        navigate("/");
+        // Si es rider, ir a mainscreen
+        // Si es shop, ir a perfil
+        const user = response.user;
+        if (user.user_type === "rider") {
+          navigate("/mainscreen");
+        } else {
+          navigate("/profile");
+        }
       }, 2000);
     } catch (error) {
       setErrorMessage(error.message || "Login failed. Please try again.");
