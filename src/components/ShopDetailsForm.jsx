@@ -11,7 +11,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import CategoryIcon from "@mui/icons-material/Category";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapboxClient from "@mapbox/mapbox-sdk/services/geocoding";
-import { registerShop } from "../services/authService";
+import { registerShopAndMark } from "../services/authService";
 
 const mapboxClient = MapboxClient({
   accessToken: import.meta.env.VITE_MAPBOX_TOKEN,
@@ -115,7 +115,7 @@ const ShopDetailsForm = () => {
       }
 
       // Llamada al backend
-      await registerShop(formData, userId);
+      await registerShopAndMark(formData, userId);
 
       setSuccessMessage("Shop and Mark registered successfully!");
       setTimeout(() => {

@@ -62,4 +62,19 @@ export const registerShop = async (shopData, userId) => {
   }
 };
 
+export const registerShopAndMark = async (shopData, userId) => {
+  try {
+    const response = await api.post(`/createMark/createMark/${userId}`, {
+      shopName: shopData.shopName,
+      shopType: shopData.shopType,
+      streetAddress: shopData.streetAddress,
+      lat: shopData.lat,
+      long: shopData.long,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
 export default api;
