@@ -3,56 +3,87 @@ import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function MapboxMobilePage() {
   const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [marks, setMarks] = useState([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
+  // Obtener usuario de localStorage
   useEffect(() => {
-    // 🔹 Obtener usuario de localStorage
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      navigate("/login"); // Si no hay usuario, redirigir
+      navigate("/login");
     }
   }, [navigate]);
 
+  // Traer marks desde la base de datos
+  useEffect(() => {
+    const fetchMarks = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/marks`
+        );
+        setMarks(response.data); // array de marks
+      } catch (err) {
+        console.error("Error fetching marks:", err);
+      }
+    };
+
+    fetchMarks();
+  }, []);
+
+  // Inicializar mapa solo una vez
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    // Token seguro desde .env
     mapboxgl.accessToken =
       import.meta.env.VITE_MAPBOX_TOKEN ||
       "pk.eyJ1IjoiYWxleGlzcG9saXRlY25pY3MiLCJhIjoiY21ndjZodXZsMDJ0NjJvc2dyNGd5MGpiZiJ9.IuBv2n2W9_9iDKcINK3Skw";
 
-    const map = new mapboxgl.Map({
+    mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/streets-v11",
-      center: [-3.7038, 40.4168], // Madrid
+      style: "mapbox://styles/mapbox/dark-v11",
+      center: [2.15899, 41.38879], // Barcelona
       zoom: 12,
-      pitch: 0,
-      bearing: 0,
       attributionControl: false,
     });
 
-    map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+    mapRef.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
-    new mapboxgl.Marker({ color: "#3b82f6" })
-      .setLngLat([-3.7038, 40.4168])
-      .addTo(map);
+    mapRef.current.on("load", () => setMapLoaded(true));
 
-    return () => map.remove();
+    return () => mapRef.current.remove();
   }, []);
+
+  // Colocar markers cuando mapa y marks estén listos
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current) return;
+
+    marks.forEach((mark) => {
+      const lat = parseFloat(mark.lat);
+      const long = parseFloat(mark.long);
+
+      if (!isNaN(lat) && !isNaN(long)) {
+        new mapboxgl.Marker({ color: "#3b82f6" })
+          .setLngLat([long, lat])
+          .addTo(mapRef.current);
+      }
+    });
+  }, [marks, mapLoaded]);
 
   return (
     <div className="flex flex-col w-screen h-[100dvh] bg-gray-50 relative overflow-hidden mobile-safe-area">
-      {/* Header fijo */}
+      {/* Header */}
       <header className="absolute top-0 left-0 w-full z-10 bg-white/90 backdrop-blur-md px-4 py-3 flex items-center justify-between shadow-sm">
         <h1 className="text-base font-semibold text-gray-800">Map</h1>
 
-        {/* Icono + nombre del usuario */}
         <Link
           to="/profile"
           className="flex flex-col items-center text-gray-700 hover:text-gray-900 transition-colors"
@@ -71,8 +102,6 @@ export default function MapboxMobilePage() {
               d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
             />
           </svg>
-
-          {/* Nombre del usuario debajo del icono */}
           {user && (
             <span className="text-xs font-medium text-gray-600 truncate max-w-[80px] text-center">
               {user.name}
@@ -81,7 +110,7 @@ export default function MapboxMobilePage() {
         </Link>
       </header>
 
-      {/* Mapa ocupa toda la pantalla */}
+      {/* Contenedor del mapa */}
       <div
         ref={mapContainerRef}
         id="mapbox-container"
@@ -95,7 +124,7 @@ export default function MapboxMobilePage() {
             padding-top: env(safe-area-inset-top);
           }
           #mapbox-container {
-            touch-action: none; /* Evita scroll accidental */
+            touch-action: none;
           }
           .touch-manipulation {
             touch-action: manipulation;
