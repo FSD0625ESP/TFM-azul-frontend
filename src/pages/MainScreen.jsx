@@ -28,7 +28,7 @@ export default function MapboxMobilePage() {
     const fetchMarks = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/marks`
+          `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/marks`
         );
         setMarks(response.data); // array de marks
       } catch (err) {
