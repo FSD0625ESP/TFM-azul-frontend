@@ -7,9 +7,10 @@ import {
   createTheme,
   CircularProgress,
 } from "@mui/material";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { loginUser } from "../services/authService";
+import { validateEmail, validatePassword } from "../utils/validation";
+import { LOGIN_INPUTS } from "../constants/inputConfigs";
+import { textFieldSx, buttonSx } from "../styles/commonStyles";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const LoginForm = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Actualizar datos del formulario cuando el usuario escribe
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -40,30 +42,21 @@ const LoginForm = () => {
     }
   };
 
-  // Validación de email
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  // Validaciones del formulario
+  // Validar que email y password sean válidos
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!isValidEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
 
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    }
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) newErrors.password = passwordError;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Enviar datos al backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccessMessage("");
@@ -78,9 +71,7 @@ const LoginForm = () => {
     try {
       const response = await loginUser(formData.email, formData.password);
 
-      setSuccessMessage(
-        response.message || "✅ Login successful! Redirecting..."
-      );
+      setSuccessMessage(response.message || "Login successful! Redirecting...");
 
       // Limpiar el formulario después del login exitoso
       setFormData({
@@ -93,7 +84,7 @@ const LoginForm = () => {
         navigate("/");
       }, 2000);
     } catch (error) {
-      setErrorMessage(error.message || "❌ Login failed. Please try again.");
+      setErrorMessage(error.message || "Login failed. Please try again.");
       console.error("Login error:", error);
     } finally {
       setLoading(false);
@@ -110,67 +101,11 @@ const LoginForm = () => {
   };
 
   const handleSignUp = () => {
-    navigate("/register");
-  };
-
-  // Estilos reutilizables para los TextFields
-  const textFieldSx = {
-    marginBottom: "16px",
-    "& .MuiOutlinedInput-root": {
-      height: "48px",
-      backgroundColor: "white",
-      borderRadius: "9999px",
-      "& fieldset": {
-        borderColor: "transparent",
-      },
-      "&:hover fieldset": {
-        borderColor: "transparent",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "transparent",
-      },
-    },
-    "& .MuiInputBase-input": {
-      color: "black",
-    },
-  };
-
-  // Estilos para botones
-  const buttonSx = {
-    height: "48px",
-    borderRadius: "9999px",
-    backgroundColor: "#123B7E",
-    color: "white",
-    fontSize: "16px",
-    fontWeight: "500",
-    textTransform: "none",
-    border: "none",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      backgroundColor: "#0d2a5c",
-    },
-    "&:disabled": {
-      opacity: 0.7,
-      cursor: "not-allowed",
-    },
+    navigate("/select-user-type");
   };
 
   // Configuración de inputs
-  const inputsConfig = [
-    {
-      name: "email",
-      type: "email",
-      placeholder: "Email",
-      icon: <EmailOutlinedIcon style={{ color: "black", fontSize: "20px" }} />,
-    },
-    {
-      name: "password",
-      type: "password",
-      placeholder: "Password",
-      icon: <LockOutlinedIcon style={{ color: "black", fontSize: "20px" }} />,
-    },
-  ];
+  const inputsConfig = LOGIN_INPUTS;
 
   return (
     <ThemeProvider theme={theme}>

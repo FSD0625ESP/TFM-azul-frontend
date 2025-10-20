@@ -11,14 +11,18 @@ const api = axios.create({
 // Servicio de registro
 export const registerUser = async (userData) => {
   try {
-    const response = await api.post("/usuarios/register", {
+    const userType = sessionStorage.getItem("userType");
+
+    const payload = {
       name: userData.name,
       email: userData.email,
       password: userData.password,
       phone: userData.phoneNumber ? parseInt(userData.phoneNumber) : null,
       photo: "",
-      user_type: null,
-    });
+      user_type: userType,
+    };
+
+    const response = await api.post("/usuarios/register", payload);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -37,6 +41,21 @@ export const loginUser = async (email, password) => {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
     }
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// Servicio para registrar tienda
+export const registerShop = async (shopData, userId) => {
+  try {
+    const response = await api.post("/shops/register", {
+      user: userId,
+      name: shopData.shopName,
+      address: shopData.streetAddress,
+      category: shopData.shopType,
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

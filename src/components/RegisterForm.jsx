@@ -7,11 +7,16 @@ import {
   createTheme,
   CircularProgress,
 } from "@mui/material";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import { registerUser } from "../services/authService";
+import {
+  validateName,
+  validateEmail,
+  validatePassword,
+  validatePasswordMatch,
+  validatePhone,
+} from "../utils/validation";
+import { REGISTER_INPUTS } from "../constants/inputConfigs";
+import { textFieldSx, buttonSx } from "../styles/commonStyles";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -31,6 +36,7 @@ const RegisterForm = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Actualizar datos del formulario cuando el usuario escribe
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -46,50 +52,36 @@ const RegisterForm = () => {
     }
   };
 
-  // Validación de email
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  // Validaciones del formulario
+  // Validar todos los campos del registro
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
+    const nameError = validateName(formData.name);
+    if (nameError) newErrors.name = nameError;
 
-    if (!formData.surnames.trim()) {
-      newErrors.surnames = "Surnames are required";
-    }
+    const surnamesError = validateName(formData.surnames);
+    if (surnamesError) newErrors.surnames = "Surnames are required";
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!isValidEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
 
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) newErrors.password = passwordError;
 
-    if (!formData.repeatPassword) {
-      newErrors.repeatPassword = "Please confirm your password";
-    } else if (formData.password !== formData.repeatPassword) {
-      newErrors.repeatPassword = "Passwords do not match";
-    }
+    const passwordMatchError = validatePasswordMatch(
+      formData.password,
+      formData.repeatPassword
+    );
+    if (passwordMatchError) newErrors.repeatPassword = passwordMatchError;
 
-    if (formData.phoneNumber && isNaN(formData.phoneNumber)) {
-      newErrors.phoneNumber = "Please enter a valid phone number";
-    }
+    const phoneError = validatePhone(formData.phoneNumber);
+    if (phoneError) newErrors.phoneNumber = phoneError;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Enviar datos al backend y registrar usuario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccessMessage("");
@@ -110,8 +102,13 @@ const RegisterForm = () => {
       });
 
       setSuccessMessage(
-        response.message || "✅ Registration successful! You can now log in."
+        response.message || "Registration successful! Redirecting..."
       );
+
+      // Guardar el userId en sessionStorage si es shop (para vincularlo después)
+      if (response.user && response.user.id) {
+        sessionStorage.setItem("userId", response.user.id);
+      }
 
       // Limpiar el formulario después del registro exitoso
       setFormData({
@@ -125,11 +122,19 @@ const RegisterForm = () => {
 
       // Redirigir después de 2 segundos
       setTimeout(() => {
-        handleGoBack();
+        const userType = sessionStorage.getItem("userType");
+        // Si es shop, ir a agregar detalles de la tienda
+        if (userType === "shop") {
+          navigate("/shop-details");
+        } else {
+          // Si es rider, ir directamente a login
+          sessionStorage.removeItem("userType");
+          navigate("/login");
+        }
       }, 2000);
     } catch (error) {
       setErrorMessage(
-        error.message || "❌ Registration failed. Please try again."
+        error.message || "Registration failed. Please try again."
       );
       console.error("Registration error:", error);
     } finally {
@@ -141,88 +146,8 @@ const RegisterForm = () => {
     navigate("/");
   };
 
-  // Estilos reutilizables para los TextFields
-  const textFieldSx = {
-    marginBottom: "16px",
-    "& .MuiOutlinedInput-root": {
-      height: "48px",
-      backgroundColor: "white",
-      borderRadius: "9999px",
-      "& fieldset": {
-        borderColor: "transparent",
-      },
-      "&:hover fieldset": {
-        borderColor: "transparent",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "transparent",
-      },
-    },
-    "& .MuiInputBase-input": {
-      color: "black",
-    },
-  };
-
-  // Estilos para botones (mismas dimensiones que los inputs)
-  const buttonSx = {
-    height: "48px",
-    borderRadius: "9999px",
-    backgroundColor: "#123B7E",
-    color: "white",
-    fontSize: "16px",
-    fontWeight: "500",
-    textTransform: "none",
-    border: "none",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      backgroundColor: "#0d2a5c",
-    },
-    "&:disabled": {
-      opacity: 0.7,
-      cursor: "not-allowed",
-    },
-  };
-
   // Configuración de inputs
-  const inputsConfig = [
-    {
-      name: "name",
-      type: "text",
-      placeholder: "Name",
-      icon: <PersonOutlinedIcon style={{ color: "black", fontSize: "20px" }} />,
-    },
-    {
-      name: "surnames",
-      type: "text",
-      placeholder: "Surnames",
-      icon: <PersonOutlinedIcon style={{ color: "black", fontSize: "20px" }} />,
-    },
-    {
-      name: "email",
-      type: "email",
-      placeholder: "Email",
-      icon: <EmailOutlinedIcon style={{ color: "black", fontSize: "20px" }} />,
-    },
-    {
-      name: "password",
-      type: "password",
-      placeholder: "Password",
-      icon: <LockOutlinedIcon style={{ color: "black", fontSize: "20px" }} />,
-    },
-    {
-      name: "repeatPassword",
-      type: "password",
-      placeholder: "Repeat Password",
-      icon: <LockOutlinedIcon style={{ color: "black", fontSize: "20px" }} />,
-    },
-    {
-      name: "phoneNumber",
-      type: "tel",
-      placeholder: "Phone Number",
-      icon: <PhoneOutlinedIcon style={{ color: "black", fontSize: "20px" }} />,
-    },
-  ];
+  const inputsConfig = REGISTER_INPUTS;
 
   return (
     <ThemeProvider theme={theme}>
@@ -237,7 +162,7 @@ const RegisterForm = () => {
                 Register
               </h1>
               <p className="text-sm text-center text-white mb-6">
-                Fill in the details and become a rider
+                Fill in the details to join SoulBites
               </p>
 
               {/* Mensaje de éxito */}

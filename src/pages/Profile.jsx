@@ -108,7 +108,7 @@ const Profile = () => {
                       style={{
                         height: "48px",
                         borderRadius: "9999px",
-                        backgroundColor: "#dc2626",
+                        backgroundColor: "#123B7E",
                         color: "white",
                         fontSize: "16px",
                         fontWeight: "600",
@@ -118,6 +118,8 @@ const Profile = () => {
                         transition: "all 0.3s ease",
                         marginBottom: "12px",
                       }}
+                      onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
+                      onMouseLeave={(e) => (e.target.style.opacity = "1")}
                     >
                       Logout
                     </button>
@@ -136,6 +138,8 @@ const Profile = () => {
                         width: "100%",
                         transition: "all 0.3s ease",
                       }}
+                      onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
+                      onMouseLeave={(e) => (e.target.style.opacity = "1")}
                     >
                       Go Back
                     </button>

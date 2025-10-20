@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { buttonStyleInline } from "../styles/commonStyles";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Home = () => {
   }, []);
 
   const handleRegister = () => {
-    navigate("/register");
+    navigate("/select-user-type");
   };
 
   const handleLogin = () => {
@@ -23,23 +24,6 @@ const Home = () => {
 
   const handleProfile = () => {
     navigate("/profile");
-  };
-
-  const buttonStyle = {
-    height: "48px",
-    borderRadius: "9999px",
-    backgroundColor: "#123B7E",
-    color: "white",
-    fontSize: "16px",
-    fontWeight: "500",
-    textTransform: "none",
-    border: "none",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    padding: "0 24px",
-    "&:hover": {
-      backgroundColor: "#0d2a5c",
-    },
   };
 
   return (
@@ -52,29 +36,55 @@ const Home = () => {
           <div className="card-body text-center">
             {!user ? (
               <>
-                <h1 className="text-4xl font-normal mb-6 text-white">
-                  Welcome
+                <h1 className="text-5xl font-bold text-center mb-4 text-white">
+                  SoulBites
                 </h1>
                 <p className="text-sm text-center text-white mb-12">
-                  Please login or register to continue
+                  Our main objective is to provide users with an intuitive and
+                  easy-to-use platform where they can help the most
+                  disadvantaged without having to use their own financial
+                  resources.
                 </p>
+
+                <button
+                  onClick={handleRegister}
+                  style={{
+                    height: "48px",
+                    borderRadius: "9999px",
+                    backgroundColor: "#123B7E",
+                    color: "white",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    border: "none",
+                    cursor: "pointer",
+                    width: "100%",
+                    marginBottom: "12px",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
+                  onMouseLeave={(e) => (e.target.style.opacity = "1")}
+                >
+                  Register
+                </button>
 
                 <button
                   onClick={handleLogin}
                   style={{
-                    ...buttonStyle,
+                    height: "48px",
+                    borderRadius: "9999px",
+                    backgroundColor: "#123B7E",
+                    color: "white",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    border: "none",
+                    cursor: "pointer",
                     width: "100%",
-                    marginBottom: "16px",
+                    transition: "all 0.3s ease",
                   }}
+                  onMouseEnter={(e) => (e.target.style.opacity = "0.9")}
+                  onMouseLeave={(e) => (e.target.style.opacity = "1")}
                 >
                   Login
-                </button>
-
-                <button
-                  onClick={handleRegister}
-                  style={{ ...buttonStyle, width: "100%" }}
-                >
-                  Register
                 </button>
               </>
             ) : (
@@ -89,25 +99,17 @@ const Home = () => {
                   style={{
                     height: "48px",
                     borderRadius: "9999px",
-                    backgroundColor: "white",
-                    border: "2px solid white",
-                    color: "#123B7E",
+                    backgroundColor: "#123B7E",
+                    color: "white",
                     fontSize: "16px",
                     fontWeight: "600",
+                    border: "none",
                     cursor: "pointer",
                     width: "100%",
                     transition: "all 0.3s ease",
                   }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = "#60BE1A";
-                    e.target.style.color = "white";
-                    e.target.style.borderColor = "white";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = "white";
-                    e.target.style.color = "#123B7E";
-                    e.target.style.borderColor = "white";
-                  }}
+                  onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
+                  onMouseLeave={(e) => (e.target.style.opacity = "1")}
                 >
                   View Profile
                 </button>
