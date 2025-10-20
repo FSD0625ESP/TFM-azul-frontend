@@ -10,7 +10,12 @@ import {
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import CategoryIcon from "@mui/icons-material/Category";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import MapboxClient from "@mapbox/mapbox-sdk/services/geocoding";
 import { registerShop } from "../services/authService";
+
+const mapboxClient = MapboxClient({
+  accessToken: import.meta.env.VITE_MAPBOX_TOKEN,
+});
 
 const ShopDetailsForm = () => {
   const navigate = useNavigate();
@@ -20,88 +25,113 @@ const ShopDetailsForm = () => {
     shopName: "",
     shopType: "",
     streetAddress: "",
+    lat: "",
+    long: "",
   });
 
   const [errors, setErrors] = useState({});
+  const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Manejo de cambios en inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+
+    // Autocompletado solo para streetAddress
+    if (name === "streetAddress") {
+      if (value.length > 3) searchAddress(value);
+      else setSuggestions([]);
     }
   };
 
+  // Buscar direcciones con Mapbox
+  const searchAddress = async (query) => {
+    try {
+      const response = await mapboxClient
+        .forwardGeocode({
+          query,
+          autocomplete: true,
+          limit: 5,
+        })
+        .send();
+
+      setSuggestions(response.body.features);
+    } catch (err) {
+      console.error("Mapbox error:", err);
+    }
+  };
+
+  // Seleccionar sugerencia
+  const handleSelectAddress = (feature) => {
+    const lat = feature.center[1].toString();
+    const long = feature.center[0].toString();
+
+    console.log("Selected address:", feature.place_name, { lat, long });
+
+    setFormData((prev) => ({
+      ...prev,
+      streetAddress: feature.place_name,
+      lat,
+      long,
+    }));
+    setSuggestions([]);
+  };
+
+  // Validación del formulario
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.shopName.trim()) {
-      newErrors.shopName = "Shop name is required";
-    }
-
-    if (!formData.shopType.trim()) {
-      newErrors.shopType = "Shop type is required";
-    }
-
-    if (!formData.streetAddress.trim()) {
+    if (!formData.shopName.trim()) newErrors.shopName = "Shop name is required";
+    if (!formData.shopType.trim()) newErrors.shopType = "Shop type is required";
+    if (!formData.streetAddress.trim())
       newErrors.streetAddress = "Street address is required";
-    }
+    if (!formData.lat || !formData.long)
+      newErrors.streetAddress = "Please select a valid address";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Enviar formulario al backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccessMessage("");
     setErrorMessage("");
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
 
     try {
       const userId = sessionStorage.getItem("userId");
-
       if (!userId) {
-        setErrorMessage("Error: User ID not found. Please register again.");
+        setErrorMessage("User ID not found. Please register again.");
         setLoading(false);
         return;
       }
 
-      // Enviar datos de tienda al backend
+      // Llamada al backend
       await registerShop(formData, userId);
 
-      setSuccessMessage("Shop details saved! Proceeding to login...");
-
-      // Limpiar sessionStorage
+      setSuccessMessage("Shop and Mark registered successfully!");
       setTimeout(() => {
         sessionStorage.removeItem("userType");
         sessionStorage.removeItem("userId");
         navigate("/login");
       }, 2000);
-    } catch (error) {
+    } catch (err) {
+      console.error("Shop registration error:", err);
       setErrorMessage("Error saving shop details. Please try again.");
-      console.error("Shop details error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoBack = () => {
-    navigate("/");
-  };
+  const handleGoBack = () => navigate("/");
 
   const textFieldSx = {
     marginBottom: "16px",
@@ -109,19 +139,11 @@ const ShopDetailsForm = () => {
       height: "48px",
       backgroundColor: "white",
       borderRadius: "9999px",
-      "& fieldset": {
-        borderColor: "transparent",
-      },
-      "&:hover fieldset": {
-        borderColor: "transparent",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "transparent",
-      },
+      "& fieldset": { borderColor: "transparent" },
+      "&:hover fieldset": { borderColor: "transparent" },
+      "&.Mui-focused fieldset": { borderColor: "transparent" },
     },
-    "& .MuiInputBase-input": {
-      color: "black",
-    },
+    "& .MuiInputBase-input": { color: "black" },
   };
 
   const inputsConfig = [
@@ -129,19 +151,19 @@ const ShopDetailsForm = () => {
       name: "shopName",
       type: "text",
       placeholder: "Shop Name",
-      icon: <StorefrontIcon style={{ color: "black", fontSize: "20px" }} />,
+      icon: <StorefrontIcon />,
     },
     {
       name: "shopType",
       type: "text",
       placeholder: "Type of Shop",
-      icon: <CategoryIcon style={{ color: "black", fontSize: "20px" }} />,
+      icon: <CategoryIcon />,
     },
     {
       name: "streetAddress",
       type: "text",
       placeholder: "Street Address",
-      icon: <LocationOnIcon style={{ color: "black", fontSize: "20px" }} />,
+      icon: <LocationOnIcon />,
     },
   ];
 
@@ -161,20 +183,19 @@ const ShopDetailsForm = () => {
             </p>
 
             {successMessage && (
-              <div className="alert alert-success mb-4 text-white bg-green-600 border-none rounded-2xl">
-                <span>{successMessage}</span>
+              <div className="alert alert-success mb-4 text-white bg-green-600 rounded-2xl">
+                {successMessage}
               </div>
             )}
-
             {errorMessage && (
-              <div className="alert alert-error mb-4 text-white bg-red-600 border-none rounded-2xl">
-                <span>{errorMessage}</span>
+              <div className="alert alert-error mb-4 text-white bg-red-600 rounded-2xl">
+                {errorMessage}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {inputsConfig.map((config) => (
-                <div key={config.name}>
+                <div key={config.name} style={{ position: "relative" }}>
                   <TextField
                     type={config.type}
                     name={config.name}
@@ -196,6 +217,21 @@ const ShopDetailsForm = () => {
                     disabled={loading}
                     required
                   />
+                  {/* Sugerencias Mapbox */}
+                  {config.name === "streetAddress" &&
+                    suggestions.length > 0 && (
+                      <div className="bg-white border rounded p-2 max-h-40 overflow-y-auto absolute w-full z-10">
+                        {suggestions.map((s) => (
+                          <div
+                            key={s.id}
+                            onClick={() => handleSelectAddress(s)}
+                            className="p-1 cursor-pointer hover:bg-gray-200 text-black"
+                          >
+                            {s.place_name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                 </div>
               ))}
 
@@ -214,10 +250,7 @@ const ShopDetailsForm = () => {
                   width: "100%",
                   marginBottom: "12px",
                   marginTop: "24px",
-                  transition: "all 0.3s ease",
                 }}
-                onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
-                onMouseLeave={(e) => (e.target.style.opacity = "1")}
               >
                 {loading ? (
                   <CircularProgress size={20} color="inherit" />
@@ -240,10 +273,7 @@ const ShopDetailsForm = () => {
                   border: "none",
                   cursor: "pointer",
                   width: "100%",
-                  transition: "all 0.3s ease",
                 }}
-                onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
-                onMouseLeave={(e) => (e.target.style.opacity = "1")}
               >
                 Go Back
               </button>
