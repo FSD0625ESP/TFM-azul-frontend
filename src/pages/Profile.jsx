@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material";
+import {
+  createLot,
+  getShopLots,
+  deleteLot,
+  getShopByUserId,
+} from "../services/lotService.js";
 
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lots, setLots] = useState([]);
+  const [showLotForm, setShowLotForm] = useState(false);
+  const [lotInput, setLotInput] = useState("");
+  const [loadingLots, setLoadingLots] = useState(false);
+  const [shopId, setShopId] = useState(null);
   const theme = createTheme();
 
   useEffect(() => {
@@ -20,6 +31,93 @@ const Profile = () => {
     setLoading(false);
   }, [navigate]);
 
+  // Cargar lotes si es shop
+  useEffect(() => {
+    if (user?.user_type === "shop") {
+      if (user?.shopId) {
+        console.log("Shop ID encontrado en usuario:", user.shopId);
+        setShopId(user.shopId);
+        fetchLots(user.shopId);
+      } else if (user?.id) {
+        // Si no hay shopId, buscarlo por userId
+        console.log("No hay shopId, buscando por userId:", user.id);
+        const findShop = async () => {
+          try {
+            const shop = await getShopByUserId(user.id);
+            if (shop && shop._id) {
+              console.log("Shop encontrada por userId:", shop._id);
+              setShopId(shop._id);
+              fetchLots(shop._id);
+            } else {
+              console.warn("No se encontró shop para este usuario");
+            }
+          } catch (err) {
+            console.error("Error buscando shop:", err);
+          }
+        };
+        findShop();
+      }
+    }
+  }, [user]);
+
+  const fetchLots = async (id) => {
+    try {
+      console.log("Obteniendo lotes para shop:", id);
+      setLoadingLots(true);
+      const lotsData = await getShopLots(id);
+      console.log("Lotes obtenidos:", lotsData);
+      setLots(lotsData);
+    } catch (err) {
+      console.error("Error fetching lots:", err);
+    } finally {
+      setLoadingLots(false);
+    }
+  };
+
+  const handleAddLot = async () => {
+    console.log("Agregando lote. shopId:", shopId, "lotInput:", lotInput);
+
+    if (!lotInput || isNaN(lotInput) || lotInput <= 0) {
+      alert("Por favor ingresa un número válido");
+      return;
+    }
+
+    if (!shopId) {
+      alert("Error: No se pudo encontrar tu tienda. shopId es undefined");
+      console.error("shopId es null/undefined");
+      return;
+    }
+
+    try {
+      console.log(
+        "Creando lote con shopId:",
+        shopId,
+        "y número:",
+        parseInt(lotInput)
+      );
+      const result = await createLot(shopId, parseInt(lotInput));
+      console.log("Lote creado:", result);
+      setLotInput("");
+      setShowLotForm(false);
+      await fetchLots(shopId);
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Error al crear el lote: " + JSON.stringify(err));
+    }
+  };
+
+  const handleDeleteLot = async (lotId) => {
+    console.log("Eliminando lote:", lotId);
+    try {
+      const result = await deleteLot(lotId);
+      console.log("Lote eliminado:", result);
+      await fetchLots(shopId);
+    } catch (err) {
+      alert("Error al eliminar el lote: " + JSON.stringify(err));
+      console.error(err);
+    }
+  };
+
   const handleLogout = () => {
     // Limpiar localStorage
     localStorage.removeItem("token");
@@ -30,23 +128,6 @@ const Profile = () => {
 
   const handleGoBack = () => {
     navigate("/mainscreen");
-  };
-
-  const buttonStyle = {
-    height: "48px",
-    borderRadius: "9999px",
-    backgroundColor: "#123B7E",
-    color: "white",
-    fontSize: "16px",
-    fontWeight: "500",
-    textTransform: "none",
-    border: "none",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    width: "100%",
-    "&:hover": {
-      backgroundColor: "#0d2a5c",
-    },
   };
 
   if (loading) {
@@ -100,6 +181,149 @@ const Profile = () => {
                       {user.id}
                     </p>
                   </div>
+
+                  {/* Lots section - Solo para Shops */}
+                  {user.user_type === "shop" && (
+                    <div className="border-b pb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-gray-500 text-sm">Lots</p>
+                        <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
+                          {lots.length} lots
+                        </span>
+                      </div>
+                      {loadingLots ? (
+                        <p className="text-gray-600">Loading lots...</p>
+                      ) : lots.length > 0 ? (
+                        <div className="space-y-2 mb-3">
+                          {lots.map((lot) => (
+                            <div
+                              key={lot._id}
+                              className="flex items-center justify-between bg-gray-100 p-3 rounded-lg"
+                            >
+                              <span className="text-gray-700 font-medium">
+                                Lot: {lot.lot}
+                              </span>
+                              <button
+                                onClick={() => handleDeleteLot(lot._id)}
+                                style={{
+                                  padding: "4px 12px",
+                                  backgroundColor: "#dc2626",
+                                  color: "white",
+                                  borderRadius: "6px",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  fontSize: "12px",
+                                  fontWeight: "600",
+                                }}
+                                onMouseEnter={(e) =>
+                                  (e.target.style.opacity = "0.85")
+                                }
+                                onMouseLeave={(e) =>
+                                  (e.target.style.opacity = "1")
+                                }
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-sm mb-3">
+                          No lots added yet
+                        </p>
+                      )}
+
+                      {showLotForm ? (
+                        <div className="space-y-2">
+                          <input
+                            type="number"
+                            value={lotInput}
+                            onChange={(e) => setLotInput(e.target.value)}
+                            placeholder="Enter lot number"
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              borderRadius: "6px",
+                              border: "1px solid #e5e7eb",
+                              fontSize: "14px",
+                              color: "#1f2937",
+                            }}
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleAddLot}
+                              style={{
+                                flex: 1,
+                                padding: "8px",
+                                backgroundColor: "#123B7E",
+                                color: "white",
+                                borderRadius: "6px",
+                                border: "none",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                fontWeight: "600",
+                              }}
+                              onMouseEnter={(e) =>
+                                (e.target.style.opacity = "0.85")
+                              }
+                              onMouseLeave={(e) =>
+                                (e.target.style.opacity = "1")
+                              }
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => {
+                                setShowLotForm(false);
+                                setLotInput("");
+                              }}
+                              style={{
+                                flex: 1,
+                                padding: "8px",
+                                backgroundColor: "#9ca3af",
+                                color: "white",
+                                borderRadius: "6px",
+                                border: "none",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                fontWeight: "600",
+                              }}
+                              onMouseEnter={(e) =>
+                                (e.target.style.opacity = "0.85")
+                              }
+                              onMouseLeave={(e) =>
+                                (e.target.style.opacity = "1")
+                              }
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setShowLotForm(true)}
+                          style={{
+                            height: "48px",
+                            borderRadius: "9999px",
+                            backgroundColor: "#123B7E",
+                            color: "white",
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            border: "none",
+                            cursor: "pointer",
+                            width: "100%",
+                            transition: "all 0.3s ease",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.target.style.opacity = "0.85")
+                          }
+                          onMouseLeave={(e) => (e.target.style.opacity = "1")}
+                        >
+                          Add Lot
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   {/* Buttons */}
                   <div className="space-y-3 mt-8">
