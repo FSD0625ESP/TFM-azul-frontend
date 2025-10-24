@@ -62,199 +62,64 @@ const Login = () => {
     alert("Password recovery feature coming soon!");
   };
 
-  const labelStyle = {
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-  };
-
-  const labelTextStyle = {
-    color: "#111714",
-    fontSize: "16px",
-    fontWeight: 500,
-    lineHeight: 1.5,
-    paddingBottom: "8px",
-  };
-
-  const inputStyle = {
-    width: "100%",
-    flex: 1,
-    resize: "none",
-    overflow: "hidden",
-    borderRadius: "8px",
-    color: "#111714",
-    outline: "none",
-    border: "1px solid #dce5df",
-    backgroundColor: "#ffffff",
-    height: "56px",
-    padding: "15px",
-    fontSize: "16px",
-    fontFamily: "'Work Sans', sans-serif",
-    boxSizing: "border-box",
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        backgroundColor: "#f6f8f7",
-        fontFamily: "'Work Sans', sans-serif",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "auto",
-        padding: "16px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          width: "100%",
-          maxWidth: "448px",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+    <div className="min-h-dvh bg-white flex flex-col items-center justify-center overflow-auto p-4">
+      <div className="w-full max-w-md flex flex-col items-center">
         {/* Logo */}
-        <div
-          style={{
-            display: "flex",
-            height: "64px",
-            width: "64px",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "16px",
-            backgroundColor: "#1dc962",
-            marginBottom: "24px",
-          }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ color: "#112117", fontSize: "32px" }}
-          >
+        <div className="h-16 w-16 rounded-2xl bg-emerald-500 flex items-center justify-center mb-6">
+          <span className="material-symbols-outlined text-emerald-950 text-4xl">
             local_shipping
           </span>
         </div>
 
         {/* Headline */}
-        <h1
-          style={{
-            color: "#111714",
-            fontSize: "32px",
-            fontWeight: 700,
-            lineHeight: 1.2,
-            textAlign: "center",
-            paddingBottom: "32px",
-            margin: 0,
-          }}
-        >
+        <h1 className="text-gray-900 text-4xl font-bold leading-tight text-center pb-8 m-0">
           Welcome back
         </h1>
 
         {/* Error Message */}
         {error && (
-          <div
-            style={{
-              width: "100%",
-              marginBottom: "16px",
-              padding: "16px",
-              backgroundColor: "#fee2e2",
-              border: "1px solid #fca5a5",
-              borderRadius: "8px",
-            }}
-          >
-            <p style={{ color: "#991b1b", fontSize: "14px", margin: 0 }}>
-              {error}
-            </p>
+          <div className="w-full mb-4 p-4 bg-red-100 border border-red-400 rounded-lg">
+            <p className="text-red-900 text-sm m-0">{error}</p>
           </div>
         )}
 
         {/* Form */}
-        <form
-          onSubmit={handleLogin}
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-          }}
-        >
+        <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
           {/* Email */}
-          <div
-            style={{
-              display: "flex",
-              width: "100%",
-              flexWrap: "wrap",
-              alignItems: "flex-end",
-              gap: "16px",
-              paddingBottom: "12px",
-            }}
-          >
-            <label style={labelStyle}>
-              <p style={labelTextStyle}>Email</p>
+          <div className="flex w-full flex-wrap items-end gap-4 pb-3">
+            <label className="flex flex-col w-full">
+              <p className="text-gray-900 text-base font-medium leading-relaxed pb-2">
+                Email
+              </p>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                style={inputStyle}
+                className="w-full px-4 py-4 rounded-lg border border-gray-200 bg-white text-gray-900 text-base focus:outline-none focus:border-emerald-500"
               />
             </label>
           </div>
 
           {/* Password */}
-          <div
-            style={{
-              display: "flex",
-              width: "100%",
-              flexWrap: "wrap",
-              alignItems: "flex-end",
-              gap: "16px",
-              paddingTop: "12px",
-            }}
-          >
-            <label style={labelStyle}>
-              <p style={labelTextStyle}>Password</p>
-              <div
-                style={{
-                  display: "flex",
-                  width: "100%",
-                  flex: 1,
-                  alignItems: "stretch",
-                  borderRadius: "8px",
-                }}
-              >
+          <div className="flex w-full flex-wrap items-end gap-4 pt-3">
+            <label className="flex flex-col w-full">
+              <p className="text-gray-900 text-base font-medium leading-relaxed pb-2">
+                Password
+              </p>
+              <div className="flex w-full items-stretch rounded-lg">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  style={{
-                    ...inputStyle,
-                    borderRadius: "8px 0 0 8px",
-                    borderRight: "none",
-                    paddingRight: "8px",
-                  }}
+                  className="flex-1 px-4 py-4 rounded-l-lg border border-gray-200 border-r-0 bg-white text-gray-900 text-base focus:outline-none focus:border-emerald-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    color: "#648772",
-                    display: "flex",
-                    border: "1px solid #dce5df",
-                    backgroundColor: "#ffffff",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    paddingRight: "15px",
-                    borderRadius: "0 8px 8px 0",
-                    borderLeft: "none",
-                    cursor: "pointer",
-                    transition: "color 0.3s",
-                  }}
-                  onMouseEnter={(e) => (e.target.style.color = "#1dc962")}
-                  onMouseLeave={(e) => (e.target.style.color = "#648772")}
+                  className="flex border border-l-0 border-gray-200 bg-white items-center justify-center pr-4 rounded-r-lg border-r cursor-pointer text-teal-700 hover:text-emerald-500 transition-colors"
                 >
                   <span className="material-symbols-outlined">
                     {showPassword ? "visibility_off" : "visibility"}
@@ -265,89 +130,24 @@ const Login = () => {
           </div>
 
           {/* Forgot Password */}
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
+          <div className="w-full flex justify-end">
             <button
               type="button"
               onClick={handleForgotPassword}
-              style={{
-                color: "#648772",
-                fontSize: "14px",
-                fontWeight: 400,
-                lineHeight: 1.5,
-                paddingBottom: "12px",
-                paddingTop: "4px",
-                paddingLeft: 0,
-                paddingRight: 0,
-                textDecoration: "underline",
-                cursor: "pointer",
-                background: "none",
-                border: "none",
-                transition: "color 0.3s",
-              }}
-              onMouseEnter={(e) => (e.target.style.color = "#1dc962")}
-              onMouseLeave={(e) => (e.target.style.color = "#648772")}
+              className="text-teal-700 text-sm font-normal leading-relaxed pb-3 pt-1 px-0 underline cursor-pointer bg-none border-none hover:text-emerald-500 transition-colors"
             >
               Forgot your password?
             </button>
           </div>
 
           {/* Submit Button */}
-          <div
-            style={{
-              display: "flex",
-              width: "100%",
-              paddingLeft: 0,
-              paddingRight: 0,
-              paddingTop: "12px",
-              marginTop: "16px",
-            }}
-          >
+          <div className="flex w-full pt-3 mt-4">
             <button
               type="submit"
               disabled={loading}
-              style={{
-                display: "flex",
-                minWidth: "84px",
-                width: "100%",
-                cursor: loading ? "not-allowed" : "pointer",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden",
-                borderRadius: "8px",
-                height: "48px",
-                paddingLeft: "20px",
-                paddingRight: "20px",
-                flex: 1,
-                backgroundColor: "#1dc962",
-                color: "#112117",
-                fontSize: "16px",
-                fontWeight: 700,
-                lineHeight: 1.5,
-                letterSpacing: "0.015em",
-                transition: "background-color 0.3s",
-                border: "none",
-                opacity: loading ? 0.5 : 1,
-              }}
-              onMouseEnter={(e) =>
-                !loading && (e.target.style.backgroundColor = "#16a64d")
-              }
-              onMouseLeave={(e) =>
-                !loading && (e.target.style.backgroundColor = "#1dc962")
-              }
+              className="flex min-w-max w-full items-center justify-center overflow-hidden rounded-lg h-12 px-5 flex-1 bg-emerald-500 text-emerald-950 text-base font-bold leading-relaxed tracking-wider disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors border-none"
             >
-              <span
-                style={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                 {loading ? "Signing in..." : "Sign in"}
               </span>
             </button>
@@ -355,31 +155,12 @@ const Login = () => {
         </form>
 
         {/* Sign Up Link */}
-        <div style={{ paddingTop: "32px", textAlign: "center" }}>
-          <p
-            style={{
-              color: "#648772",
-              fontSize: "14px",
-              fontWeight: 400,
-              margin: 0,
-            }}
-          >
+        <div className="pt-8 text-center">
+          <p className="text-teal-700 text-sm font-normal m-0">
             Don't have an account?{" "}
             <button
               onClick={() => navigate("/register")}
-              style={{
-                fontWeight: 700,
-                color: "#1dc962",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                textDecoration: "none",
-                fontSize: "14px",
-              }}
-              onMouseEnter={(e) =>
-                (e.target.style.textDecoration = "underline")
-              }
-              onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
+              className="font-bold text-emerald-500 bg-none border-none cursor-pointer no-underline text-sm hover:underline transition-all"
             >
               Sign up
             </button>

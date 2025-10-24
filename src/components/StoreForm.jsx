@@ -23,23 +23,10 @@ const StoreForm = ({
   inputStyle,
 }) => {
   return (
-    <form
-      onSubmit={handleRegister}
-      style={{ display: "flex", flexDirection: "column", gap: "16px" }}
-    >
+    <form onSubmit={handleRegister} className="flex flex-col gap-4">
       {/* Store Name */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           storefront
         </span>
         <input
@@ -47,23 +34,13 @@ const StoreForm = ({
           value={shopName}
           onChange={(e) => setShopName(e.target.value)}
           placeholder="Store name"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Store Type */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           category
         </span>
         <input
@@ -71,24 +48,13 @@ const StoreForm = ({
           value={shopType}
           onChange={(e) => setShopType(e.target.value)}
           placeholder="Store type"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Address */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-            zIndex: "10",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
           location_on
         </span>
         <input
@@ -99,49 +65,21 @@ const StoreForm = ({
             searchAddress(e.target.value);
           }}
           placeholder="Address"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
 
         {/* Address suggestions dropdown */}
         {suggestions.length > 0 && (
-          <div
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: "0",
-              right: "0",
-              backgroundColor: "#ffffff",
-              border: "1px solid #d1d5db",
-              borderTop: "none",
-              borderRadius: "0 0 8px 8px",
-              maxHeight: "200px",
-              overflowY: "auto",
-              zIndex: "20",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            }}
-          >
+          <div className="absolute top-full left-0 right-0 bg-white border border-t-0 border-gray-300 rounded-b-lg max-h-50 overflow-y-auto z-20 shadow-md">
             {suggestions.map((suggestion, index) => (
               <div
                 key={index}
                 onClick={() => handleSelectAddress(suggestion)}
-                style={{
-                  padding: "12px 16px",
-                  cursor: "pointer",
-                  borderBottom:
-                    index < suggestions.length - 1
-                      ? "1px solid #f0f0f0"
-                      : "none",
-                  color: "#111714",
-                  fontSize: "14px",
-                  fontFamily: "'Work Sans', sans-serif",
-                  transition: "background-color 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f6f8f7";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
+                className={`px-4 py-3 cursor-pointer text-gray-900 text-sm transition-colors hover:bg-gray-100 ${
+                  index < suggestions.length - 1
+                    ? "border-b border-gray-100"
+                    : ""
+                }`}
               >
                 {suggestion.place_name}
               </div>
@@ -151,18 +89,8 @@ const StoreForm = ({
       </div>
 
       {/* Email */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           mail
         </span>
         <input
@@ -170,23 +98,13 @@ const StoreForm = ({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Phone */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           phone
         </span>
         <input
@@ -194,23 +112,13 @@ const StoreForm = ({
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Phone number"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Password */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           lock
         </span>
         <input
@@ -218,23 +126,13 @@ const StoreForm = ({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Repeat Password */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           lock
         </span>
         <input
@@ -242,7 +140,7 @@ const StoreForm = ({
           value={repeatPassword}
           onChange={(e) => setRepeatPassword(e.target.value)}
           placeholder="Repeat password"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
@@ -250,42 +148,17 @@ const StoreForm = ({
       <button
         type="submit"
         disabled={loading}
-        style={{
-          marginTop: "24px",
-          padding: "12px 16px",
-          borderRadius: "8px",
-          border: "none",
-          backgroundColor: "#1dc962",
-          color: "white",
-          fontSize: "16px",
-          fontWeight: "600",
-          cursor: loading ? "not-allowed" : "pointer",
-          opacity: loading ? 0.6 : 1,
-          fontFamily: "'Work Sans', sans-serif",
-        }}
+        className="mt-6 py-3 px-4 rounded-lg border-none bg-emerald-500 text-white text-base font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors"
       >
         {loading ? "Creating store..." : "Create store"}
       </button>
 
       {/* Sign In Link */}
-      <p
-        style={{
-          textAlign: "center",
-          fontSize: "14px",
-          color: "#6b7280",
-          marginTop: "16px",
-        }}
-      >
+      <p className="text-center text-sm text-gray-500 mt-4">
         Already have an account?{" "}
         <a
           href="/login"
-          style={{
-            color: "#1dc962",
-            textDecoration: "none",
-            fontSize: "14px",
-          }}
-          onMouseEnter={(e) => (e.target.style.textDecoration = "underline")}
-          onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
+          className="text-emerald-500 no-underline text-sm hover:underline"
         >
           Sign In
         </a>

@@ -76,100 +76,39 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "flex-end",
-        zIndex: 50,
-      }}
+      className="fixed inset-0 bg-black/50 flex items-end z-50"
       onClick={onClose}
     >
       <div
-        style={{
-          width: "100%",
-          backgroundColor: "#f6f8f7",
-          borderTopLeftRadius: "24px",
-          borderTopRightRadius: "24px",
-          padding: "24px 16px 32px",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          fontFamily: "'Work Sans', sans-serif",
-        }}
+        className="w-full bg-[#f6f8f7] rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "24px",
-          }}
-        >
+        <div className="flex items-center justify-between mb-6">
           <button
             onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              fontSize: "24px",
-              cursor: "pointer",
-              color: "#6b7280",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className="bg-transparent border-none text-2xl cursor-pointer text-gray-500 flex items-center justify-center"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
-          <h2
-            style={{
-              fontSize: "18px",
-              fontWeight: "bold",
-              color: "#111714",
-              flex: 1,
-              textAlign: "center",
-            }}
-          >
+          <h2 className="text-lg font-bold text-gray-900 flex-1 text-center">
             Add Food Lot
           </h2>
-          <div style={{ width: "24px" }}></div>
+          <div className="w-6"></div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div
-            style={{
-              backgroundColor: "#fee2e2",
-              border: "1px solid #fca5a5",
-              borderRadius: "8px",
-              padding: "12px",
-              marginBottom: "16px",
-              color: "#991b1b",
-              fontSize: "14px",
-            }}
-          >
+          <div className="bg-red-100 border border-red-400 rounded-lg p-3 mb-4 text-red-900 text-sm">
             {error}
           </div>
         )}
 
         {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "16px" }}
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Lot Name */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "#111714",
-                marginBottom: "8px",
-              }}
-            >
+            <label className="block text-sm font-medium text-gray-900 mb-2">
               Lot Name
             </label>
             <input
@@ -177,64 +116,26 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="E.g: Monday Bakery Pack"
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #dce5df",
-                backgroundColor: "#ffffff",
-                fontSize: "14px",
-                fontFamily: "'Work Sans', sans-serif",
-                boxSizing: "border-box",
-                color: "#111714",
-              }}
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:border-emerald-500"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "#111714",
-                marginBottom: "8px",
-              }}
-            >
+            <label className="block text-sm font-medium text-gray-900 mb-2">
               Description
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add details about the content, possible allergens, pickup time, etc."
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #dce5df",
-                backgroundColor: "#ffffff",
-                fontSize: "14px",
-                fontFamily: "'Work Sans', sans-serif",
-                boxSizing: "border-box",
-                minHeight: "120px",
-                resize: "vertical",
-                color: "#111714",
-              }}
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:border-emerald-500 min-h-[120px] resize-vertical"
             />
           </div>
 
           {/* Pickup Deadline */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "#111714",
-                marginBottom: "8px",
-              }}
-            >
+            <label className="block text-sm font-medium text-gray-900 mb-2">
               Pickup Deadline
             </label>
             <input
@@ -247,17 +148,7 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
                 const minutes = String(now.getMinutes()).padStart(2, "0");
                 return `${hours}:${minutes}`;
               })()}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #dce5df",
-                backgroundColor: "#ffffff",
-                fontSize: "14px",
-                fontFamily: "'Work Sans', sans-serif",
-                boxSizing: "border-box",
-                color: "#111714",
-              }}
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 focus:outline-none focus:border-emerald-500"
             />
           </div>
 
@@ -265,20 +156,7 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
           <button
             type="submit"
             disabled={loading}
-            style={{
-              width: "100%",
-              padding: "14px",
-              borderRadius: "8px",
-              border: "none",
-              backgroundColor: "#1dc962",
-              color: "white",
-              fontSize: "16px",
-              fontWeight: "600",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.6 : 1,
-              fontFamily: "'Work Sans', sans-serif",
-              marginTop: "16px",
-            }}
+            className="w-full py-3.5 rounded-lg border-none bg-emerald-500 text-white text-base font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-4 hover:bg-emerald-600 transition-colors"
           >
             {loading ? "Publishing..." : "Publish Lot"}
           </button>

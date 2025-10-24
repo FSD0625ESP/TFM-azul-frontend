@@ -124,112 +124,35 @@ const Register = () => {
     }
   };
 
-  const inputStyle = {
-    width: "100%",
-    borderRadius: "8px",
-    border: "1px solid #d1d5db",
-    backgroundColor: "#ffffff",
-    padding: "12px 12px 12px 44px",
-    color: "#111714",
-    fontSize: "16px",
-    fontFamily: "'Work Sans', sans-serif",
-    boxSizing: "border-box",
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        backgroundColor: "#f6f8f7",
-        fontFamily: "'Work Sans', sans-serif",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "16px",
-      }}
-    >
-      <main style={{ width: "100%", maxWidth: "448px" }}>
+    <div className="min-h-dvh bg-white flex flex-col items-center justify-center p-4">
+      <main className="w-full max-w-md">
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              height: "64px",
-              width: "64px",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: "50%",
-              backgroundColor: "rgba(29, 201, 98, 0.2)",
-              marginBottom: "16px",
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ color: "#1dc962", fontSize: "36px" }}
-            >
+        <div className="text-center mb-8">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mb-4">
+            <span className="material-symbols-outlined text-emerald-500 text-4xl">
               volunteer_activism
             </span>
           </div>
-          <h1
-            style={{
-              fontSize: "24px",
-              fontWeight: 700,
-              color: "#111714",
-              marginTop: 0,
-              marginBottom: "8px",
-            }}
-          >
+          <h1 className="text-2xl font-bold text-gray-900 mt-0 mb-2">
             Create your account
           </h1>
-          <p
-            style={{
-              fontSize: "16px",
-              color: "#4b5563",
-              marginTop: "8px",
-              marginBottom: 0,
-            }}
-          >
+          <p className="text-base text-gray-600 mt-2 mb-0">
             Select your account type to continue.
           </p>
         </div>
 
         {/* Role Selector */}
-        <div
-          style={{
-            display: "flex",
-            height: "48px",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "12px",
-            backgroundColor: "#e5e7eb",
-            padding: "6px",
-            marginBottom: "24px",
-            gap: "6px",
-          }}
-        >
+        <div className="flex h-12 items-center justify-center rounded-xl bg-gray-200 p-1.5 mb-6 gap-1.5">
           {["rider", "shop"].map((role) => (
             <label
               key={role}
               onClick={() => setUserType(role)}
-              style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
-                borderRadius: "8px",
-                paddingLeft: "8px",
-                paddingRight: "8px",
-                fontSize: "14px",
-                fontWeight: 500,
-                cursor: "pointer",
-                transition: "all 0.3s",
-                backgroundColor: userType === role ? "#ffffff" : "transparent",
-                color: userType === role ? "#111714" : "#6b7280",
-                boxShadow:
-                  userType === role ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-              }}
+              className={`flex-1 flex items-center justify-center h-full rounded-lg px-2 text-sm font-medium cursor-pointer transition-all ${
+                userType === role
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "bg-transparent text-gray-500"
+              }`}
             >
               <span>{role === "rider" ? "Rider" : "Store"}</span>
               <input
@@ -238,7 +161,7 @@ const Register = () => {
                 value={role}
                 checked={userType === role}
                 onChange={() => setUserType(role)}
-                style={{ display: "none" }}
+                className="hidden"
               />
             </label>
           ))}
@@ -261,7 +184,6 @@ const Register = () => {
             setRepeatPassword={setRepeatPassword}
             loading={loading}
             handleRegister={handleRegister}
-            inputStyle={inputStyle}
           />
         )}
 
@@ -286,32 +208,23 @@ const Register = () => {
             setRepeatPassword={setRepeatPassword}
             loading={loading}
             handleRegister={handleRegister}
-            inputStyle={inputStyle}
           />
         )}
 
         {/* Terms */}
-        <div style={{ textAlign: "center", marginTop: "32px" }}>
-          <p style={{ fontSize: "12px", color: "#6b7280", margin: 0 }}>
+        <div className="text-center mt-8">
+          <p className="text-xs text-gray-500 m-0">
             By creating an account, you accept our{" "}
             <a
               href="#"
-              style={{
-                color: "#1dc962",
-                textDecoration: "none",
-                fontWeight: 500,
-              }}
+              className="text-emerald-500 no-underline font-medium hover:underline"
             >
               Terms and Conditions
             </a>{" "}
             and{" "}
             <a
               href="#"
-              style={{
-                color: "#1dc962",
-                textDecoration: "none",
-                fontWeight: 500,
-              }}
+              className="text-emerald-500 no-underline font-medium hover:underline"
             >
               Privacy Policy
             </a>
@@ -320,24 +233,12 @@ const Register = () => {
         </div>
 
         {/* Sign In Link */}
-        <div style={{ textAlign: "center", marginTop: "24px" }}>
-          <p style={{ fontSize: "14px", color: "#4b5563", margin: 0 }}>
+        <div className="text-center mt-6">
+          <p className="text-sm text-gray-600 m-0">
             Already have an account?{" "}
             <button
               onClick={() => navigate("/login")}
-              style={{
-                fontWeight: 700,
-                color: "#1dc962",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                textDecoration: "none",
-                fontSize: "14px",
-              }}
-              onMouseEnter={(e) =>
-                (e.target.style.textDecoration = "underline")
-              }
-              onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
+              className="font-bold text-emerald-500 bg-none border-none cursor-pointer no-underline text-sm hover:underline"
             >
               Sign In
             </button>

@@ -5,7 +5,9 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import MAPBOX_CONFIG from "../config/mapboxConfig";
-import { API_BASE_URL } from "../services/authService";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 export default function MainScreen() {
   const mapContainerRef = useRef(null);
@@ -78,71 +80,21 @@ export default function MainScreen() {
   }, [marks, mapLoaded]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        height: "100dvh",
-        backgroundColor: "#f6f8f7",
-        position: "relative",
-        overflow: "hidden",
-        fontFamily: "'Work Sans', sans-serif",
-      }}
-    >
+    <div className="flex flex-col w-full h-dvh bg-white relative overflow-hidden">
       {/* Contenedor del mapa */}
-      <div
-        ref={mapContainerRef}
-        style={{
-          flex: 1,
-          width: "100%",
-          height: "100%",
-          position: "relative",
-        }}
-      />
+      <div ref={mapContainerRef} className="flex-1 w-full h-full relative" />
 
       {/* Bottom Navigation */}
-      <footer
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "space-around",
-          alignItems: "center",
-          height: "64px",
-          backgroundColor: "#ffffff",
-          borderTop: "1px solid #dce5df",
-          fontFamily: "'Work Sans', sans-serif",
-          zIndex: 1000,
-        }}
-      >
+      <footer className="fixed bottom-0 left-0 right-0 flex justify-around items-center h-16 bg-white border-t border-gray-200 z-1000">
         {/* Map Tab */}
         <button
           onClick={() => setActiveTab("map")}
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "4px",
-            backgroundColor: "transparent",
-            border: "none",
-            cursor: "pointer",
-            padding: "8px",
-            color: activeTab === "map" ? "#1dc962" : "#9ca3af",
-            transition: "color 0.3s",
-          }}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors ${
+            activeTab === "map" ? "text-emerald-500" : "text-gray-400"
+          }`}
         >
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: "24px" }}
-          >
-            map
-          </span>
-          <span style={{ fontSize: "12px", fontWeight: "500" }}>Map</span>
+          <span className="material-symbols-outlined text-2xl">map</span>
+          <span className="text-xs font-medium">Map</span>
         </button>
 
         {/* Profile Tab */}
@@ -151,28 +103,12 @@ export default function MainScreen() {
             setActiveTab("profile");
             navigate("/rider-profile");
           }}
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "4px",
-            backgroundColor: "transparent",
-            border: "none",
-            cursor: "pointer",
-            padding: "8px",
-            color: activeTab === "profile" ? "#1dc962" : "#9ca3af",
-            transition: "color 0.3s",
-          }}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors ${
+            activeTab === "profile" ? "text-emerald-500" : "text-gray-400"
+          }`}
         >
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: "24px" }}
-          >
-            person
-          </span>
-          <span style={{ fontSize: "12px", fontWeight: "500" }}>Profile</span>
+          <span className="material-symbols-outlined text-2xl">person</span>
+          <span className="text-xs font-medium">Profile</span>
         </button>
       </footer>
 

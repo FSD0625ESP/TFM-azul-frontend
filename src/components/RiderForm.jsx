@@ -18,23 +18,10 @@ const RiderForm = ({
   inputStyle,
 }) => {
   return (
-    <form
-      onSubmit={handleRegister}
-      style={{ display: "flex", flexDirection: "column", gap: "16px" }}
-    >
+    <form onSubmit={handleRegister} className="flex flex-col gap-4">
       {/* First Name */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           person
         </span>
         <input
@@ -42,23 +29,13 @@ const RiderForm = ({
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           placeholder="First name"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Last Name */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           badge
         </span>
         <input
@@ -66,23 +43,13 @@ const RiderForm = ({
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           placeholder="Last name"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Email */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           mail
         </span>
         <input
@@ -90,23 +57,13 @@ const RiderForm = ({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Phone */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           phone
         </span>
         <input
@@ -114,23 +71,13 @@ const RiderForm = ({
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Phone number"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Password */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           lock
         </span>
         <input
@@ -138,23 +85,13 @@ const RiderForm = ({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
       {/* Repeat Password */}
-      <div style={{ position: "relative" }}>
-        <span
-          className="material-symbols-outlined"
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-            pointerEvents: "none",
-          }}
-        >
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           lock
         </span>
         <input
@@ -162,7 +99,7 @@ const RiderForm = ({
           value={repeatPassword}
           onChange={(e) => setRepeatPassword(e.target.value)}
           placeholder="Repeat password"
-          style={inputStyle}
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
@@ -170,42 +107,17 @@ const RiderForm = ({
       <button
         type="submit"
         disabled={loading}
-        style={{
-          marginTop: "24px",
-          padding: "12px 16px",
-          borderRadius: "8px",
-          border: "none",
-          backgroundColor: "#1dc962",
-          color: "white",
-          fontSize: "16px",
-          fontWeight: "600",
-          cursor: loading ? "not-allowed" : "pointer",
-          opacity: loading ? 0.6 : 1,
-          fontFamily: "'Work Sans', sans-serif",
-        }}
+        className="mt-6 py-3 px-4 rounded-lg border-none bg-emerald-500 text-white text-base font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors"
       >
         {loading ? "Creating account..." : "Create account"}
       </button>
 
       {/* Sign In Link */}
-      <p
-        style={{
-          textAlign: "center",
-          fontSize: "14px",
-          color: "#6b7280",
-          marginTop: "16px",
-        }}
-      >
+      <p className="text-center text-sm text-gray-500 mt-4">
         Already have an account?{" "}
         <a
           href="/login"
-          style={{
-            color: "#1dc962",
-            textDecoration: "none",
-            fontSize: "14px",
-          }}
-          onMouseEnter={(e) => (e.target.style.textDecoration = "underline")}
-          onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
+          className="text-emerald-500 no-underline text-sm hover:underline"
         >
           Sign In
         </a>

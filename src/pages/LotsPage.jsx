@@ -67,123 +67,38 @@ const LotsPage = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          backgroundColor: "#f6f8f7",
-          fontFamily: "'Work Sans', sans-serif",
-        }}
-      >
+      <div className="flex items-center justify-center min-h-screen bg-[#f6f8f7]">
         Loading...
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        backgroundColor: "#f6f8f7",
-        fontFamily: "'Work Sans', sans-serif",
-      }}
-    >
+    <div className="flex flex-col min-h-screen bg-[#f6f8f7]">
       {/* Main Content */}
-      <main
-        style={{
-          flex: 1,
-          padding: "16px",
-          display: "flex",
-          flexDirection: "column",
-          paddingBottom: "80px",
-          paddingTop: "16px",
-        }}
-      >
+      <main className="flex-1 p-4 flex flex-col pb-20 pt-4">
         {/* Header */}
-        <h1
-          style={{
-            fontSize: "28px",
-            fontWeight: "bold",
-            color: "#111714",
-            marginBottom: "24px",
-          }}
-        >
-          Food Lots
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Food Lots</h1>
 
         {lots.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 16px",
-              color: "#6b7280",
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{
-                fontSize: "48px",
-                marginBottom: "16px",
-                display: "block",
-                color: "#d1d5db",
-              }}
-            >
+          <div className="text-center p-10 text-gray-500">
+            <span className="material-symbols-outlined text-5xl mb-4 block text-gray-300">
               inbox
             </span>
-            <p style={{ fontSize: "16px" }}>No food lots yet</p>
-            <p style={{ fontSize: "14px", marginTop: "8px" }}>
-              Go to Profile and add your first lot
-            </p>
+            <p className="text-base">No food lots yet</p>
+            <p className="text-sm mt-2">Go to Profile and add your first lot</p>
           </div>
         ) : (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px",
-            }}
-          >
+          <div className="flex flex-col gap-4">
             {lots.map((lot) => (
-              <div
-                key={lot._id}
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: "12px",
-                  padding: "16px",
-                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-                }}
-              >
+              <div key={lot._id} className="bg-white rounded-lg p-4 shadow-sm">
                 {/* Lot Header */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: "12px",
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <h3
-                      style={{
-                        fontSize: "18px",
-                        fontWeight: "600",
-                        color: "#111714",
-                        margin: "0 0 4px 0",
-                      }}
-                    >
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 m-0 mb-1">
                       {lot.name}
                     </h3>
-                    <p
-                      style={{
-                        fontSize: "12px",
-                        color: "#9ca3af",
-                        margin: 0,
-                      }}
-                    >
+                    <p className="text-xs text-gray-400 m-0">
                       Created:{" "}
                       {new Date(lot.createdAt).toLocaleDateString("en-US", {
                         year: "numeric",
@@ -194,37 +109,19 @@ const LotsPage = () => {
                       })}
                     </p>
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => {
                         setSelectedLot(lot);
                         setIsEditModalOpen(true);
                       }}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        fontSize: "20px",
-                        cursor: "pointer",
-                        color: "#1dc962",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
+                      className="bg-transparent border-none text-xl cursor-pointer text-emerald-500 flex items-center justify-center hover:text-emerald-600"
                     >
                       <span className="material-symbols-outlined">edit</span>
                     </button>
                     <button
                       onClick={() => handleDeleteLot(lot._id)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#dc2626",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
+                      className="bg-transparent border-none text-red-600 cursor-pointer text-xl flex items-center justify-center hover:text-red-700"
                     >
                       <span className="material-symbols-outlined">delete</span>
                     </button>
@@ -233,32 +130,14 @@ const LotsPage = () => {
 
                 {/* Lot Description */}
                 {lot.description && (
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      color: "#4b5563",
-                      margin: "0 0 12px 0",
-                      lineHeight: "1.5",
-                    }}
-                  >
+                  <p className="text-sm text-gray-600 mb-3 leading-relaxed">
                     {lot.description}
                   </p>
                 )}
 
                 {/* Pickup Deadline */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontSize: "14px",
-                    color: "#111714",
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "18px" }}
-                  >
+                <div className="flex items-center gap-2 text-sm text-gray-900">
+                  <span className="material-symbols-outlined text-base">
                     schedule
                   </span>
                   <span>
@@ -281,38 +160,11 @@ const LotsPage = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <nav
-        style={{
-          position: "sticky",
-          bottom: 0,
-          display: "flex",
-          justifyContent: "space-around",
-          borderTop: "1px solid #dce5df",
-          backgroundColor: "rgba(255, 255, 255, 0.8)",
-          backdropFilter: "blur(4px)",
-          padding: "8px",
-          gap: "8px",
-        }}
-      >
+      <nav className="fixed bottom-0 w-full flex justify-around border-t border-gray-300 bg-white/80 backdrop-blur p-2 gap-2">
         {/* Lots (Active) */}
         <a
           href="/lots"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "4px",
-            flex: 1,
-            borderRadius: "8px",
-            backgroundColor: "rgba(29, 201, 98, 0.1)",
-            padding: "8px",
-            textDecoration: "none",
-            color: "#1dc962",
-            fontSize: "12px",
-            fontWeight: "bold",
-            fontFamily: "'Work Sans', sans-serif",
-          }}
+          className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg bg-emerald-500/10 p-2 no-underline text-emerald-500 text-xs font-bold hover:bg-emerald-500/20"
         >
           <span className="material-symbols-outlined">list_alt</span>
           <span>Lots</span>
@@ -321,22 +173,7 @@ const LotsPage = () => {
         {/* Profile */}
         <a
           href="/store-profile"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "4px",
-            flex: 1,
-            borderRadius: "8px",
-            padding: "8px",
-            textDecoration: "none",
-            color: "#9ca3af",
-            fontSize: "12px",
-            fontFamily: "'Work Sans', sans-serif",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#4b5563")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
+          className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg p-2 no-underline text-gray-400 text-xs hover:text-gray-600 transition-colors"
         >
           <span className="material-symbols-outlined">person</span>
           <span>Profile</span>
