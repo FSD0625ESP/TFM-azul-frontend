@@ -2,30 +2,25 @@
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import MAPBOX_CONFIG from "../config/mapboxConfig";
 import { API_BASE_URL } from "../services/authService";
 
-export default function MapboxMobilePage() {
+export default function MainScreen() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [marks, setMarks] = useState([]);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState("map");
 
   // Obtener usuario de localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      // Solo Riders pueden acceder al mapa
-      if (userData.user_type !== "rider") {
-        navigate("/profile");
-        return;
-      }
-      setUser(userData);
+      setUser(JSON.parse(storedUser));
     } else {
       navigate("/login");
     }
@@ -82,59 +77,109 @@ export default function MapboxMobilePage() {
     });
   }, [marks, mapLoaded]);
 
-  const handleGoBack = () => {
-    navigate("/profile");
-  };
-
   return (
-    <div className="flex flex-col w-screen h-[100dvh] bg-gray-50 relative overflow-hidden mobile-safe-area">
-      <header className="absolute top-0 left-0 w-full z-10 bg-white/90 backdrop-blur-md px-4 py-3 flex items-center justify-between shadow-sm">
-        <h1 className="text-base font-semibold text-gray-800">Map</h1>
-
-        <Link
-          to="/profile"
-          className="flex flex-col items-center text-gray-700 hover:text-gray-900 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="w-6 h-6 mb-1"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-            />
-          </svg>
-          {user && (
-            <span className="text-xs font-medium text-gray-600 truncate max-w-[80px] text-center">
-              {user.name}
-            </span>
-          )}
-        </Link>
-      </header>
-
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        height: "100dvh",
+        backgroundColor: "#f6f8f7",
+        position: "relative",
+        overflow: "hidden",
+        fontFamily: "'Work Sans', sans-serif",
+      }}
+    >
       {/* Contenedor del mapa */}
       <div
         ref={mapContainerRef}
-        id="mapbox-container"
-        className="absolute inset-0 w-full h-full"
+        style={{
+          flex: 1,
+          width: "100%",
+          height: "100%",
+          position: "relative",
+        }}
       />
+
+      {/* Bottom Navigation */}
+      <footer
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          height: "64px",
+          backgroundColor: "#ffffff",
+          borderTop: "1px solid #dce5df",
+          fontFamily: "'Work Sans', sans-serif",
+          zIndex: 1000,
+        }}
+      >
+        {/* Map Tab */}
+        <button
+          onClick={() => setActiveTab("map")}
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "4px",
+            backgroundColor: "transparent",
+            border: "none",
+            cursor: "pointer",
+            padding: "8px",
+            color: activeTab === "map" ? "#1dc962" : "#9ca3af",
+            transition: "color 0.3s",
+          }}
+        >
+          <span
+            className="material-symbols-outlined"
+            style={{ fontSize: "24px" }}
+          >
+            map
+          </span>
+          <span style={{ fontSize: "12px", fontWeight: "500" }}>Map</span>
+        </button>
+
+        {/* Profile Tab */}
+        <button
+          onClick={() => {
+            setActiveTab("profile");
+            navigate("/rider-profile");
+          }}
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "4px",
+            backgroundColor: "transparent",
+            border: "none",
+            cursor: "pointer",
+            padding: "8px",
+            color: activeTab === "profile" ? "#1dc962" : "#9ca3af",
+            transition: "color 0.3s",
+          }}
+        >
+          <span
+            className="material-symbols-outlined"
+            style={{ fontSize: "24px" }}
+          >
+            person
+          </span>
+          <span style={{ fontSize: "12px", fontWeight: "500" }}>Profile</span>
+        </button>
+      </footer>
 
       <style>
         {`
-          .mobile-safe-area {
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-top: env(safe-area-inset-top);
-          }
           #mapbox-container {
             touch-action: none;
-          }
-          .touch-manipulation {
-            touch-action: manipulation;
           }
         `}
       </style>
