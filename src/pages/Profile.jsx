@@ -14,7 +14,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [lots, setLots] = useState([]);
   const [showLotForm, setShowLotForm] = useState(false);
-  const [lotInput, setLotInput] = useState("");
+  const [lotName, setLotName] = useState("");
+  const [lotDescription, setLotDescription] = useState("");
   const [loadingLots, setLoadingLots] = useState(false);
   const [shopId, setShopId] = useState(null);
   const theme = createTheme();
@@ -75,10 +76,17 @@ const Profile = () => {
   };
 
   const handleAddLot = async () => {
-    console.log("Agregando lote. shopId:", shopId, "lotInput:", lotInput);
+    console.log(
+      "Agregando lote. shopId:",
+      shopId,
+      "lotName:",
+      lotName,
+      "lotDescription:",
+      lotDescription
+    );
 
-    if (!lotInput || isNaN(lotInput) || lotInput <= 0) {
-      alert("Por favor ingresa un número válido");
+    if (!lotName.trim() || !lotDescription.trim()) {
+      alert("Por favor ingresa el nombre y descripción del lote");
       return;
     }
 
@@ -92,12 +100,15 @@ const Profile = () => {
       console.log(
         "Creando lote con shopId:",
         shopId,
-        "y número:",
-        parseInt(lotInput)
+        "nombre:",
+        lotName,
+        "descripción:",
+        lotDescription
       );
-      const result = await createLot(shopId, parseInt(lotInput));
+      const result = await createLot(shopId, lotName, lotDescription);
       console.log("Lote creado:", result);
-      setLotInput("");
+      setLotName("");
+      setLotDescription("");
       setShowLotForm(false);
       await fetchLots(shopId);
     } catch (err) {
@@ -200,9 +211,14 @@ const Profile = () => {
                               key={lot._id}
                               className="flex items-center justify-between bg-gray-100 p-3 rounded-lg"
                             >
-                              <span className="text-gray-700 font-medium">
-                                Lot: {lot.lot}
-                              </span>
+                              <div className="flex-1">
+                                <span className="text-gray-700 font-medium">
+                                  {lot.name}
+                                </span>
+                                <p className="text-gray-600 text-sm">
+                                  {lot.description}
+                                </p>
+                              </div>
                               <button
                                 onClick={() => handleDeleteLot(lot._id)}
                                 style={{
@@ -214,6 +230,8 @@ const Profile = () => {
                                   cursor: "pointer",
                                   fontSize: "12px",
                                   fontWeight: "600",
+                                  marginLeft: "8px",
+                                  flexShrink: 0,
                                 }}
                                 onMouseEnter={(e) =>
                                   (e.target.style.opacity = "0.85")
@@ -236,10 +254,10 @@ const Profile = () => {
                       {showLotForm ? (
                         <div className="space-y-2">
                           <input
-                            type="number"
-                            value={lotInput}
-                            onChange={(e) => setLotInput(e.target.value)}
-                            placeholder="Enter lot number"
+                            type="text"
+                            value={lotName}
+                            onChange={(e) => setLotName(e.target.value)}
+                            placeholder="Enter lot name (e.g., Pizza Margarita)"
                             style={{
                               width: "100%",
                               padding: "10px",
@@ -247,6 +265,21 @@ const Profile = () => {
                               border: "1px solid #e5e7eb",
                               fontSize: "14px",
                               color: "#1f2937",
+                            }}
+                          />
+                          <textarea
+                            value={lotDescription}
+                            onChange={(e) => setLotDescription(e.target.value)}
+                            placeholder="Enter lot description"
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              borderRadius: "6px",
+                              border: "1px solid #e5e7eb",
+                              fontSize: "14px",
+                              color: "#1f2937",
+                              minHeight: "80px",
+                              fontFamily: "inherit",
                             }}
                           />
                           <div className="flex gap-2">
@@ -275,7 +308,8 @@ const Profile = () => {
                             <button
                               onClick={() => {
                                 setShowLotForm(false);
-                                setLotInput("");
+                                setLotName("");
+                                setLotDescription("");
                               }}
                               style={{
                                 flex: 1,

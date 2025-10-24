@@ -13,12 +13,13 @@ export const getShopByUserId = async (userId) => {
   }
 };
 
-// Crear un nuevo lote
-export const createLot = async (shopId, lotNumber) => {
+// Crear un nuevo lote (plato)
+export const createLot = async (shopId, name, description) => {
   try {
     const response = await axios.post(`${API_URL}/lots/create`, {
       shopId,
-      lot: lotNumber,
+      name,
+      description,
     });
     return response.data;
   } catch (error) {
