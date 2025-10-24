@@ -16,37 +16,31 @@ const Profile = () => {
   const [showLotForm, setShowLotForm] = useState(false);
   const [lotName, setLotName] = useState("");
   const [lotDescription, setLotDescription] = useState("");
+  const [pickupDeadline, setPickupDeadline] = useState(""); // Nuevo estado
   const [loadingLots, setLoadingLots] = useState(false);
   const [shopId, setShopId] = useState(null);
   const theme = createTheme();
 
   useEffect(() => {
-    // Obtener usuario de localStorage
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      // Redirigir a login si no hay usuario
       navigate("/login");
     }
     setLoading(false);
   }, [navigate]);
 
-  // Cargar lotes si es shop
   useEffect(() => {
     if (user?.user_type === "shop") {
       if (user?.shopId) {
-        console.log("Shop ID encontrado en usuario:", user.shopId);
         setShopId(user.shopId);
         fetchLots(user.shopId);
       } else if (user?.id) {
-        // Si no hay shopId, buscarlo por userId
-        console.log("No hay shopId, buscando por userId:", user.id);
         const findShop = async () => {
           try {
             const shop = await getShopByUserId(user.id);
             if (shop && shop._id) {
-              console.log("Shop encontrada por userId:", shop._id);
               setShopId(shop._id);
               fetchLots(shop._id);
             } else {
@@ -63,10 +57,8 @@ const Profile = () => {
 
   const fetchLots = async (id) => {
     try {
-      console.log("Obteniendo lotes para shop:", id);
       setLoadingLots(true);
       const lotsData = await getShopLots(id);
-      console.log("Lotes obtenidos:", lotsData);
       setLots(lotsData);
     } catch (err) {
       console.error("Error fetching lots:", err);
@@ -76,52 +68,42 @@ const Profile = () => {
   };
 
   const handleAddLot = async () => {
-    console.log(
-      "Agregando lote. shopId:",
-      shopId,
-      "lotName:",
-      lotName,
-      "lotDescription:",
-      lotDescription
-    );
-
     if (!lotName.trim()) {
       alert("Por favor ingresa el nombre del lote");
       return;
     }
 
+    if (!pickupDeadline) {
+      alert("Por favor ingresa la hora límite de recogida");
+      return;
+    }
+
     if (!shopId) {
       alert("Error: No se pudo encontrar tu tienda. shopId es undefined");
-      console.error("shopId es null/undefined");
       return;
     }
 
     try {
-      console.log(
-        "Creando lote con shopId:",
+      const result = await createLot(
         shopId,
-        "nombre:",
         lotName,
-        "descripción:",
-        lotDescription
+        lotDescription,
+        pickupDeadline
       );
-      const result = await createLot(shopId, lotName, lotDescription);
-      console.log("Lote creado:", result);
       setLotName("");
       setLotDescription("");
+      setPickupDeadline("");
       setShowLotForm(false);
       await fetchLots(shopId);
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Error al crear el lote:", err);
       alert("Error al crear el lote: " + JSON.stringify(err));
     }
   };
 
   const handleDeleteLot = async (lotId) => {
-    console.log("Eliminando lote:", lotId);
     try {
-      const result = await deleteLot(lotId);
-      console.log("Lote eliminado:", result);
+      await deleteLot(lotId);
       await fetchLots(shopId);
     } catch (err) {
       alert("Error al eliminar el lote: " + JSON.stringify(err));
@@ -130,10 +112,8 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
-    // Limpiar localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    // Redirigir a home
     navigate("/");
   };
 
@@ -169,7 +149,6 @@ const Profile = () => {
 
               {user && (
                 <div className="space-y-6">
-                  {/* Name */}
                   <div className="border-b pb-4">
                     <p className="text-gray-500 text-sm mb-1">Name</p>
                     <p className="text-xl font-semibold text-gray-800">
@@ -177,7 +156,6 @@ const Profile = () => {
                     </p>
                   </div>
 
-                  {/* Email */}
                   <div className="border-b pb-4">
                     <p className="text-gray-500 text-sm mb-1">Email</p>
                     <p className="text-xl font-semibold text-gray-800">
@@ -185,7 +163,6 @@ const Profile = () => {
                     </p>
                   </div>
 
-                  {/* ID */}
                   <div className="border-b pb-4">
                     <p className="text-gray-500 text-sm mb-1">ID</p>
                     <p className="text-xs font-mono text-gray-600 break-all">
@@ -193,7 +170,6 @@ const Profile = () => {
                     </p>
                   </div>
 
-                  {/* Lots section - Solo para Shops */}
                   {user.user_type === "shop" && (
                     <div className="border-b pb-4">
                       <div className="flex items-center justify-between mb-3">
@@ -202,6 +178,7 @@ const Profile = () => {
                           {lots.length} lots
                         </span>
                       </div>
+
                       {loadingLots ? (
                         <p className="text-gray-600">Loading lots...</p>
                       ) : lots.length > 0 ? (
@@ -218,6 +195,12 @@ const Profile = () => {
                                 <p className="text-gray-600 text-sm">
                                   {lot.description}
                                 </p>
+                                <p className="text-gray-500 text-xs">
+                                  Pickup by:{" "}
+                                  {new Date(
+                                    lot.pickupDeadline
+                                  ).toLocaleString()}
+                                </p>
                               </div>
                               <button
                                 onClick={() => handleDeleteLot(lot._id)}
@@ -233,12 +216,6 @@ const Profile = () => {
                                   marginLeft: "8px",
                                   flexShrink: 0,
                                 }}
-                                onMouseEnter={(e) =>
-                                  (e.target.style.opacity = "0.85")
-                                }
-                                onMouseLeave={(e) =>
-                                  (e.target.style.opacity = "1")
-                                }
                               >
                                 Delete
                               </button>
@@ -282,6 +259,19 @@ const Profile = () => {
                               fontFamily: "inherit",
                             }}
                           />
+                          <input
+                            type="datetime-local"
+                            value={pickupDeadline}
+                            onChange={(e) => setPickupDeadline(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              borderRadius: "6px",
+                              border: "1px solid #e5e7eb",
+                              fontSize: "14px",
+                              color: "#1f2937",
+                            }}
+                          />
                           <div className="flex gap-2">
                             <button
                               onClick={handleAddLot}
@@ -296,12 +286,6 @@ const Profile = () => {
                                 fontSize: "14px",
                                 fontWeight: "600",
                               }}
-                              onMouseEnter={(e) =>
-                                (e.target.style.opacity = "0.85")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.target.style.opacity = "1")
-                              }
                             >
                               Save
                             </button>
@@ -310,6 +294,7 @@ const Profile = () => {
                                 setShowLotForm(false);
                                 setLotName("");
                                 setLotDescription("");
+                                setPickupDeadline("");
                               }}
                               style={{
                                 flex: 1,
@@ -322,12 +307,6 @@ const Profile = () => {
                                 fontSize: "14px",
                                 fontWeight: "600",
                               }}
-                              onMouseEnter={(e) =>
-                                (e.target.style.opacity = "0.85")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.target.style.opacity = "1")
-                              }
                             >
                               Cancel
                             </button>
@@ -348,10 +327,6 @@ const Profile = () => {
                             width: "100%",
                             transition: "all 0.3s ease",
                           }}
-                          onMouseEnter={(e) =>
-                            (e.target.style.opacity = "0.85")
-                          }
-                          onMouseLeave={(e) => (e.target.style.opacity = "1")}
                         >
                           Add Lot
                         </button>
@@ -359,7 +334,6 @@ const Profile = () => {
                     </div>
                   )}
 
-                  {/* Buttons */}
                   <div className="space-y-3 mt-8">
                     <button
                       onClick={handleLogout}
@@ -376,12 +350,9 @@ const Profile = () => {
                         transition: "all 0.3s ease",
                         marginBottom: "12px",
                       }}
-                      onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
-                      onMouseLeave={(e) => (e.target.style.opacity = "1")}
                     >
                       Logout
                     </button>
-
                     {user.user_type === "rider" && (
                       <button
                         onClick={handleGoBack}
@@ -397,8 +368,6 @@ const Profile = () => {
                           width: "100%",
                           transition: "all 0.3s ease",
                         }}
-                        onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
-                        onMouseLeave={(e) => (e.target.style.opacity = "1")}
                       >
                         Go Back
                       </button>
