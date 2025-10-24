@@ -7,7 +7,6 @@ import Register from "./pages/Register";
 import ShopDetails from "./pages/ShopDetails";
 import Profile from "./pages/Profile";
 import MainScreen from "./pages/MainScreen";
-import AddLotForm from "./components/AddLotForm";
 
 function App() {
   return (
@@ -20,7 +19,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/mainscreen" element={<MainScreen />} />
-        <Route path="/add-lot" element={<AddLotForm />} />{" "}
       </Routes>
     </Router>
   );
