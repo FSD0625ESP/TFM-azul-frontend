@@ -17,7 +17,13 @@ export default function MapboxMobilePage() {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const userData = JSON.parse(storedUser);
+      // Solo Riders pueden acceder al mapa
+      if (userData.user_type !== "rider") {
+        navigate("/profile");
+        return;
+      }
+      setUser(userData);
     } else {
       navigate("/login");
     }
@@ -78,9 +84,12 @@ export default function MapboxMobilePage() {
     });
   }, [marks, mapLoaded]);
 
+  const handleGoBack = () => {
+    navigate("/profile");
+  };
+
   return (
     <div className="flex flex-col w-screen h-[100dvh] bg-gray-50 relative overflow-hidden mobile-safe-area">
-      {/* Header */}
       <header className="absolute top-0 left-0 w-full z-10 bg-white/90 backdrop-blur-md px-4 py-3 flex items-center justify-between shadow-sm">
         <h1 className="text-base font-semibold text-gray-800">Map</h1>
 

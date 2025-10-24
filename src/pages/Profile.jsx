@@ -29,7 +29,7 @@ const Profile = () => {
   };
 
   const handleGoBack = () => {
-    navigate("/");
+    navigate("/mainscreen");
   };
 
   const buttonStyle = {
@@ -124,25 +124,27 @@ const Profile = () => {
                       Logout
                     </button>
 
-                    <button
-                      onClick={handleGoBack}
-                      style={{
-                        height: "48px",
-                        borderRadius: "9999px",
-                        backgroundColor: "#123B7E",
-                        color: "white",
-                        fontSize: "16px",
-                        fontWeight: "600",
-                        border: "none",
-                        cursor: "pointer",
-                        width: "100%",
-                        transition: "all 0.3s ease",
-                      }}
-                      onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
-                      onMouseLeave={(e) => (e.target.style.opacity = "1")}
-                    >
-                      Go Back
-                    </button>
+                    {user.user_type === "rider" && (
+                      <button
+                        onClick={handleGoBack}
+                        style={{
+                          height: "48px",
+                          borderRadius: "9999px",
+                          backgroundColor: "#123B7E",
+                          color: "white",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          border: "none",
+                          cursor: "pointer",
+                          width: "100%",
+                          transition: "all 0.3s ease",
+                        }}
+                        onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
+                        onMouseLeave={(e) => (e.target.style.opacity = "1")}
+                      >
+                        Go Back
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
