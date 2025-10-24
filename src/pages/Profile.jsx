@@ -85,8 +85,8 @@ const Profile = () => {
       lotDescription
     );
 
-    if (!lotName.trim() || !lotDescription.trim()) {
-      alert("Por favor ingresa el nombre y descripción del lote");
+    if (!lotName.trim()) {
+      alert("Por favor ingresa el nombre del lote");
       return;
     }
 
