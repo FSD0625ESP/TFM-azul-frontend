@@ -4,6 +4,8 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import MAPBOX_CONFIG from "../config/mapboxConfig";
+import { API_BASE_URL } from "../services/authService";
 
 export default function MapboxMobilePage() {
   const mapContainerRef = useRef(null);
@@ -33,9 +35,7 @@ export default function MapboxMobilePage() {
   useEffect(() => {
     const fetchMarks = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/marks`
-        );
+        const response = await axios.get(`${API_BASE_URL}/marks`);
         setMarks(response.data); // array de marks
       } catch (err) {
         console.error("Error fetching marks:", err);
@@ -49,15 +49,13 @@ export default function MapboxMobilePage() {
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    mapboxgl.accessToken =
-      import.meta.env.VITE_MAPBOX_TOKEN ||
-      "pk.eyJ1IjoiYWxleGlzcG9saXRlY25pY3MiLCJhIjoiY21ndjZodXZsMDJ0NjJvc2dyNGd5MGpiZiJ9.IuBv2n2W9_9iDKcINK3Skw";
+    mapboxgl.accessToken = MAPBOX_CONFIG.accessToken;
 
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/dark-v11",
-      center: [2.15899, 41.38879], // Barcelona
-      zoom: 12,
+      style: MAPBOX_CONFIG.defaultStyle,
+      center: MAPBOX_CONFIG.defaultCenter,
+      zoom: MAPBOX_CONFIG.defaultZoom,
       attributionControl: false,
     });
 
@@ -77,7 +75,7 @@ export default function MapboxMobilePage() {
       const long = parseFloat(mark.long);
 
       if (!isNaN(lat) && !isNaN(long)) {
-        new mapboxgl.Marker({ color: "#3b82f6" })
+        new mapboxgl.Marker({ color: MAPBOX_CONFIG.markerColor })
           .setLngLat([long, lat])
           .addTo(mapRef.current);
       }

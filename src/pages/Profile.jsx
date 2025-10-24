@@ -7,6 +7,9 @@ import {
   deleteLot,
   getShopByUserId,
 } from "../services/lotService.js";
+import Button from "../components/Button";
+import FormAlert from "../components/FormAlert";
+import { COLORS } from "../styles/commonStyles";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -202,8 +205,10 @@ const Profile = () => {
                                   ).toLocaleString()}
                                 </p>
                               </div>
-                              <button
+                              <Button
+                                variant="danger"
                                 onClick={() => handleDeleteLot(lot._id)}
+<<<<<<< HEAD
                                 style={{
                                   padding: "4px 12px",
                                   backgroundColor: "#dc2626",
@@ -216,9 +221,13 @@ const Profile = () => {
                                   marginLeft: "8px",
                                   flexShrink: 0,
                                 }}
+=======
+                                fullWidth={false}
+                                style={{ marginBottom: 0 }}
+>>>>>>> e439d30 (feat: implement reusable Button and FormAlert components, update styles and integrate into Profile and ShopDetailsForm)
                               >
                                 Delete
-                              </button>
+                              </Button>
                             </div>
                           ))}
                         </div>
@@ -313,6 +322,7 @@ const Profile = () => {
                           </div>
                         </div>
                       ) : (
+<<<<<<< HEAD
                         <button
                           onClick={() => setShowLotForm(true)}
                           style={{
@@ -328,13 +338,17 @@ const Profile = () => {
                             transition: "all 0.3s ease",
                           }}
                         >
+=======
+                        <Button onClick={() => setShowLotForm(true)}>
+>>>>>>> e439d30 (feat: implement reusable Button and FormAlert components, update styles and integrate into Profile and ShopDetailsForm)
                           Add Lot
-                        </button>
+                        </Button>
                       )}
                     </div>
                   )}
 
                   <div className="space-y-3 mt-8">
+<<<<<<< HEAD
                     <button
                       onClick={handleLogout}
                       style={{
@@ -371,6 +385,12 @@ const Profile = () => {
                       >
                         Go Back
                       </button>
+=======
+                    <Button onClick={handleLogout}>Logout</Button>
+
+                    {user.user_type === "rider" && (
+                      <Button onClick={handleGoBack}>Go Back</Button>
+>>>>>>> e439d30 (feat: implement reusable Button and FormAlert components, update styles and integrate into Profile and ShopDetailsForm)
                     )}
                   </div>
                 </div>

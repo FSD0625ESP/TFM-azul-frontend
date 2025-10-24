@@ -5,13 +5,15 @@ import {
   InputAdornment,
   ThemeProvider,
   createTheme,
-  CircularProgress,
 } from "@mui/material";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import CategoryIcon from "@mui/icons-material/Category";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapboxClient from "@mapbox/mapbox-sdk/services/geocoding";
 import { registerShopAndMark } from "../services/authService";
+import Button from "./Button";
+import FormAlert from "./FormAlert";
+import { textFieldSx } from "../styles/commonStyles";
 
 const mapboxClient = MapboxClient({
   accessToken: import.meta.env.VITE_MAPBOX_TOKEN,
@@ -133,19 +135,6 @@ const ShopDetailsForm = () => {
 
   const handleGoBack = () => navigate("/");
 
-  const textFieldSx = {
-    marginBottom: "16px",
-    "& .MuiOutlinedInput-root": {
-      height: "48px",
-      backgroundColor: "white",
-      borderRadius: "9999px",
-      "& fieldset": { borderColor: "transparent" },
-      "&:hover fieldset": { borderColor: "transparent" },
-      "&.Mui-focused fieldset": { borderColor: "transparent" },
-    },
-    "& .MuiInputBase-input": { color: "black" },
-  };
-
   const inputsConfig = [
     {
       name: "shopName",
@@ -182,16 +171,8 @@ const ShopDetailsForm = () => {
               Complete your shop information
             </p>
 
-            {successMessage && (
-              <div className="alert alert-success mb-4 text-white bg-green-600 rounded-2xl">
-                {successMessage}
-              </div>
-            )}
-            {errorMessage && (
-              <div className="alert alert-error mb-4 text-white bg-red-600 rounded-2xl">
-                {errorMessage}
-              </div>
-            )}
+            <FormAlert type="success" message={successMessage} />
+            <FormAlert type="error" message={errorMessage} />
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {inputsConfig.map((config) => (
@@ -235,48 +216,18 @@ const ShopDetailsForm = () => {
                 </div>
               ))}
 
-              <button
+              <Button
                 type="submit"
                 disabled={loading}
-                style={{
-                  height: "48px",
-                  borderRadius: "9999px",
-                  backgroundColor: "#123B7E",
-                  color: "white",
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  border: "none",
-                  cursor: "pointer",
-                  width: "100%",
-                  marginBottom: "12px",
-                  marginTop: "24px",
-                }}
+                loading={loading}
+                style={{ marginTop: "24px" }}
               >
-                {loading ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  "Continue"
-                )}
-              </button>
+                Continue
+              </Button>
 
-              <button
-                type="button"
-                onClick={handleGoBack}
-                disabled={loading}
-                style={{
-                  height: "48px",
-                  borderRadius: "9999px",
-                  backgroundColor: "#123B7E",
-                  color: "white",
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  border: "none",
-                  cursor: "pointer",
-                  width: "100%",
-                }}
-              >
+              <Button type="button" onClick={handleGoBack} disabled={loading}>
                 Go Back
-              </button>
+              </Button>
             </form>
           </div>
         </div>
