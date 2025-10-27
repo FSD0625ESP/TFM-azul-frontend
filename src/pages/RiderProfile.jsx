@@ -19,7 +19,7 @@ const RiderProfile = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   if (loading) {
@@ -76,7 +76,7 @@ const RiderProfile = () => {
             <div className="flex-1">
               <p className="text-xs text-gray-400 mb-1">Phone</p>
               <p className="text-base font-medium text-gray-900">
-                {user.phone ? `+${user.phone}` : "Not specified"}
+                {user.phone ? user.phone : "Not specified"}
               </p>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import AddFoodLotModal from "../components/AddFoodLotModal";
 import EditFoodLotModal from "../components/EditFoodLotModal";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -10,6 +11,7 @@ const LotsPage = () => {
   const [store, setStore] = useState(null);
   const [lots, setLots] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedLot, setSelectedLot] = useState(null);
 
@@ -78,7 +80,28 @@ const LotsPage = () => {
       {/* Main Content */}
       <main className="flex-1 p-4 flex flex-col pb-20 pt-4">
         {/* Header */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Food Lots</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Food Lots</h1>
+          <div className="flex gap-2 items-center">
+            <button
+              onClick={() => {
+                // QR functionality will be implemented in the future
+              }}
+              className="flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-2 border-none text-sm font-bold text-white cursor-pointer shadow-lg hover:bg-blue-600 transition-colors h-10"
+              title="Generate Store QR Code"
+            >
+              <span className="material-symbols-outlined">qr_code_2</span>
+              <span className="leading-none">QR</span>
+            </button>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 border-none text-sm font-bold text-white cursor-pointer shadow-lg hover:bg-emerald-600 transition-colors h-10"
+            >
+              <span className="material-symbols-outlined">add_circle</span>
+              <span className="leading-none">Add</span>
+            </button>
+          </div>
+        </div>
 
         {lots.length === 0 ? (
           <div className="text-center p-10 text-gray-500">
@@ -191,6 +214,17 @@ const LotsPage = () => {
         onSuccess={() => {
           setIsEditModalOpen(false);
           setSelectedLot(null);
+          fetchLots();
+        }}
+      />
+
+      {/* Add Food Lot Modal */}
+      <AddFoodLotModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        storeId={store?._id || store?.id}
+        onSuccess={() => {
+          setIsAddModalOpen(false);
           fetchLots();
         }}
       />
