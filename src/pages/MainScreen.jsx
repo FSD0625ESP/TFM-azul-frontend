@@ -48,6 +48,7 @@ export default function MainScreen() {
 
     mapboxgl.accessToken = MAPBOX_CONFIG.accessToken;
 
+    // Create the map with a sensible fallback center/zoom (Barcelona by default)
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: MAPBOX_CONFIG.defaultStyle,
@@ -58,9 +59,59 @@ export default function MainScreen() {
 
     mapRef.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
-    mapRef.current.on("load", () => setMapLoaded(true));
+    // When the map loads, try to get the device location and move the map there
+    mapRef.current.on("load", () => {
+      setMapLoaded(true);
 
-    return () => mapRef.current.remove();
+      // If geolocation is available, request the current position and fly there.
+      if (typeof navigator !== "undefined" && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            // Fly to the device location with a closer zoom for a better default focus
+            try {
+              mapRef.current.flyTo({ center: [longitude, latitude], zoom: 15 });
+
+              // Show a rider icon at the user's location instead of the default marker
+              try {
+                // Remove previous rider marker if exists
+                if (mapRef.current.userMarker) {
+                  mapRef.current.userMarker.remove();
+                }
+
+                const el = document.createElement("div");
+                el.className = "rider-marker";
+                el.innerHTML =
+                  '<span class="material-symbols-outlined">person_pin</span>';
+
+                const userMarker = new mapboxgl.Marker({
+                  element: el,
+                  anchor: "center",
+                })
+                  .setLngLat([longitude, latitude])
+                  .addTo(mapRef.current);
+
+                mapRef.current.userMarker = userMarker;
+              } catch (err) {
+                console.warn("Error adding rider marker:", err);
+              }
+            } catch (err) {
+              // If anything goes wrong with map ref, just log and keep fallback
+              console.warn("Map flyTo error:", err);
+            }
+          },
+          (err) => {
+            // Permission denied or other geolocation error — keep fallback center
+            console.warn("Geolocation error or permission denied:", err);
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } else {
+        console.warn("Geolocation not available in this browser.");
+      }
+    });
+
+    return () => mapRef.current && mapRef.current.remove();
   }, []);
 
   // Colocar markers cuando mapa y marks estén listos
@@ -116,6 +167,22 @@ export default function MainScreen() {
         {`
           #mapbox-container {
             touch-action: none;
+          }
+          .rider-marker span {
+            font-size: 28px;
+            color: #1e40af;
+            /* Add a subtle white stroke for visibility on dark maps */
+            text-shadow: 0 0 2px rgba(255,255,255,0.8);
+            display: inline-block;
+            transform: translateY(0);
+          }
+          .rider-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: transparent;
           }
         `}
       </style>
