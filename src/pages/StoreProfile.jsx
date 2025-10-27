@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AddFoodLotModal from "../components/AddFoodLotModal";
 
 const StoreProfile = () => {
   const navigate = useNavigate();
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const storeData = localStorage.getItem("store");
@@ -21,7 +19,7 @@ const StoreProfile = () => {
   const handleLogout = () => {
     localStorage.removeItem("store");
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   if (loading) {
@@ -96,21 +94,10 @@ const StoreProfile = () => {
             <div className="flex-1">
               <p className="text-xs text-gray-400 mb-1">Phone</p>
               <p className="text-base font-medium text-gray-900">
-                {store.phone ? `+${store.phone}` : "Not specified"}
+                {store.phone ? store.phone : "Not specified"}
               </p>
             </div>
           </div>
-        </div>
-
-        {/* Add Food Lots Button */}
-        <div className="mb-8">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 w-full rounded-xl bg-emerald-500 px-6 py-4 border-none text-base font-bold text-white cursor-pointer shadow-lg hover:bg-emerald-600 transition-colors"
-          >
-            <span className="material-symbols-outlined">add_circle</span>
-            <span>Add Food Lots</span>
-          </button>
         </div>
 
         {/* Logout Button */}
@@ -145,16 +132,6 @@ const StoreProfile = () => {
           <span>Profile</span>
         </a>
       </nav>
-
-      {/* Add Food Lot Modal */}
-      <AddFoodLotModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        storeId={store?._id || store?.id}
-        onSuccess={() => {
-          // Optional: refresh store data if needed
-        }}
-      />
     </div>
   );
 };
