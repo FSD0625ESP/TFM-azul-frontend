@@ -13,7 +13,7 @@ const Home = () => {
           <span className="material-symbols-outlined text-emerald-500 text-4xl">
             local_mall
           </span>
-          <span className="font-bold text-2xl text-gray-800">FoodLink</span>
+          <span className="font-bold text-2xl text-gray-800">SoulBites</span>
         </div>
       </header>
 

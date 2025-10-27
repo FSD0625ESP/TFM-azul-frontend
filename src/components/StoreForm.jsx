@@ -34,7 +34,7 @@ const StoreForm = ({
           value={shopName}
           onChange={(e) => setShopName(e.target.value)}
           placeholder="Store name"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
@@ -48,7 +48,7 @@ const StoreForm = ({
           value={shopType}
           onChange={(e) => setShopType(e.target.value)}
           placeholder="Store type"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
@@ -65,7 +65,7 @@ const StoreForm = ({
             searchAddress(e.target.value);
           }}
           placeholder="Address"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
         />
 
         {/* Address suggestions dropdown */}
@@ -98,7 +98,7 @@ const StoreForm = ({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
@@ -112,7 +112,7 @@ const StoreForm = ({
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Phone number"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
@@ -126,7 +126,7 @@ const StoreForm = ({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 
@@ -140,7 +140,7 @@ const StoreForm = ({
           value={repeatPassword}
           onChange={(e) => setRepeatPassword(e.target.value)}
           placeholder="Repeat password"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
         />
       </div>
 

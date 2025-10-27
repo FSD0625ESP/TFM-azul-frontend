@@ -4,6 +4,7 @@ import axios from "axios";
 import MapboxClient from "@mapbox/mapbox-sdk/services/geocoding";
 import RiderForm from "../components/RiderForm";
 import StoreForm from "../components/StoreForm";
+import ModalDialog from "../components/ModalDialog";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -15,6 +16,8 @@ const Register = () => {
   const navigate = useNavigate();
   const [userType, setUserType] = useState("rider");
   const [loading, setLoading] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   // Rider fields
   const [firstName, setFirstName] = useState("");
@@ -223,19 +226,19 @@ const Register = () => {
         <div className="text-center mt-8">
           <p className="text-xs text-gray-500 m-0">
             By creating an account, you accept our{" "}
-            <a
-              href="#"
-              className="text-emerald-500 no-underline font-medium hover:underline"
+            <button
+              onClick={() => setShowTermsModal(true)}
+              className="text-emerald-500 no-underline font-medium hover:underline bg-none border-none cursor-pointer text-xs"
             >
               Terms and Conditions
-            </a>{" "}
+            </button>{" "}
             and{" "}
-            <a
-              href="#"
-              className="text-emerald-500 no-underline font-medium hover:underline"
+            <button
+              onClick={() => setShowPrivacyModal(true)}
+              className="text-emerald-500 no-underline font-medium hover:underline bg-none border-none cursor-pointer text-xs"
             >
               Privacy Policy
-            </a>
+            </button>
             .
           </p>
         </div>
@@ -253,6 +256,107 @@ const Register = () => {
           </p>
         </div>
       </main>
+
+      {/* Terms and Conditions Modal */}
+      <ModalDialog
+        isOpen={showTermsModal}
+        title="Terms and Conditions"
+        onClose={() => setShowTermsModal(false)}
+      >
+        <h3 className="font-bold text-emerald-600 mb-3">1. Purpose and Use</h3>
+        <p className="mb-4">
+          SoulBites is a community platform designed to connect stores, riders,
+          and volunteers to rescue surplus food and distribute it to those in
+          need within your city.
+        </p>
+
+        <h3 className="font-bold text-emerald-600 mb-3">
+          2. User Responsibilities
+        </h3>
+        <p className="mb-4">
+          Users agree to:
+          <ul className="list-disc ml-5 mt-2">
+            <li>Provide accurate and truthful information</li>
+            <li>Use the platform only for legitimate food rescue purposes</li>
+            <li>Respect other community members</li>
+            <li>Comply with all applicable laws and regulations</li>
+          </ul>
+        </p>
+
+        <h3 className="font-bold text-emerald-600 mb-3">3. Food Safety</h3>
+        <p className="mb-4">
+          Stores are responsible for ensuring food safety and compliance with
+          local health regulations. SoulBites does not guarantee the quality or
+          safety of any food shared on the platform.
+        </p>
+
+        <h3 className="font-bold text-emerald-600 mb-3">
+          4. Limitation of Liability
+        </h3>
+        <p className="mb-4">
+          SoulBites and its operators are not liable for any damages arising
+          from the use of this platform, including food-related incidents or
+          delivery issues.
+        </p>
+
+        <h3 className="font-bold text-emerald-600 mb-3">5. Modifications</h3>
+        <p>
+          We reserve the right to modify these terms at any time. Changes will
+          be effective immediately upon posting.
+        </p>
+      </ModalDialog>
+
+      {/* Privacy Policy Modal */}
+      <ModalDialog
+        isOpen={showPrivacyModal}
+        title="Privacy Policy"
+        onClose={() => setShowPrivacyModal(false)}
+      >
+        <h3 className="font-bold text-emerald-600 mb-3">
+          1. Information We Collect
+        </h3>
+        <p className="mb-4">
+          We collect information you provide directly, including:
+          <ul className="list-disc ml-5 mt-2">
+            <li>Name and contact information</li>
+            <li>Email address and phone number</li>
+            <li>Location and address data</li>
+            <li>Account credentials</li>
+          </ul>
+        </p>
+
+        <h3 className="font-bold text-emerald-600 mb-3">
+          2. How We Use Your Information
+        </h3>
+        <p className="mb-4">
+          We use collected information to:
+          <ul className="list-disc ml-5 mt-2">
+            <li>Facilitate food rescue operations</li>
+            <li>Connect users within your area</li>
+            <li>Communicate important updates</li>
+            <li>Improve our services</li>
+          </ul>
+        </p>
+
+        <h3 className="font-bold text-emerald-600 mb-3">3. Data Protection</h3>
+        <p className="mb-4">
+          We implement reasonable security measures to protect your personal
+          information. However, no method of transmission over the internet is
+          completely secure.
+        </p>
+
+        <h3 className="font-bold text-emerald-600 mb-3">4. Third Parties</h3>
+        <p className="mb-4">
+          We do not sell or share your personal information with third parties
+          without your consent, except as required by law.
+        </p>
+
+        <h3 className="font-bold text-emerald-600 mb-3">5. Contact Us</h3>
+        <p>
+          If you have questions about this privacy policy, please contact us
+          through the app's support feature.
+        </p>
+      </ModalDialog>
     </div>
   );
 };
