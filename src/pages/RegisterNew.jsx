@@ -53,9 +53,16 @@ const Register = () => {
     }
   };
 
+  // Store selected coordinates
+  const [selectedCoordinates, setSelectedCoordinates] = useState(null);
+
   // Handle address selection
   const handleSelectAddress = (feature) => {
     setAddress(feature.place_name);
+    setSelectedCoordinates({
+      lat: feature.center[1],
+      lng: feature.center[0],
+    });
     setSuggestions([]);
   };
 
@@ -108,6 +115,7 @@ const Register = () => {
           email,
           password,
           phone: phone ? parseInt(phone) : null,
+          coordinates: selectedCoordinates,
         });
 
         console.log("Store registered:", storeResponse.data);
