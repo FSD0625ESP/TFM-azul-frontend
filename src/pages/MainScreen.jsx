@@ -321,6 +321,17 @@ export default function MainScreen() {
 
             el.innerHTML = `<span class="material-symbols-outlined">store</span><span class="shop-count">${count}</span>`;
 
+            // Add click handler directly to the element
+            el.addEventListener("click", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate(`/store/${shopId}/lots`);
+            });
+
+            el.style.cursor = "pointer";
+            el.style.zIndex = "1000";
+            el.style.pointerEvents = "auto";
+
             const shopMarker = new mapboxgl.Marker({
               element: el,
               anchor: "center",
