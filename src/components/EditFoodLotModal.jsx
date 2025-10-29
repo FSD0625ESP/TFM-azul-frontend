@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -67,11 +68,14 @@ const EditFoodLotModal = ({ isOpen, onClose, lot, onSuccess }) => {
       });
 
       console.log("Lot updated:", response.data);
+      toast.success("Food lot updated successfully!");
       onSuccess?.();
       onClose();
     } catch (err) {
       console.error("Error updating lot:", err);
-      setError(err.response?.data?.message || "Error updating lot");
+      const errorMsg = err.response?.data?.message || "Error updating lot";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

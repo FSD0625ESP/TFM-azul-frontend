@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -62,11 +63,14 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
       setName("");
       setDescription("");
       setPickupDeadline("");
+      toast.success("Food lot published successfully!");
       onSuccess?.();
       onClose();
     } catch (err) {
       console.error("Error creating lot:", err);
-      setError(err.response?.data?.message || "Error creating lot");
+      const errorMsg = err.response?.data?.message || "Error creating lot";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
