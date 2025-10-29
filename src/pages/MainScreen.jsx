@@ -35,17 +35,64 @@ export default function MainScreen() {
         return;
       }
 
-      // Promise wrapper para getCurrentPosition
+      // Try to get a fresh position with a longer timeout and better error handling.
       const getPosition = () =>
         new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            (pos) => resolve(pos),
-            (err) => reject(err),
-            { enableHighAccuracy: true, timeout: 10000 }
-          );
+          try {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => resolve(pos),
+              (err) => reject(err),
+              { enableHighAccuracy: true, timeout: 30000 }
+            );
+          } catch (err) {
+            reject(err);
+          }
         });
 
-      const position = await getPosition();
+      let position = null;
+      try {
+        position = await getPosition();
+      } catch (err) {
+        console.warn("Geolocation getCurrentPosition failed:", err);
+        // err may be a GeolocationPositionError with code 1 (PERMISSION_DENIED),
+        // 2 (POSITION_UNAVAILABLE) or 3 (TIMEOUT)
+        if (err && err.code === 1) {
+          window.alert(
+            "Permiso de ubicación denegado. Activa los permisos de ubicación para la app y vuelve a intentarlo."
+          );
+          return;
+        }
+
+        if (err && err.code === 3) {
+          // Timeout: try to fallback to the last known marker position if available
+          try {
+            const last = mapRef.current && mapRef.current.userMarker;
+            if (last && typeof last.getLngLat === "function") {
+              const ll = last.getLngLat();
+              position = { coords: { latitude: ll.lat, longitude: ll.lng } };
+              console.info("Using last known marker position as fallback.");
+            } else {
+              window.alert(
+                "No se pudo obtener la ubicación (timeout) y no hay posición previa. Asegúrate de que el GPS está activado y vuelve a intentarlo."
+              );
+              return;
+            }
+          } catch (fallbackErr) {
+            console.error("Fallback to marker failed:", fallbackErr);
+            window.alert(
+              "No se pudo obtener la ubicación. Comprueba el GPS y los permisos e inténtalo de nuevo."
+            );
+            return;
+          }
+        } else {
+          // Other geolocation errors
+          window.alert(
+            "Error al obtener la ubicación: " + (err.message || "Unknown error")
+          );
+          return;
+        }
+      }
+
       const { latitude, longitude } = position.coords;
 
       // Llamada al backend para crear la mark con type_mark 'homeless' (coincide con el enum del modelo)
