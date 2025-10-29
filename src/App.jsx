@@ -209,6 +209,22 @@ function App() {
           }
         />
 
+        {/* New route without id in URL - storeId passed via location.state or sessionStorage */}
+        <Route
+          path="/store/lots"
+          element={
+            <ProtectedRoute
+              element={
+                <RiderOnlyRoute
+                  element={<StoreLotsPage />}
+                  userType={userType}
+                />
+              }
+              isAuthenticated={isAuthenticated}
+            />
+          }
+        />
+
         {/* Fallback - redirect to home */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

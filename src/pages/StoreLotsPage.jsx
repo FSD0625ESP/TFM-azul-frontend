@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -7,7 +7,14 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const StoreLotsPage = () => {
   const navigate = useNavigate();
-  const { storeId } = useParams();
+  const params = useParams();
+  const location = useLocation();
+
+  // Derive storeId from URL params, or location.state, or sessionStorage fallback
+  const storeId =
+    params.storeId ||
+    location?.state?.storeId ||
+    sessionStorage.getItem("selectedStoreId");
   const [store, setStore] = useState(null);
   const [lots, setLots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,11 +38,13 @@ const StoreLotsPage = () => {
         const lotsResponse = await axios.get(`${API_URL}/lots`);
         console.log("All lots:", lotsResponse.data);
 
-        const storeLots = lotsResponse.data.filter((lot) => {
-          const shopId = lot.shop?._id || lot.shop;
-          console.log(`Comparing lot.shop: ${shopId} with storeId: ${storeId}`);
-          return String(shopId) === String(storeId);
-        });
+        const storeLots = lotsResponse.data
+          .filter((lot) => {
+            const shopId = lot.shop?._id || lot.shop;
+            return String(shopId) === String(storeId);
+          })
+          // Mostrar sólo lotes no reservados
+          .filter((lot) => !lot.reserved);
 
         console.log("Filtered store lots:", storeLots);
         setLots(storeLots);
@@ -60,12 +69,56 @@ const StoreLotsPage = () => {
 
     if (storeId) {
       fetchLots();
+    } else {
+      // If no storeId is available (very unlikely), redirect back with a message
+      console.warn("No storeId available for StoreLotsPage");
+      toast.error("Tienda no seleccionada");
+      navigate(-1);
     }
   }, [storeId]);
 
-  const handleReserve = (lotId) => {
-    toast.info("Reserve functionality coming soon!");
-    // TODO: Implement reservation logic when backend is ready
+  const handleReserve = async (lotId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Necesitas iniciar sesión para reservar");
+        return;
+      }
+
+      const resp = await axios.post(
+        `${API_URL}/lots/${lotId}/reserve`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (resp && resp.data && resp.data.lot) {
+        const updatedLot = resp.data.lot;
+        // Si el lote ahora está reservado, lo quitamos de la lista mostrada
+        if (updatedLot.reserved) {
+          setLots((prev) =>
+            prev.filter((l) => String(l._id) !== String(updatedLot._id))
+          );
+        } else {
+          setLots((prev) =>
+            prev.map((l) =>
+              String(l._id) === String(updatedLot._id) ? updatedLot : l
+            )
+          );
+        }
+
+        toast.success("Lote reservado correctamente");
+      } else {
+        toast.error("No se pudo reservar el lote");
+      }
+    } catch (err) {
+      console.error("Error reservando lote:", err);
+      const msg = err?.response?.data?.message || err.message || "Error";
+      toast.error("Error reservando lote: " + msg);
+    }
   };
 
   if (loading) {
