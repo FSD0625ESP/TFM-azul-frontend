@@ -325,7 +325,15 @@ export default function MainScreen() {
             el.addEventListener("click", (e) => {
               e.preventDefault();
               e.stopPropagation();
-              navigate(`/store/${shopId}/lots`);
+              // Guardamos el id en sessionStorage como fallback para recargas
+              try {
+                sessionStorage.setItem("selectedStoreId", shopId);
+              } catch (err) {
+                console.warn("sessionStorage unavailable:", err);
+              }
+
+              // Navegamos a una ruta sin id en la URL, pasando el id via state
+              navigate(`/store/lots`, { state: { storeId: shopId } });
             });
 
             el.style.cursor = "pointer";
