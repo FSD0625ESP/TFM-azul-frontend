@@ -4,6 +4,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 import MAPBOX_CONFIG from "../config/mapboxConfig";
 import deliveryIcon from "../assets/delivery.png";
 
@@ -26,12 +27,12 @@ export default function MainScreen() {
       // Determine user id: backend responses sometimes use `id` and sometimes `_id`
       const userId = user?.id || user?._id || null;
       if (!user || !userId) {
-        window.alert("Usuario no autenticado");
+        toast.error("Usuario no autenticado");
         return;
       }
 
       if (typeof navigator === "undefined" || !navigator.geolocation) {
-        window.alert("Geolocalización no disponible en este navegador.");
+        toast.error("Geolocalización no disponible en este navegador.");
         return;
       }
 
@@ -57,7 +58,7 @@ export default function MainScreen() {
         // err may be a GeolocationPositionError with code 1 (PERMISSION_DENIED),
         // 2 (POSITION_UNAVAILABLE) or 3 (TIMEOUT)
         if (err && err.code === 1) {
-          window.alert(
+          toast.error(
             "Permiso de ubicación denegado. Activa los permisos de ubicación para la app y vuelve a intentarlo."
           );
           return;
@@ -72,21 +73,21 @@ export default function MainScreen() {
               position = { coords: { latitude: ll.lat, longitude: ll.lng } };
               console.info("Using last known marker position as fallback.");
             } else {
-              window.alert(
+              toast.error(
                 "No se pudo obtener la ubicación (timeout) y no hay posición previa. Asegúrate de que el GPS está activado y vuelve a intentarlo."
               );
               return;
             }
           } catch (fallbackErr) {
             console.error("Fallback to marker failed:", fallbackErr);
-            window.alert(
+            toast.error(
               "No se pudo obtener la ubicación. Comprueba el GPS y los permisos e inténtalo de nuevo."
             );
             return;
           }
         } else {
           // Other geolocation errors
-          window.alert(
+          toast.error(
             "Error al obtener la ubicación: " + (err.message || "Unknown error")
           );
           return;
@@ -125,13 +126,13 @@ export default function MainScreen() {
         // Actualizar estado local para que quede persistente en la vista
         setMarks((prev) => [...prev, createdMark]);
 
-        window.alert("Marca creada en tu ubicación.");
+        toast.success("Marca creada en tu ubicación.");
       } else {
-        window.alert("No se pudo crear la marca. Intenta de nuevo.");
+        toast.error("No se pudo crear la marca. Intenta de nuevo.");
       }
     } catch (err) {
       console.error("Error creando marca en ubicación:", err);
-      window.alert("Error creando la marca: " + (err.message || err));
+      toast.error("Error creando la marca: " + (err.message || err));
     }
   };
 

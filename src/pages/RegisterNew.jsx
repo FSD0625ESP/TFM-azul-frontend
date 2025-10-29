@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 import MapboxClient from "@mapbox/mapbox-sdk/services/geocoding";
 import RiderForm from "../components/RiderForm";
 import StoreForm from "../components/StoreForm";
@@ -74,7 +75,7 @@ const Register = () => {
 
     if (userType === "rider") {
       if (!firstName || !lastName || !email || !password || !repeatPassword) {
-        alert("Please fill in all required fields");
+        toast.error("Please fill in all required fields");
         return;
       }
     } else if (userType === "shop") {
@@ -87,13 +88,13 @@ const Register = () => {
         !password ||
         !repeatPassword
       ) {
-        alert("Please fill in all required fields");
+        toast.error("Please fill in all required fields");
         return;
       }
     }
 
     if (password !== repeatPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -127,7 +128,7 @@ const Register = () => {
       navigate("/login");
     } catch (error) {
       console.error("Registration error:", error);
-      alert(
+      toast.error(
         error.response?.data?.message || "An error occurred during registration"
       );
     } finally {

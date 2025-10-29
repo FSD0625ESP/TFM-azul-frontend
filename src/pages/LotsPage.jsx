@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 import AddFoodLotModal from "../components/AddFoodLotModal";
 import EditFoodLotModal from "../components/EditFoodLotModal";
 
@@ -61,9 +62,10 @@ const LotsPage = () => {
     try {
       await axios.delete(`${API_URL}/lots/${lotId}`);
       setLots(lots.filter((lot) => lot._id !== lotId));
+      toast.success("Lot deleted successfully");
     } catch (err) {
       console.error("Error deleting lot:", err);
-      alert("Error deleting lot");
+      toast.error("Error deleting lot");
     }
   };
 
