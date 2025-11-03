@@ -410,6 +410,20 @@ export default function MainScreen() {
           <span className="text-xs font-medium">Map</span>
         </button>
 
+        {/* Reserved Lots Tab */}
+        <button
+          onClick={() => {
+            setActiveTab("reserved");
+            navigate("/reserved-lots");
+          }}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors ${
+            activeTab === "reserved" ? "text-emerald-500" : "text-gray-400"
+          }`}
+        >
+          <span className="material-symbols-outlined text-2xl">bookmark</span>
+          <span className="text-xs font-medium">Reserved</span>
+        </button>
+
         {/* Profile Tab */}
         <button
           onClick={() => {
