@@ -202,6 +202,7 @@ export default function MainScreen() {
       center: MAPBOX_CONFIG.defaultCenter,
       zoom: MAPBOX_CONFIG.defaultZoom,
       attributionControl: false,
+      projection: MAPBOX_CONFIG.projection,
     });
 
     mapRef.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");

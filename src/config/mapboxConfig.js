@@ -11,6 +11,7 @@ const MAPBOX_CONFIG = {
   // A slightly closer default zoom; will be overridden by device geolocation when available
   defaultZoom: 15,
   markerColor: "#3b82f6",
+  projection: "mercator",
 };
 
 export default MAPBOX_CONFIG;
