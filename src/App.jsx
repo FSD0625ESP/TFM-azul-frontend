@@ -13,6 +13,7 @@ import StoreProfile from "./pages/StoreProfile";
 import MainScreen from "./pages/MainScreen";
 import LotsPage from "./pages/LotsPage";
 import StoreLotsPage from "./pages/StoreLotsPage";
+import ReservedLotsPage from "./pages/ReservedLotsPage";
 
 // Protected Route for authenticated users only
 const ProtectedRoute = ({ element, isAuthenticated }) => {
@@ -158,6 +159,22 @@ function App() {
               element={
                 <RiderOnlyRoute
                   element={<RiderProfile />}
+                  userType={userType}
+                />
+              }
+              isAuthenticated={isAuthenticated}
+            />
+          }
+        />
+
+        {/* Reserved Lots - Rider only route */}
+        <Route
+          path="/reserved-lots"
+          element={
+            <ProtectedRoute
+              element={
+                <RiderOnlyRoute
+                  element={<ReservedLotsPage />}
                   userType={userType}
                 />
               }

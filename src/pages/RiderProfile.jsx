@@ -105,6 +105,15 @@ const RiderProfile = () => {
           <span>Map</span>
         </a>
 
+        {/* Reserved Lots */}
+        <a
+          href="/reserved-lots"
+          className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg p-2 no-underline text-gray-400 text-xs hover:text-gray-600 transition-colors"
+        >
+          <span className="material-symbols-outlined">bookmark</span>
+          <span>Reserved</span>
+        </a>
+
         {/* Profile (Active) */}
         <a
           href="#"

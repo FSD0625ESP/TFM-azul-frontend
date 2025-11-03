@@ -160,7 +160,7 @@ export default function MainScreen() {
     fetchMarks();
   }, []);
 
-  // Traer lots y computar conteo por tienda
+  // Traer lots y computar conteo por tienda (solo lotes NO reservados)
   useEffect(() => {
     const fetchLots = async () => {
       try {
@@ -169,10 +169,15 @@ export default function MainScreen() {
 
         const counts = {};
         lots.forEach((lot) => {
-          // lot.shop puede venir como objeto poblado o como id
-          const shopId =
-            lot.shop && lot.shop._id ? String(lot.shop._id) : String(lot.shop);
-          counts[shopId] = (counts[shopId] || 0) + 1;
+          // Solo contar lotes no reservados
+          if (!lot.reserved) {
+            // lot.shop puede venir como objeto poblado o como id
+            const shopId =
+              lot.shop && lot.shop._id
+                ? String(lot.shop._id)
+                : String(lot.shop);
+            counts[shopId] = (counts[shopId] || 0) + 1;
+          }
         });
 
         setLotCounts(counts);
@@ -318,6 +323,11 @@ export default function MainScreen() {
                 ? String(mark.user._id)
                 : String(mark.user);
             const count = lotCounts[shopId] || 0;
+
+            // No mostrar la tienda si no tiene lotes disponibles
+            if (count === 0) {
+              return;
+            }
 
             el.innerHTML = `<span class="material-symbols-outlined">store</span><span class="shop-count">${count}</span>`;
 
