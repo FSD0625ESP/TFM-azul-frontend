@@ -192,101 +192,106 @@ export default function MainScreen() {
   // Inicializar mapa solo una vez
   useEffect(() => {
     if (!mapContainerRef.current) return;
-
     mapboxgl.accessToken = MAPBOX_CONFIG.accessToken;
 
-    // Create the map with a sensible fallback center/zoom (Barcelona by default)
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: MAPBOX_CONFIG.defaultStyle,
       center: MAPBOX_CONFIG.defaultCenter,
       zoom: MAPBOX_CONFIG.defaultZoom,
-      attributionControl: false,
       projection: MAPBOX_CONFIG.projection,
     });
 
     mapRef.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
-    // When the map loads, try to get the device location and move the map there
+    // ✅ Import dinámico de Directions desde CDN (solo una vez)
+    (async () => {
+      try {
+        await import(
+          "https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-directions@4.1.1/dist/mapbox-gl-directions.js"
+        );
+
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href =
+          "https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-directions@4.1.1/dist/mapbox-gl-directions.css";
+        document.head.appendChild(link);
+
+        // ✅ Evita añadir el control más de una vez
+        if (!mapRef.current.directions) {
+          const directions = new window.MapboxDirections({
+            accessToken: MAPBOX_CONFIG.accessToken,
+            unit: "metric",
+            profile: "mapbox/driving",
+            controls: { inputs: true, instructions: true },
+          });
+
+          mapRef.current.addControl(directions, "top-left");
+          mapRef.current.directions = directions;
+
+          // Establecer destino al hacer click
+          mapRef.current.on("click", (e) => {
+            const destination = [e.lngLat.lng, e.lngLat.lat];
+            directions.setDestination(destination);
+          });
+        }
+      } catch (err) {
+        console.error("Error cargando MapboxDirections:", err);
+      }
+    })();
+
+    // Cuando el mapa cargue completamente
     mapRef.current.on("load", () => {
       setMapLoaded(true);
 
-      // If geolocation is available, start watching position so the rider marker
-      // updates as the device moves. We use watchPosition instead of getCurrentPosition.
-      if (typeof navigator !== "undefined" && navigator.geolocation) {
-        const onPosition = (position) => {
-          const { latitude, longitude } = position.coords;
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
 
-          // Fly to the device location on the first fix
-          try {
+            // Centrar mapa al inicio
             if (!mapRef.current._hasInitialFly) {
               mapRef.current.flyTo({ center: [longitude, latitude], zoom: 15 });
               mapRef.current._hasInitialFly = true;
             }
 
-            // Create or update rider marker
-            try {
-              if (mapRef.current.userMarker) {
-                // move existing marker
-                mapRef.current.userMarker.setLngLat([longitude, latitude]);
-              } else {
-                const el = document.createElement("div");
-                el.className = "rider-marker";
-                // Use the delivery.png asset from src/assets as the rider icon
-                el.innerHTML = `<img src="${deliveryIcon}" class="rider-img" alt="rider" />`;
-
-                const userMarker = new mapboxgl.Marker({
-                  element: el,
-                  anchor: "center",
-                })
-                  .setLngLat([longitude, latitude])
-                  .addTo(mapRef.current);
-
-                mapRef.current.userMarker = userMarker;
-              }
-            } catch (err) {
-              console.warn("Error adding/moving rider marker:", err);
+            // Establecer origen en directions
+            if (mapRef.current.directions) {
+              mapRef.current.directions.setOrigin([longitude, latitude]);
             }
-          } catch (err) {
-            console.warn("Map flyTo/update error:", err);
-          }
-        };
 
-        const onError = (err) => {
-          console.warn("Geolocation watch error:", err);
-        };
-
-        // Start watching position and store the watchId so we can clear it later
-        try {
-          const watchId = navigator.geolocation.watchPosition(
-            onPosition,
-            onError,
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0,
+            // Crear o actualizar marcador del rider
+            if (!mapRef.current.userMarker) {
+              const el = document.createElement("div");
+              el.innerHTML = `<img src="${deliveryIcon}" class="rider-img" alt="rider" />`;
+              el.style.pointerEvents = "none";
+              const marker = new mapboxgl.Marker({ element: el })
+                .setLngLat([longitude, latitude])
+                .addTo(mapRef.current);
+              mapRef.current.userMarker = marker;
+            } else {
+              mapRef.current.userMarker.setLngLat([longitude, latitude]);
             }
-          );
-          mapRef.current._geoWatchId = watchId;
-        } catch (err) {
-          console.warn("Failed to start geolocation watch:", err);
-        }
-      } else {
-        console.warn("Geolocation not available in this browser.");
+          },
+          (err) => console.warn("Geo error:", err),
+          { enableHighAccuracy: true }
+        );
       }
     });
 
+    // ✅ Limpiar mapa y evitar duplicados al desmontar
     return () => {
-      // Clear geolocation watcher if active
-      try {
-        if (mapRef.current && mapRef.current._geoWatchId != null) {
-          navigator.geolocation.clearWatch(mapRef.current._geoWatchId);
+      if (mapRef.current) {
+        if (mapRef.current.directions) {
+          try {
+            mapRef.current.removeControl(mapRef.current.directions);
+          } catch (err) {
+            console.warn("Error removing directions control:", err);
+          }
+          mapRef.current.directions = null;
         }
-      } catch (err) {
-        // ignore
+        mapRef.current.remove();
       }
-
-      mapRef.current && mapRef.current.remove();
     };
   }, []);
 
