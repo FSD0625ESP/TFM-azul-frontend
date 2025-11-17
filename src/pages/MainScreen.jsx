@@ -14,29 +14,28 @@ const API_BASE_URL =
 export default function MainScreen() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
+  const [openChat, setOpenChat] = useState(false);
+  const [selectedStore, setSelectedStore] = useState(null);
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [marks, setMarks] = useState([]);
   const [lotCounts, setLotCounts] = useState({});
   const [mapLoaded, setMapLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState("map");
+  const [userLocation, setUserLocation] = useState(null); // ✅ estado de ubicación
 
-  // Handler para crear una mark en la ubicación actual con type_mark = 'homeles'
   const handleCreateHomelesMark = async () => {
     try {
-      // Determine user id: backend responses sometimes use `id` and sometimes `_id`
       const userId = user?.id || user?._id || null;
       if (!user || !userId) {
         toast.error("Usuario no autenticado");
         return;
       }
-
       if (typeof navigator === "undefined" || !navigator.geolocation) {
         toast.error("Geolocalización no disponible en este navegador.");
         return;
       }
 
-      // Try to get a fresh position with a longer timeout and better error handling.
       const getPosition = () =>
         new Promise((resolve, reject) => {
           try {
@@ -55,38 +54,29 @@ export default function MainScreen() {
         position = await getPosition();
       } catch (err) {
         console.warn("Geolocation getCurrentPosition failed:", err);
-        // err may be a GeolocationPositionError with code 1 (PERMISSION_DENIED),
-        // 2 (POSITION_UNAVAILABLE) or 3 (TIMEOUT)
         if (err && err.code === 1) {
           toast.error(
             "Permiso de ubicación denegado. Activa los permisos de ubicación para la app y vuelve a intentarlo."
           );
           return;
         }
-
         if (err && err.code === 3) {
-          // Timeout: try to fallback to the last known marker position if available
           try {
             const last = mapRef.current && mapRef.current.userMarker;
             if (last && typeof last.getLngLat === "function") {
               const ll = last.getLngLat();
               position = { coords: { latitude: ll.lat, longitude: ll.lng } };
-              console.info("Using last known marker position as fallback.");
             } else {
               toast.error(
-                "No se pudo obtener la ubicación (timeout) y no hay posición previa. Asegúrate de que el GPS está activado y vuelve a intentarlo."
+                "No se pudo obtener la ubicación (timeout) y no hay posición previa."
               );
               return;
             }
-          } catch (fallbackErr) {
-            console.error("Fallback to marker failed:", fallbackErr);
-            toast.error(
-              "No se pudo obtener la ubicación. Comprueba el GPS y los permisos e inténtalo de nuevo."
-            );
+          } catch {
+            toast.error("No se pudo obtener la ubicación. Comprueba el GPS.");
             return;
           }
         } else {
-          // Other geolocation errors
           toast.error(
             "Error al obtener la ubicación: " + (err.message || "Unknown error")
           );
@@ -95,8 +85,6 @@ export default function MainScreen() {
       }
 
       const { latitude, longitude } = position.coords;
-
-      // Llamada al backend para crear la mark con type_mark 'homeless' (coincide con el enum del modelo)
       const payload = {
         lat: latitude,
         long: longitude,
@@ -108,92 +96,67 @@ export default function MainScreen() {
         payload
       );
 
-      if (response && response.data && response.data.mark) {
+      if (response?.data?.mark) {
         const createdMark = response.data.mark;
-
-        // Añadir marcador visual al mapa inmediatamente
-        try {
-          new mapboxgl.Marker({ color: "#ef4444" }) // rojo para distinguir
-            .setLngLat([
-              parseFloat(createdMark.long),
-              parseFloat(createdMark.lat),
-            ])
-            .addTo(mapRef.current);
-        } catch (err) {
-          console.warn("Error añadiendo marker al mapa:", err);
-        }
-
-        // Actualizar estado local para que quede persistente en la vista
+        new mapboxgl.Marker({ color: "#ef4444" })
+          .setLngLat([
+            parseFloat(createdMark.long),
+            parseFloat(createdMark.lat),
+          ])
+          .addTo(mapRef.current);
         setMarks((prev) => [...prev, createdMark]);
-
         toast.success("Marca creada en tu ubicación.");
       } else {
         toast.error("No se pudo crear la marca. Intenta de nuevo.");
       }
     } catch (err) {
-      console.error("Error creando marca en ubicación:", err);
       toast.error("Error creando la marca: " + (err.message || err));
     }
   };
 
-  // Obtener usuario de localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      navigate("/login");
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
+    else navigate("/login");
   }, [navigate]);
 
-  // Traer marks desde la base de datos
   useEffect(() => {
     const fetchMarks = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/marks`);
-        setMarks(response.data); // array de marks
+        setMarks(response.data);
       } catch (err) {
         console.error("Error fetching marks:", err);
       }
     };
-
     fetchMarks();
   }, []);
 
-  // Traer lots y computar conteo por tienda (solo lotes NO reservados)
   useEffect(() => {
     const fetchLots = async () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/lots`);
         const lots = res.data || [];
-
         const counts = {};
         lots.forEach((lot) => {
-          // Solo contar lotes no reservados
           if (!lot.reserved) {
-            // lot.shop puede venir como objeto poblado o como id
-            const shopId =
-              lot.shop && lot.shop._id
-                ? String(lot.shop._id)
-                : String(lot.shop);
+            const shopId = lot.shop?._id
+              ? String(lot.shop._id)
+              : String(lot.shop);
             counts[shopId] = (counts[shopId] || 0) + 1;
           }
         });
-
         setLotCounts(counts);
       } catch (err) {
         console.error("Error fetching lots:", err);
       }
     };
-
     fetchLots();
   }, []);
 
-  // Inicializar mapa solo una vez
   useEffect(() => {
     if (!mapContainerRef.current) return;
     mapboxgl.accessToken = MAPBOX_CONFIG.accessToken;
-
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: MAPBOX_CONFIG.defaultStyle,
@@ -204,63 +167,48 @@ export default function MainScreen() {
 
     mapRef.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
-    // ✅ Import dinámico de Directions desde CDN (solo una vez)
     (async () => {
       try {
         await import(
           "https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-directions@4.1.1/dist/mapbox-gl-directions.js"
         );
-
         const link = document.createElement("link");
         link.rel = "stylesheet";
         link.href =
           "https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-directions@4.1.1/dist/mapbox-gl-directions.css";
         document.head.appendChild(link);
-
-        // ✅ Evita añadir el control más de una vez
         if (!mapRef.current.directions) {
           const directions = new window.MapboxDirections({
             accessToken: MAPBOX_CONFIG.accessToken,
             unit: "metric",
             profile: "mapbox/driving",
-            controls: { inputs: true, instructions: true },
+            controls: { inputs: false, instructions: false },
+            interactive: false,
           });
-
           mapRef.current.addControl(directions, "top-left");
           mapRef.current.directions = directions;
-
-          // Establecer destino al hacer click
-          mapRef.current.on("click", (e) => {
-            const destination = [e.lngLat.lng, e.lngLat.lat];
-            directions.setDestination(destination);
-          });
         }
       } catch (err) {
         console.error("Error cargando MapboxDirections:", err);
       }
     })();
 
-    // Cuando el mapa cargue completamente
     mapRef.current.on("load", () => {
       setMapLoaded(true);
-
       if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
           (pos) => {
             const { latitude, longitude } = pos.coords;
+            setUserLocation({ lat: latitude, lng: longitude }); // ✅ actualizar estado
 
-            // Centrar mapa al inicio
             if (!mapRef.current._hasInitialFly) {
               mapRef.current.flyTo({ center: [longitude, latitude], zoom: 15 });
               mapRef.current._hasInitialFly = true;
             }
-
-            // Establecer origen en directions
             if (mapRef.current.directions) {
               mapRef.current.directions.setOrigin([longitude, latitude]);
             }
 
-            // Crear o actualizar marcador del rider
             if (!mapRef.current.userMarker) {
               const el = document.createElement("div");
               el.innerHTML = `<img src="${deliveryIcon}" class="rider-img" alt="rider" />`;
@@ -279,15 +227,12 @@ export default function MainScreen() {
       }
     });
 
-    // ✅ Limpiar mapa y evitar duplicados al desmontar
     return () => {
       if (mapRef.current) {
         if (mapRef.current.directions) {
           try {
             mapRef.current.removeControl(mapRef.current.directions);
-          } catch (err) {
-            console.warn("Error removing directions control:", err);
-          }
+          } catch {}
           mapRef.current.directions = null;
         }
         mapRef.current.remove();
@@ -295,96 +240,78 @@ export default function MainScreen() {
     };
   }, []);
 
-  // Colocar markers cuando mapa y marks estén listos
   useEffect(() => {
     if (!mapLoaded || !mapRef.current) return;
-
-    // Remove previous non-user markers to avoid duplicates
-    try {
-      if (!mapRef.current.markers) mapRef.current.markers = [];
-      mapRef.current.markers.forEach((m) => m.remove());
-      mapRef.current.markers = [];
-    } catch (err) {
-      console.warn("Error clearing old markers:", err);
-    }
+    if (!mapRef.current.markers) mapRef.current.markers = [];
+    mapRef.current.markers.forEach((m) => m.remove());
+    mapRef.current.markers = [];
 
     marks.forEach((mark) => {
       const lat = parseFloat(mark.lat);
       const long = parseFloat(mark.long);
+      if (isNaN(lat) || isNaN(long)) return;
 
-      if (!isNaN(lat) && !isNaN(long)) {
-        // If it's a shop, use a custom shop icon; otherwise use the default pin
-        if (mark.type_mark === "shop") {
-          try {
-            const el = document.createElement("div");
-            el.className = "shop-marker";
-            // Determine shop id: prefer mark.shop if present (populated or id),
-            // otherwise fall back to mark.user which previously held the store id
-            const shopId =
-              mark.shop && mark.shop._id
-                ? String(mark.shop._id)
-                : mark.shop
-                ? String(mark.shop)
-                : mark.user && mark.user._id
-                ? String(mark.user._id)
-                : String(mark.user);
-            const count = lotCounts[shopId] || 0;
+      if (mark.type_mark === "shop") {
+        try {
+          const el = document.createElement("div");
+          el.className = "shop-marker";
+          const shopId = mark.shop?._id
+            ? String(mark.shop._id)
+            : mark.shop
+            ? String(mark.shop)
+            : mark.user?._id
+            ? String(mark.user._id)
+            : String(mark.user);
+          const count = lotCounts[shopId] || 0;
+          if (count === 0) return;
 
-            // No mostrar la tienda si no tiene lotes disponibles
-            if (count === 0) {
-              return;
-            }
+          el.innerHTML = `<span class="material-symbols-outlined">store</span><span class="shop-count">${count}</span>`;
+          el.style.cursor = "pointer";
+          el.style.pointerEvents = "auto";
+          el.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            sessionStorage.setItem("selectedStoreId", shopId);
+            setSelectedStore(shopId);
+            setOpenChat(true);
+          });
 
-            el.innerHTML = `<span class="material-symbols-outlined">store</span><span class="shop-count">${count}</span>`;
-
-            // Add click handler directly to the element
-            el.addEventListener("click", (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              // Guardamos el id en sessionStorage como fallback para recargas
-              try {
-                sessionStorage.setItem("selectedStoreId", shopId);
-              } catch (err) {
-                console.warn("sessionStorage unavailable:", err);
-              }
-
-              // Navegamos a una ruta sin id en la URL, pasando el id via state
-              navigate(`/store/lots`, { state: { storeId: shopId } });
-            });
-
-            el.style.cursor = "pointer";
-            el.style.zIndex = "1000";
-            el.style.pointerEvents = "auto";
-
-            const shopMarker = new mapboxgl.Marker({
-              element: el,
-              anchor: "center",
-            })
-              .setLngLat([long, lat])
-              .addTo(mapRef.current);
-
-            mapRef.current.markers.push(shopMarker);
-          } catch (err) {
-            console.warn(
-              "Error adding shop marker, falling back to default:",
-              err
-            );
-            const fallback = new mapboxgl.Marker({
-              color: MAPBOX_CONFIG.markerColor,
-            })
-              .setLngLat([long, lat])
-              .addTo(mapRef.current);
-            mapRef.current.markers.push(fallback);
-          }
-        } else {
-          const m = new mapboxgl.Marker({ color: MAPBOX_CONFIG.markerColor })
+          const shopMarker = new mapboxgl.Marker({
+            element: el,
+            anchor: "center",
+          })
             .setLngLat([long, lat])
             .addTo(mapRef.current);
-          mapRef.current.markers.push(m);
+          mapRef.current.markers.push(shopMarker);
+        } catch {
+          const fallback = new mapboxgl.Marker({
+            color: MAPBOX_CONFIG.markerColor,
+          })
+            .setLngLat([long, lat])
+            .addTo(mapRef.current);
+          mapRef.current.markers.push(fallback);
         }
+      } else {
+        const m = new mapboxgl.Marker({ color: MAPBOX_CONFIG.markerColor })
+          .setLngLat([long, lat])
+          .addTo(mapRef.current);
+        mapRef.current.markers.push(m);
       }
     });
-  }, [marks, mapLoaded]);
+  }, [marks, mapLoaded, lotCounts]);
+
+  function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
 
   return (
     <div className="flex flex-col w-full h-dvh bg-white relative overflow-hidden">
@@ -414,6 +341,138 @@ export default function MainScreen() {
           <span className="material-symbols-outlined text-2xl">map</span>
           <span className="text-xs font-medium">Map</span>
         </button>
+
+        {/* Lista lateral con nombres de tiendas y lotes */}
+        <div className="fixed top-5 left-4 z-50 max-h-[40vh] w-45 overflow-y-auto bg-white/90 rounded-lg shadow-lg p-2">
+          {/* Puntos de recogida (tiendas) */}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold mb-2 text-black">
+              Puntos de recogida
+            </h3>
+            <ul>
+              {marks
+                .filter((mark) => mark.type_mark === "shop")
+                .map((mark, idx) => {
+                  const lat = parseFloat(mark.lat);
+                  const long = parseFloat(mark.long);
+                  if (isNaN(lat) || isNaN(long)) return null;
+
+                  const shopId =
+                    mark.shop && mark.shop._id
+                      ? String(mark.shop._id)
+                      : mark.shop
+                      ? String(mark.shop)
+                      : mark.user && mark.user._id
+                      ? String(mark.user._id)
+                      : String(mark.user);
+
+                  const lotCount = lotCounts[shopId] || 0;
+                  if (lotCount === 0) return null;
+
+                  const shopName = mark.name || mark.shop?.name || "Tienda";
+
+                  let distanceKm = null;
+                  if (userLocation) {
+                    distanceKm = getDistanceFromLatLonInKm(
+                      userLocation.lat,
+                      userLocation.lng,
+                      lat,
+                      long
+                    ).toFixed(1);
+                  }
+
+                  return (
+                    <li
+                      key={idx}
+                      className="p-2 mb-1 rounded border border-gray-300 cursor-pointer flex justify-between items-center
+                         bg-white text-black transition-all duration-300
+                         hover:bg-gray-800 hover:text-white hover:shadow-md"
+                      onClick={() => {
+                        if (
+                          mapRef.current &&
+                          mapRef.current.directions &&
+                          userLocation
+                        ) {
+                          mapRef.current.directions.setOrigin([
+                            userLocation.lng,
+                            userLocation.lat,
+                          ]);
+                          mapRef.current.directions.setDestination([long, lat]);
+                          mapRef.current.flyTo({
+                            center: [long, lat],
+                            zoom: 16,
+                          });
+                        }
+                      }}
+                    >
+                      <span>
+                        {shopName} <br />
+                        Lotes: {lotCounts[shopId] || 0} <br />
+                        Distancia:{" "}
+                        {distanceKm ? `${distanceKm} km` : "Desconocida"}
+                      </span>
+                    </li>
+                  );
+                })}
+            </ul>
+          </div>
+
+          {/* Puntos de entrega (homeless) */}
+          <div>
+            <h3 className="text-sm font-semibold mb-2 text-black">
+              Puntos de entrega
+            </h3>
+            <ul>
+              {marks
+                .filter((mark) => mark.type_mark === "homeless")
+                .map((mark, idx) => {
+                  const lat = parseFloat(mark.lat);
+                  const long = parseFloat(mark.long);
+                  if (isNaN(lat) || isNaN(long)) return null;
+
+                  let distanceKm = null;
+                  if (userLocation) {
+                    distanceKm = getDistanceFromLatLonInKm(
+                      userLocation.lat,
+                      userLocation.lng,
+                      lat,
+                      long
+                    ).toFixed(1);
+                  }
+
+                  return (
+                    <li
+                      key={idx}
+                      className="p-2 mb-1 rounded border border-gray-300 cursor-pointer flex justify-between items-center
+                         bg-white text-black transition-all duration-300
+                         hover:bg-red-800 hover:text-white hover:shadow-md"
+                      onClick={() => {
+                        if (
+                          mapRef.current &&
+                          mapRef.current.directions &&
+                          userLocation
+                        ) {
+                          mapRef.current.directions.setOrigin([
+                            userLocation.lng,
+                            userLocation.lat,
+                          ]);
+                          mapRef.current.directions.setDestination([long, lat]);
+                          mapRef.current.flyTo({
+                            center: [long, lat],
+                            zoom: 16,
+                          });
+                        }
+                      }}
+                    >
+                      <span>
+                        📍 Entrega {distanceKm ? `- ${distanceKm} km` : ""}
+                      </span>
+                    </li>
+                  );
+                })}
+            </ul>
+          </div>
+        </div>
 
         {/* Reserved Lots Tab */}
         <button
@@ -446,60 +505,59 @@ export default function MainScreen() {
 
       <style>
         {`
-          #mapbox-container {
-            touch-action: none;
-          }
-          .rider-marker span {
-            font-size: 28px;
-            color: #1e40af;
-            /* Add a subtle white stroke for visibility on dark maps */
-            text-shadow: 0 0 2px rgba(255,255,255,0.8);
-            display: inline-block;
-            transform: translateY(0);
-          }
-          .rider-marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            background: transparent;
-          }
-          .rider-img {
-            width: 36px;
-            height: 36px;
-            object-fit: contain;
-            display: block;
-          }
-          .shop-marker span {
-            font-size: 24px;
-            color: #f59e0b; /* amber for shop */
-            text-shadow: 0 0 2px rgba(0,0,0,0.6);
-            display: inline-block;
-          }
-          .shop-marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 8px;
-          }
-          .shop-count {
-            display: inline-block;
-            min-width: 18px;
-            height: 18px;
-            line-height: 18px;
-            background: #ef4444;
-            color: white;
-            font-size: 12px;
-            border-radius: 999px;
-            text-align: center;
-            margin-left: 6px;
-            padding: 0 4px;
-          }
-        `}
+        #mapbox-container {
+          touch-action: none;
+        }
+        .rider-marker span {
+          font-size: 28px;
+          color: #1e40af;
+          text-shadow: 0 0 2px rgba(255,255,255,0.8);
+          display: inline-block;
+          transform: translateY(0);
+        }
+        .rider-marker {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          background: transparent;
+        }
+        .rider-img {
+          width: 36px;
+          height: 36px;
+          object-fit: contain;
+          display: block;
+        }
+        .shop-marker span {
+          font-size: 24px;
+          color: #f59e0b;
+          text-shadow: 0 0 2px rgba(0,0,0,0.6);
+          display: inline-block;
+        }
+        .shop-marker {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          background: rgba(255,255,255,0.06);
+          border-radius: 8px;
+        }
+        .shop-count {
+          display: inline-block;
+          min-width: 18px;
+          height: 18px;
+          line-height: 18px;
+          background: #ef4444;
+          color: white;
+          font-size: 12px;
+          border-radius: 999px;
+          text-align: center;
+          margin-left: 6px;
+          padding: 0 4px;
+        }
+      `}
       </style>
     </div>
   );
