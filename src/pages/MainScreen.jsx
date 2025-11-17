@@ -271,9 +271,7 @@ export default function MainScreen() {
           el.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            sessionStorage.setItem("selectedStoreId", shopId);
-            setSelectedStore(shopId);
-            setOpenChat(true);
+            navigate(`/store/${shopId}/lots`);
           });
 
           const shopMarker = new mapboxgl.Marker({
@@ -505,59 +503,59 @@ export default function MainScreen() {
 
       <style>
         {`
-        #mapbox-container {
-          touch-action: none;
-        }
-        .rider-marker span {
-          font-size: 28px;
-          color: #1e40af;
-          text-shadow: 0 0 2px rgba(255,255,255,0.8);
-          display: inline-block;
-          transform: translateY(0);
-        }
-        .rider-marker {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 36px;
-          height: 36px;
-          background: transparent;
-        }
-        .rider-img {
-          width: 36px;
-          height: 36px;
-          object-fit: contain;
-          display: block;
-        }
-        .shop-marker span {
-          font-size: 24px;
-          color: #f59e0b;
-          text-shadow: 0 0 2px rgba(0,0,0,0.6);
-          display: inline-block;
-        }
-        .shop-marker {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 36px;
-          height: 36px;
-          background: rgba(255,255,255,0.06);
-          border-radius: 8px;
-        }
-        .shop-count {
-          display: inline-block;
-          min-width: 18px;
-          height: 18px;
-          line-height: 18px;
-          background: #ef4444;
-          color: white;
-          font-size: 12px;
-          border-radius: 999px;
-          text-align: center;
-          margin-left: 6px;
-          padding: 0 4px;
-        }
-      `}
+          #mapbox-container {
+            touch-action: none;
+          }
+          .rider-marker span {
+            font-size: 28px;
+            color: #1e40af;
+            text-shadow: 0 0 2px rgba(255,255,255,0.8);
+            display: inline-block;
+            transform: translateY(0);
+          }
+          .rider-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: transparent;
+          }
+          .rider-img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            display: block;
+          }
+          .shop-marker span {
+            font-size: 24px;
+            color: #f59e0b;
+            text-shadow: 0 0 2px rgba(0,0,0,0.6);
+            display: inline-block;
+          }
+          .shop-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 8px;
+          }
+          .shop-count {
+            display: inline-block;
+            min-width: 18px;
+            height: 18px;
+            line-height: 18px;
+            background: #ef4444;
+            color: white;
+            font-size: 12px;
+            border-radius: 999px;
+            text-align: center;
+            margin-left: 6px;
+            padding: 0 4px;
+          }
+        `}
       </style>
     </div>
   );

@@ -2,61 +2,57 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import ChatBox from "../components/ChatBox"; // Componente de chat que te pasé antes
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const StoreLotsPage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
 
-  // Derive storeId from URL params, or location.state, or sessionStorage fallback
   const storeId =
     params.storeId ||
     location?.state?.storeId ||
     sessionStorage.getItem("selectedStoreId");
+
   const [store, setStore] = useState(null);
   const [lots, setLots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  // Get current rider from localStorage
+  // Chat
+  const [openChat, setOpenChat] = useState(false);
+  const [chatOrderId, setChatOrderId] = useState(null);
+
+  // Obtener usuario
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  // Fetch lots and extract store info
+  // Abrir chat si hay storeId
+  useEffect(() => {
+    if (storeId) {
+      sessionStorage.setItem("selectedStoreId", storeId);
+    }
+  }, [storeId]);
+
+  // Fetch lots y store info
   useEffect(() => {
     const fetchLots = async () => {
       try {
-        console.log("Fetching lots for storeId:", storeId);
-
-        // Fetch all lots and filter by store
         const lotsResponse = await axios.get(`${API_URL}/lots`);
-        console.log("All lots:", lotsResponse.data);
-
         const storeLots = lotsResponse.data
-          .filter((lot) => {
-            const shopId = lot.shop?._id || lot.shop;
-            return String(shopId) === String(storeId);
-          })
-          // Mostrar sólo lotes no reservados
+          .filter(
+            (lot) => String(lot.shop?._id || lot.shop) === String(storeId)
+          )
           .filter((lot) => !lot.reserved);
 
-        console.log("Filtered store lots:", storeLots);
         setLots(storeLots);
 
-        // Extract store info from the first lot if available
-        if (
-          storeLots.length > 0 &&
-          storeLots[0].shop &&
-          typeof storeLots[0].shop === "object"
-        ) {
+        if (storeLots.length > 0 && typeof storeLots[0].shop === "object") {
           setStore(storeLots[0].shop);
-          console.log("Store data from lot:", storeLots[0].shop);
         }
 
         setLoading(false);
@@ -67,16 +63,14 @@ const StoreLotsPage = () => {
       }
     };
 
-    if (storeId) {
-      fetchLots();
-    } else {
-      // If no storeId is available (very unlikely), redirect back with a message
-      console.warn("No storeId available for StoreLotsPage");
+    if (storeId) fetchLots();
+    else {
       toast.error("Tienda no seleccionada");
       navigate(-1);
     }
   }, [storeId]);
 
+  // Reservar lote y abrir chat
   const handleReserve = async (lotId) => {
     try {
       const token = localStorage.getItem("token");
@@ -88,36 +82,35 @@ const StoreLotsPage = () => {
       const resp = await axios.post(
         `${API_URL}/lots/${lotId}/reserve`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (resp && resp.data && resp.data.lot) {
+      if (resp?.data?.lot) {
         const updatedLot = resp.data.lot;
-        // Si el lote ahora está reservado, lo quitamos de la lista mostrada
         if (updatedLot.reserved) {
-          setLots((prev) =>
-            prev.filter((l) => String(l._id) !== String(updatedLot._id))
-          );
+          setLots((prev) => prev.filter((l) => l._id !== updatedLot._id));
         } else {
           setLots((prev) =>
-            prev.map((l) =>
-              String(l._id) === String(updatedLot._id) ? updatedLot : l
-            )
+            prev.map((l) => (l._id === updatedLot._id ? updatedLot : l))
           );
         }
 
         toast.success("Lote reservado correctamente");
+
+        // Abrir chat con el orderId del lote
+        if (updatedLot._id) {
+          setChatOrderId(updatedLot._id); // usamos _id como orderId
+          setOpenChat(true);
+        }
       } else {
         toast.error("No se pudo reservar el lote");
       }
     } catch (err) {
       console.error("Error reservando lote:", err);
-      const msg = err?.response?.data?.message || err.message || "Error";
-      toast.error("Error reservando lote: " + msg);
+      toast.error(
+        "Error reservando lote: " +
+          (err?.response?.data?.message || err.message)
+      );
     }
   };
 
@@ -139,20 +132,20 @@ const StoreLotsPage = () => {
         <div className="flex items-center gap-4 p-4">
           <button
             onClick={() => navigate(-1)}
-            className="text-gray-400 hover:text-gray-600 bg-none border-none cursor-pointer text-2xl leading-none flex items-center justify-center"
+            className="text-gray-400 hover:text-gray-600 text-2xl"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-bold text-gray-900 m-0">
+            <h1 className="text-lg font-bold text-gray-900">
               {store?.name || "Store"}
             </h1>
-            <p className="text-xs text-gray-500 m-0">{store?.address}</p>
+            <p className="text-xs text-gray-500">{store?.address}</p>
           </div>
         </div>
       </header>
 
-      {/* Store Info Card */}
+      {/* Store Info */}
       {store && (
         <div className="bg-white mx-4 mt-4 rounded-lg p-4 shadow-sm border border-gray-100">
           <div className="flex gap-3">
@@ -162,11 +155,9 @@ const StoreLotsPage = () => {
               </span>
             </div>
             <div className="flex-1">
-              <h2 className="font-bold text-gray-900 text-sm m-0">
-                {store.name}
-              </h2>
-              <p className="text-xs text-gray-600 m-0 mt-1">{store.type}</p>
-              <p className="text-xs text-gray-500 m-0 mt-1 flex items-center gap-1">
+              <h2 className="font-bold text-gray-900 text-sm">{store.name}</h2>
+              <p className="text-xs text-gray-600">{store.type}</p>
+              <p className="text-xs text-gray-500 flex items-center gap-1">
                 <span className="material-symbols-outlined text-xs">phone</span>
                 {store.phone || "No phone available"}
               </p>
@@ -202,15 +193,12 @@ const StoreLotsPage = () => {
                   key={lot._id}
                   className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
                 >
-                  {/* Lot Header */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-base m-0">
+                      <h3 className="font-bold text-gray-900 text-base">
                         {lot.name}
                       </h3>
-                      <p className="text-xs text-gray-500 m-0 mt-1">
-                        {pickupDate}
-                      </p>
+                      <p className="text-xs text-gray-500 mt-1">{pickupDate}</p>
                     </div>
                     <div className="text-right">
                       <div className="bg-emerald-100 text-emerald-700 rounded-full px-3 py-1 text-xs font-semibold">
@@ -219,17 +207,15 @@ const StoreLotsPage = () => {
                     </div>
                   </div>
 
-                  {/* Description */}
                   {lot.description && (
-                    <p className="text-sm text-gray-600 m-0 mb-3 leading-relaxed">
+                    <p className="text-sm text-gray-600 mb-3 leading-relaxed">
                       {lot.description}
                     </p>
                   )}
 
-                  {/* Reserve Button */}
                   <button
                     onClick={() => handleReserve(lot._id)}
-                    className="w-full py-2.5 rounded-lg border-none bg-emerald-500 text-white text-sm font-semibold cursor-pointer hover:bg-emerald-600 active:bg-emerald-700 transition-colors flex items-center justify-center"
+                    className="w-full py-2.5 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600"
                   >
                     <span className="material-symbols-outlined text-sm mr-2">
                       bookmark_add
@@ -242,6 +228,17 @@ const StoreLotsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Chat */}
+      {openChat && chatOrderId && user && (
+        <div className="fixed bottom-0 right-0 w-80 h-96 bg-black text-white border shadow-lg rounded-lg p-4 flex flex-col">
+          <ChatBox
+            orderId={chatOrderId}
+            userType={user.role || "rider"} // Ajusta según tu rol
+            userId={user._id}
+          />
+        </div>
+      )}
     </div>
   );
 };
