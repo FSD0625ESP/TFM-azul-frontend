@@ -73,6 +73,37 @@ const ReservedLotsPage = () => {
     if (user) fetchReservedLots();
   }, [user, refreshTrigger]);
 
+  // Función para desreservar un lote
+  const handleUnreserveLot = async (lotId) => {
+    if (!confirm("¿Estás seguro de que quieres desreservar este lote?")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("No estás autenticado");
+        return;
+      }
+
+      await axios.post(
+        `${API_URL}/lots/${lotId}/unreserve`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Lote desreservado correctamente");
+      // Refrescar la lista
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err) {
+      console.error("Error desreservando lote:", err);
+      toast.error(
+        "Error desreservando lote: " +
+          (err?.response?.data?.message || err.message)
+      );
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#f6f8f7]">
@@ -152,23 +183,28 @@ const ReservedLotsPage = () => {
                 </p>
               )}
 
-              {/* Reserved Status */}
-              <div className="flex justify-between items-center">
-                <div className="bg-emerald-50 rounded-lg p-3 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-emerald-600 text-sm">
-                    check_circle
+              {/* Action Buttons */}
+              <div className="flex justify-between items-center gap-2 mt-3">
+                {/* Cancel Button - Left */}
+                <button
+                  onClick={() => handleUnreserveLot(lot._id)}
+                  className="p-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors flex items-center justify-center"
+                  title="Cancel reservation"
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    close
                   </span>
-                  <p className="text-xs text-emerald-700 font-medium m-0">
-                    Reserved
-                  </p>
-                </div>
+                </button>
 
-                {/* Chat Button */}
+                {/* Chat Button - Right */}
                 <button
                   onClick={() => setOpenChatOrderId(lot._id)}
-                  className="px-3 py-1 bg-emerald-500 text-white text-xs rounded hover:bg-emerald-600"
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 text-white text-xs rounded hover:bg-emerald-600 transition-colors"
                 >
-                  Chat with Store
+                  <span className="material-symbols-outlined text-sm">
+                    chat
+                  </span>
+                  <span>Chat</span>
                 </button>
               </div>
             </div>
