@@ -153,28 +153,22 @@ const LotsPage = () => {
                   </div>
                   <div className="flex gap-2">
                     {!lot.reserved && (
-                      <>
-                        <button
-                          onClick={() => {
-                            setSelectedLot(lot);
-                            setIsEditModalOpen(true);
-                          }}
-                          className="bg-transparent border-none text-xl cursor-pointer text-emerald-500 flex items-center justify-center hover:text-emerald-600"
-                        >
-                          <span className="material-symbols-outlined">
-                            edit
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => handleDeleteLot(lot._id)}
-                          className="bg-transparent border-none text-red-600 cursor-pointer text-xl flex items-center justify-center hover:text-red-700"
-                        >
-                          <span className="material-symbols-outlined">
-                            delete
-                          </span>
-                        </button>
-                      </>
+                      <button
+                        onClick={() => {
+                          setSelectedLot(lot);
+                          setIsEditModalOpen(true);
+                        }}
+                        className="bg-transparent border-none text-xl cursor-pointer text-emerald-500 flex items-center justify-center hover:text-emerald-600"
+                      >
+                        <span className="material-symbols-outlined">edit</span>
+                      </button>
                     )}
+                    <button
+                      onClick={() => handleDeleteLot(lot._id)}
+                      className="bg-transparent border-none text-red-600 cursor-pointer text-xl flex items-center justify-center hover:text-red-700"
+                    >
+                      <span className="material-symbols-outlined">delete</span>
+                    </button>
                   </div>
                 </div>
 
