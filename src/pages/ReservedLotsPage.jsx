@@ -16,6 +16,7 @@ const ReservedLotsPage = () => {
   const [reservedLots, setReservedLots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openChatOrderId, setOpenChatOrderId] = useState(null); // orderId del chat abierto
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // para forzar refresh
 
   // Get current rider from localStorage
   useEffect(() => {
@@ -25,20 +26,41 @@ const ReservedLotsPage = () => {
     }
   }, []);
 
-  // Fetch reserved lots
+  // Refrescar cuando la página vuelve a tener foco
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // La página vuelve a ser visible, refrescar
+        setRefreshTrigger((prev) => prev + 1);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  // Fetch reserved lots - se ejecuta cuando user cambia o refreshTrigger cambia
   useEffect(() => {
     const fetchReservedLots = async () => {
       try {
         if (!user) return;
 
+        setLoading(true);
         const userId = user.id || user._id;
         const res = await axios.get(`${API_URL}/lots`);
         const lots = res.data || [];
 
-        const reserved = lots.filter(
-          (lot) => lot.reserved && String(lot.rider) === String(userId)
-        );
+        const reserved = lots.filter((lot) => {
+          if (!lot.reserved) return false;
 
+          // lot.rider puede ser un objeto (populated) o un string (id)
+          const lotRiderId =
+            typeof lot.rider === "object" ? lot.rider?._id : lot.rider;
+          return String(lotRiderId) === String(userId);
+        });
+
+        console.log("Reserved lots:", reserved);
         setReservedLots(reserved);
         setLoading(false);
       } catch (err) {
@@ -49,7 +71,7 @@ const ReservedLotsPage = () => {
     };
 
     if (user) fetchReservedLots();
-  }, [user]);
+  }, [user, refreshTrigger]);
 
   if (loading) {
     return (
