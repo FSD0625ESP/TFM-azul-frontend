@@ -116,13 +116,30 @@ const LotsPage = () => {
         ) : (
           <div className="flex flex-col gap-4">
             {lots.map((lot) => (
-              <div key={lot._id} className="bg-white rounded-lg p-4 shadow-sm">
+              <div
+                key={lot._id}
+                className={`rounded-lg p-4 shadow-sm ${
+                  lot.reserved
+                    ? "bg-blue-50 border border-blue-200"
+                    : "bg-white"
+                }`}
+              >
                 {/* Lot Header */}
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 m-0 mb-1">
-                      {lot.name}
-                    </h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg font-semibold text-gray-900 m-0">
+                        {lot.name}
+                      </h3>
+                      {lot.reserved && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-200 text-blue-800">
+                          <span className="material-symbols-outlined text-sm">
+                            check_circle
+                          </span>
+                          Reserved
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-400 m-0">
                       Created:{" "}
                       {new Date(lot.createdAt).toLocaleDateString("en-US", {
@@ -135,21 +152,29 @@ const LotsPage = () => {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedLot(lot);
-                        setIsEditModalOpen(true);
-                      }}
-                      className="bg-transparent border-none text-xl cursor-pointer text-emerald-500 flex items-center justify-center hover:text-emerald-600"
-                    >
-                      <span className="material-symbols-outlined">edit</span>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteLot(lot._id)}
-                      className="bg-transparent border-none text-red-600 cursor-pointer text-xl flex items-center justify-center hover:text-red-700"
-                    >
-                      <span className="material-symbols-outlined">delete</span>
-                    </button>
+                    {!lot.reserved && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setSelectedLot(lot);
+                            setIsEditModalOpen(true);
+                          }}
+                          className="bg-transparent border-none text-xl cursor-pointer text-emerald-500 flex items-center justify-center hover:text-emerald-600"
+                        >
+                          <span className="material-symbols-outlined">
+                            edit
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteLot(lot._id)}
+                          className="bg-transparent border-none text-red-600 cursor-pointer text-xl flex items-center justify-center hover:text-red-700"
+                        >
+                          <span className="material-symbols-outlined">
+                            delete
+                          </span>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -161,7 +186,7 @@ const LotsPage = () => {
                 )}
 
                 {/* Pickup Deadline */}
-                <div className="flex items-center gap-2 text-sm text-gray-900">
+                <div className="flex items-center gap-2 text-sm text-gray-900 mb-3">
                   <span className="material-symbols-outlined text-base">
                     schedule
                   </span>
@@ -178,6 +203,34 @@ const LotsPage = () => {
                     })()}
                   </span>
                 </div>
+
+                {/* Reserved By - Show rider info if reserved */}
+                {lot.reserved && lot.rider && (
+                  <div className="bg-blue-100 rounded-lg p-3 border border-blue-300">
+                    <p className="text-xs font-medium text-blue-900 mb-2">
+                      Reserved by:
+                    </p>
+                    <div className="text-sm text-blue-800">
+                      <p className="font-semibold m-0">{lot.rider.name}</p>
+                      {lot.rider.email && (
+                        <p className="text-xs m-0 mt-1">
+                          <span className="material-symbols-outlined text-xs align-middle mr-1">
+                            email
+                          </span>
+                          {lot.rider.email}
+                        </p>
+                      )}
+                      {lot.rider.phone && (
+                        <p className="text-xs m-0 mt-1">
+                          <span className="material-symbols-outlined text-xs align-middle mr-1">
+                            phone
+                          </span>
+                          {lot.rider.phone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
