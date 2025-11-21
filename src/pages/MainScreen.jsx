@@ -23,6 +23,7 @@ export default function MainScreen() {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState("map");
   const [userLocation, setUserLocation] = useState(null); // ✅ estado de ubicación
+  const [activeDestination, setActiveDestination] = useState(null);
 
   const handleCreateHomelesMark = async () => {
     try {
@@ -347,6 +348,7 @@ export default function MainScreen() {
             <h3 className="text-sm font-semibold mb-2 text-black">
               Puntos de recogida
             </h3>
+
             <ul>
               {marks
                 .filter((mark) => mark.type_mark === "shop")
@@ -379,33 +381,58 @@ export default function MainScreen() {
                     ).toFixed(1);
                   }
 
+                  const isActive =
+                    activeDestination &&
+                    activeDestination.lat === lat &&
+                    activeDestination.long === long;
+
                   return (
                     <li
                       key={idx}
-                      className="p-2 mb-1 rounded border border-gray-300 cursor-pointer flex justify-between items-center
-                         bg-white text-black transition-all duration-300
-                         hover:bg-gray-800 hover:text-white hover:shadow-md"
+                      className={`p-2 mb-1 rounded border cursor-pointer flex justify-between items-center transition-all duration-300
+    ${
+      isActive
+        ? "bg-red-600 text-white border-red-700 shadow-md"
+        : "bg-white text-black border-gray-300 hover:bg-red-800 hover:text-white"
+    }
+  `}
                       onClick={() => {
                         if (
-                          mapRef.current &&
-                          mapRef.current.directions &&
-                          userLocation
-                        ) {
-                          mapRef.current.directions.setOrigin([
-                            userLocation.lng,
-                            userLocation.lat,
-                          ]);
-                          mapRef.current.directions.setDestination([long, lat]);
-                          mapRef.current.flyTo({
-                            center: [long, lat],
-                            zoom: 16,
-                          });
+                          !mapRef.current ||
+                          !mapRef.current.directions ||
+                          !userLocation
+                        )
+                          return;
+
+                        const dest = { lat, long };
+
+                        // Si clicas estando activo -> desactiva
+                        if (isActive) {
+                          mapRef.current.directions.removeRoutes();
+                          setActiveDestination(null);
+                          return;
                         }
+
+                        // Activar nueva ruta
+                        mapRef.current.directions.setOrigin([
+                          userLocation.lng,
+                          userLocation.lat,
+                        ]);
+                        mapRef.current.directions.setDestination([long, lat]);
+
+                        mapRef.current.flyTo({
+                          center: [long, lat],
+                          zoom: 16,
+                        });
+
+                        setActiveDestination(dest);
                       }}
                     >
                       <span>
-                        {shopName} <br />
-                        Lotes: {lotCounts[shopId] || 0} <br />
+                        🏪 {shopName}
+                        <br />
+                        Lotes: {lotCount}
+                        <br />
                         Distancia:{" "}
                         {distanceKm ? `${distanceKm} km` : "Desconocida"}
                       </span>
@@ -441,25 +468,49 @@ export default function MainScreen() {
                   return (
                     <li
                       key={idx}
-                      className="p-2 mb-1 rounded border border-gray-300 cursor-pointer flex justify-between items-center
-                         bg-white text-black transition-all duration-300
-                         hover:bg-red-800 hover:text-white hover:shadow-md"
+                      className={`p-2 mb-1 rounded border cursor-pointer flex justify-between items-center transition-all duration-300
+              ${
+                activeDestination &&
+                activeDestination.lat === lat &&
+                activeDestination.long === long
+                  ? "bg-red-600 text-white border-red-700 shadow-md" // ACTIVO
+                  : "bg-white text-black border-gray-300 hover:bg-red-800 hover:text-white" // NORMAL
+              }
+            `}
                       onClick={() => {
                         if (
-                          mapRef.current &&
-                          mapRef.current.directions &&
-                          userLocation
+                          !mapRef.current ||
+                          !mapRef.current.directions ||
+                          !userLocation
+                        )
+                          return;
+
+                        const dest = { lat, long };
+
+                        // Si haces click en el mismo → DESACTIVA
+                        if (
+                          activeDestination &&
+                          activeDestination.lat === lat &&
+                          activeDestination.long === long
                         ) {
-                          mapRef.current.directions.setOrigin([
-                            userLocation.lng,
-                            userLocation.lat,
-                          ]);
-                          mapRef.current.directions.setDestination([long, lat]);
-                          mapRef.current.flyTo({
-                            center: [long, lat],
-                            zoom: 16,
-                          });
+                          mapRef.current.directions.removeRoutes();
+                          setActiveDestination(null);
+                          return;
                         }
+
+                        // Activar ruta
+                        mapRef.current.directions.setOrigin([
+                          userLocation.lng,
+                          userLocation.lat,
+                        ]);
+                        mapRef.current.directions.setDestination([long, lat]);
+
+                        mapRef.current.flyTo({
+                          center: [long, lat],
+                          zoom: 16,
+                        });
+
+                        setActiveDestination(dest);
                       }}
                     >
                       <span>
