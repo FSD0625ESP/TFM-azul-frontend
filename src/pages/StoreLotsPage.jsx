@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import ChatBox from "../components/ChatBox"; // Componente de chat que te pasé antes
+// Chat handled from ReservedLotsPage; do not auto-open chat here
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
@@ -21,9 +21,7 @@ const StoreLotsPage = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  // Chat
-  const [openChat, setOpenChat] = useState(false);
-  const [chatOrderId, setChatOrderId] = useState(null);
+  // Chat is managed from ReservedLotsPage; do not auto-open here
 
   // Obtener usuario
   useEffect(() => {
@@ -96,12 +94,8 @@ const StoreLotsPage = () => {
         }
 
         toast.success("Lote reservado correctamente");
-
-        // Abrir chat con el orderId del lote
-        if (updatedLot._id) {
-          setChatOrderId(updatedLot._id); // usamos _id como orderId
-          setOpenChat(true);
-        }
+        // No abrir chat automáticamente al reservar. El chat se usa desde
+        // la sección "Reserved Lots".
       } else {
         toast.error("No se pudo reservar el lote");
       }
@@ -229,16 +223,7 @@ const StoreLotsPage = () => {
         )}
       </div>
 
-      {/* Chat */}
-      {openChat && chatOrderId && user && (
-        <div className="fixed bottom-0 right-0 w-80 h-96 bg-black text-white border shadow-lg rounded-lg p-4 flex flex-col">
-          <ChatBox
-            orderId={chatOrderId}
-            userType={user.role || "rider"} // Ajusta según tu rol
-            userId={user._id}
-          />
-        </div>
-      )}
+      {/* Chat handled from ReservedLotsPage; no auto-popup here */}
     </div>
   );
 };

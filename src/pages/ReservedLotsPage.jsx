@@ -6,11 +6,11 @@ import ChatBox from "../components/ChatBox"; // tu ChatBox
 import { useContext } from "react";
 import { WSContext } from "../context/WebSocketContext";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const ReservedLotsPage = () => {
   const navigate = useNavigate();
-  const { chats, joinRoom, sendMessage } = useContext(WSContext);
+  const { chats, joinRoom, sendMessage, unread } = useContext(WSContext);
 
   const [user, setUser] = useState(null);
   const [reservedLots, setReservedLots] = useState([]);
@@ -199,12 +199,17 @@ const ReservedLotsPage = () => {
                 {/* Chat Button - Right */}
                 <button
                   onClick={() => setOpenChatOrderId(lot._id)}
-                  className="flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 text-white text-xs rounded hover:bg-emerald-600 transition-colors"
+                  className="relative flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 text-white text-xs rounded hover:bg-emerald-600 transition-colors"
                 >
                   <span className="material-symbols-outlined text-sm">
                     chat
                   </span>
                   <span>Chat</span>
+                  {unread?.[lot._id] > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1 rounded-full">
+                      {unread[lot._id]}
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
