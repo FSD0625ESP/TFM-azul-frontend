@@ -6,8 +6,19 @@ import "./index.css";
 import App from "./App.jsx";
 import { WSProvider } from "./context/WebSocketContext.jsx"; // 👈 Importa tu provider
 
-// Obtener usuario del localStorage
-const user = JSON.parse(localStorage.getItem("user") || "{}");
+// Obtener usuario (rider o store) del localStorage y normalizar para WS
+const rawUser = localStorage.getItem("user") || localStorage.getItem("store");
+let user = null;
+if (rawUser) {
+  try {
+    const parsed = JSON.parse(rawUser);
+    // Añadir role para que WSProvider sepa si es 'rider' o 'store'
+    const isStore = !!localStorage.getItem("store");
+    user = { ...parsed, role: isStore ? "store" : "rider" };
+  } catch (e) {
+    user = null;
+  }
+}
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

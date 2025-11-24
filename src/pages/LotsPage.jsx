@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import AddFoodLotModal from "../components/AddFoodLotModal";
 import EditFoodLotModal from "../components/EditFoodLotModal";
+import ChatBox from "../components/ChatBox";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -15,6 +16,8 @@ const LotsPage = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedLot, setSelectedLot] = useState(null);
+  const [openChatOrderId, setOpenChatOrderId] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const storeData = localStorage.getItem("store");
@@ -204,7 +207,7 @@ const LotsPage = () => {
                     <p className="text-xs font-medium text-blue-900 mb-2">
                       Reserved by:
                     </p>
-                    <div className="text-sm text-blue-800">
+                    <div className="text-sm text-blue-800 mb-3">
                       <p className="font-semibold m-0">{lot.rider.name}</p>
                       {lot.rider.email && (
                         <p className="text-xs m-0 mt-1">
@@ -222,6 +225,18 @@ const LotsPage = () => {
                           {lot.rider.phone}
                         </p>
                       )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setOpenChatOrderId(lot._id)}
+                        className="px-3 py-1 bg-emerald-500 text-white rounded text-xs hover:bg-emerald-600"
+                      >
+                        <span className="material-symbols-outlined align-middle mr-1 text-sm">
+                          chat
+                        </span>
+                        Chat with rider
+                      </button>
                     </div>
                   </div>
                 )}
@@ -277,6 +292,22 @@ const LotsPage = () => {
           fetchLots();
         }}
       />
+      {/* Chat Modal for store to reply to rider */}
+      {openChatOrderId && store && (
+        <div className="fixed bottom-0 right-0 w-80 h-96 bg-black text-white border shadow-lg rounded-lg p-4 flex flex-col z-50">
+          <ChatBox
+            orderId={openChatOrderId}
+            userType={"store"}
+            userId={store._id}
+          />
+          <button
+            onClick={() => setOpenChatOrderId(null)}
+            className="absolute top-1 right-1 text-white bg-gray-800 px-2 rounded hover:bg-gray-700 text-xs"
+          >
+            Close
+          </button>
+        </div>
+      )}
     </div>
   );
 };

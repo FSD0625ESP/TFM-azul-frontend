@@ -1,42 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { WSContext } from "../context/WebSocketContext";
 
-const ChatBox = ({ orderId, userType, userId }) => {
-  const [messages, setMessages] = useState([]);
+const ChatBox = ({ orderId }) => {
+  const { chats, joinRoom, sendMessage } = useContext(WSContext);
   const [input, setInput] = useState("");
-  const ws = useRef(null);
 
+  // Join the room using the shared WS connection/provider
   useEffect(() => {
-    // Conectar WS al montar el componente
-    ws.current = new WebSocket("ws://localhost:4000"); // o tu URL de producción
+    if (!orderId) return;
+    joinRoom(orderId);
+  }, [orderId, joinRoom]);
 
-    ws.current.onopen = () => {
-      console.log("Connected to WS");
-
-      // Unirse al chat del pedido
-      ws.current.send(
-        JSON.stringify({ type: "join", orderId, userType, userId })
-      );
-    };
-
-    ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data.type === "message") {
-        setMessages((prev) => [...prev, data]);
-      }
-    };
-
-    ws.current.onclose = () => console.log("WS disconnected");
-
-    return () => ws.current.close();
-  }, [orderId, userType, userId]);
-
-  const sendMessage = () => {
+  const onSend = () => {
     if (!input.trim()) return;
-
-    ws.current.send(JSON.stringify({ type: "message", content: input }));
+    sendMessage(orderId, input);
     setInput("");
   };
+
+  const messages = chats[orderId] || [];
 
   return (
     <div className="flex flex-col h-full">
@@ -54,10 +35,10 @@ const ChatBox = ({ orderId, userType, userId }) => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Escribe un mensaje..."
           className="flex-1 p-2 rounded bg-gray-800 text-white"
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          onKeyDown={(e) => e.key === "Enter" && onSend()}
         />
         <button
-          onClick={sendMessage}
+          onClick={onSend}
           className="bg-emerald-500 px-4 rounded hover:bg-emerald-600"
         >
           Enviar
