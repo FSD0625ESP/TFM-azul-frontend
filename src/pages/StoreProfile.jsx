@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const StoreProfile = () => {
   const navigate = useNavigate();
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showQR, setShowQR] = useState(false);
-  const handleShowQR = () => setShowQR(true);
-  const handleCloseQR = () => setShowQR(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const storeData = localStorage.getItem("store");
@@ -24,6 +26,57 @@ const StoreProfile = () => {
     localStorage.removeItem("store");
     localStorage.removeItem("token");
     navigate("/");
+  };
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validar tamaño (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+
+      const token = localStorage.getItem("token");
+      const storeId = store?.id || store?._id;
+
+      const response = await axios.patch(
+        `${API_URL}/stores/${storeId}/photo`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const updatedStore = response.data.store;
+
+      // Actualizar estado y localStorage
+      setStore(updatedStore);
+      localStorage.setItem("store", JSON.stringify(updatedStore));
+
+      toast.success("Photo updated successfully!");
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      toast.error(error.response?.data?.message || "Error uploading photo");
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (loading) {
@@ -58,28 +111,55 @@ const StoreProfile = () => {
       <main className="flex-1 p-4 flex flex-col pb-20 pt-4">
         {/* Profile Image and Name */}
         <div className="flex flex-col items-center mb-8">
-          <div className="relative mb-4">
-            <img
-              src={store.photo || "https://via.placeholder.com/96"}
-              alt="Store logo"
-              className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-md"
+          <div className="relative mb-4 group">
+            {store.photo ? (
+              <img
+                src={store.photo}
+                alt="Store logo"
+                className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-md"
+              />
+            ) : (
+              <div className="h-24 w-24 rounded-full border-4 border-white bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-md">
+                <span className="material-symbols-outlined text-white text-5xl">
+                  storefront
+                </span>
+              </div>
+            )}
+            <label
+              htmlFor="photo-upload"
+              className="absolute inset-0 flex items-center justify-center h-24 w-24 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            >
+              {uploading ? (
+                <span className="material-symbols-outlined text-white text-3xl animate-spin">
+                  sync
+                </span>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <span className="material-symbols-outlined text-white text-2xl">
+                    photo_camera
+                  </span>
+                  <span className="text-white text-xs mt-1">
+                    {store.photo ? "Change" : "Add"}
+                  </span>
+                </div>
+              )}
+            </label>
+            <input
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+              disabled={uploading}
             />
-            <button className="absolute bottom-0 right-0 flex items-center justify-center h-8 w-8 rounded-full bg-emerald-500 text-white border-none cursor-pointer shadow-md hover:bg-emerald-600">
-              <span className="material-symbols-outlined text-sm">edit</span>
-            </button>
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             {store.name}
           </h2>
           <p className="text-sm text-gray-600">{store.type}</p>
-          <button
-            className="flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-2 border-none text-sm font-bold text-white cursor-pointer shadow-lg hover:bg-blue-600 transition-colors h-10 mt-4"
-            title="Generate Store QR Code"
-            onClick={handleShowQR}
-          >
-            <span className="material-symbols-outlined">qr_code_2</span>
-            <span className="leading-none">QR</span>
-          </button>
+          <p className="text-sm text-gray-500 mt-1">
+            Click on logo to {store.photo ? "change" : "add"}
+          </p>
         </div>
 
         {/* Store Details */}

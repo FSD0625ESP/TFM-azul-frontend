@@ -13,12 +13,59 @@ const RiderForm = ({
   setPassword,
   repeatPassword,
   setRepeatPassword,
+  photo,
+  setPhoto,
+  photoPreview,
+  setPhotoPreview,
   loading,
   handleRegister,
   inputStyle,
 }) => {
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size must be less than 5MB");
+        return;
+      }
+      setPhoto(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
   return (
     <form onSubmit={handleRegister} className="flex flex-col gap-4">
+      {/* Profile Photo */}
+      <div className="flex flex-col items-center mb-4">
+        <div className="relative mb-2">
+          <img
+            src={photoPreview || "https://via.placeholder.com/96"}
+            alt="Profile preview"
+            className="h-24 w-24 rounded-full object-cover border-4 border-gray-200"
+          />
+          <label
+            htmlFor="photo-input"
+            className="absolute bottom-0 right-0 flex items-center justify-center h-8 w-8 rounded-full bg-emerald-500 text-white cursor-pointer shadow-md hover:bg-emerald-600"
+          >
+            <span className="material-symbols-outlined text-sm">
+              add_a_photo
+            </span>
+          </label>
+          <input
+            id="photo-input"
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
+            className="hidden"
+          />
+        </div>
+        <p className="text-xs text-gray-500">Optional: Add profile photo</p>
+      </div>
+
       {/* First Name */}
       <div className="relative">
         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">

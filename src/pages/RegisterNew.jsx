@@ -27,6 +27,8 @@ const Register = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [photo, setPhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
 
   // Store-specific fields
   const [shopName, setShopName] = useState("");
@@ -102,6 +104,7 @@ const Register = () => {
 
     try {
       if (userType === "rider") {
+        // Primero registrar usuario
         const userResponse = await axios.post(`${API_URL}/users/register`, {
           name: `${firstName} ${lastName}`,
           email,
@@ -111,7 +114,29 @@ const Register = () => {
 
         const user = userResponse.data.user;
         console.log("User registered:", user);
+
+        // Si hay foto, subirla
+        if (photo) {
+          const formData = new FormData();
+          formData.append("photo", photo);
+
+          // Login para obtener token
+          const loginResponse = await axios.post(`${API_URL}/users/login`, {
+            email,
+            password,
+          });
+
+          const token = loginResponse.data.token;
+
+          await axios.patch(`${API_URL}/users/${user.id}/photo`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        }
       } else if (userType === "shop") {
+        // Primero registrar tienda
         const storeResponse = await axios.post(`${API_URL}/stores/register`, {
           name: shopName,
           address,
@@ -122,9 +147,32 @@ const Register = () => {
           coordinates: selectedCoordinates,
         });
 
-        console.log("Store registered:", storeResponse.data);
+        const store = storeResponse.data.store;
+        console.log("Store registered:", store);
+
+        // Si hay foto, subirla
+        if (photo) {
+          const formData = new FormData();
+          formData.append("photo", photo);
+
+          // Login para obtener token
+          const loginResponse = await axios.post(`${API_URL}/stores/login`, {
+            email,
+            password,
+          });
+
+          const token = loginResponse.data.token;
+
+          await axios.patch(`${API_URL}/stores/${store._id}/photo`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        }
       }
 
+      toast.success("Registration successful!");
       navigate("/login");
     } catch (error) {
       console.error("Registration error:", error);
@@ -194,6 +242,10 @@ const Register = () => {
             setPassword={setPassword}
             repeatPassword={repeatPassword}
             setRepeatPassword={setRepeatPassword}
+            photo={photo}
+            setPhoto={setPhoto}
+            photoPreview={photoPreview}
+            setPhotoPreview={setPhotoPreview}
             loading={loading}
             handleRegister={handleRegister}
           />
@@ -218,6 +270,10 @@ const Register = () => {
             setPassword={setPassword}
             repeatPassword={repeatPassword}
             setRepeatPassword={setRepeatPassword}
+            photo={photo}
+            setPhoto={setPhoto}
+            photoPreview={photoPreview}
+            setPhotoPreview={setPhotoPreview}
             loading={loading}
             handleRegister={handleRegister}
           />
