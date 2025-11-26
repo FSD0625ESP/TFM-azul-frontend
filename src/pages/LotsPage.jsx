@@ -134,14 +134,21 @@ const LotsPage = () => {
                       <h3 className="text-lg font-semibold text-gray-900 m-0">
                         {lot.name}
                       </h3>
-                      {lot.reserved && (
+                      {!!lot.reserved && !!lot.pickedUp ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                          <span className="material-symbols-outlined text-sm">
+                            check_circle
+                          </span>
+                          Recogido
+                        </span>
+                      ) : !!lot.reserved ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-200 text-blue-800">
                           <span className="material-symbols-outlined text-sm">
                             check_circle
                           </span>
-                          Reserved
+                          Reservado
                         </span>
-                      )}
+                      ) : null}
                     </div>
                     <p className="text-xs text-gray-400 m-0">
                       Created:{" "}

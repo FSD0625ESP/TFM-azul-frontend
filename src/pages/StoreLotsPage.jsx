@@ -41,13 +41,32 @@ const StoreLotsPage = () => {
     const fetchLots = async () => {
       try {
         const lotsResponse = await axios.get(`${API_URL}/lots`);
-        const storeLots = lotsResponse.data
-          .filter(
-            (lot) => String(lot.shop?._id || lot.shop) === String(storeId)
-          )
-          .filter((lot) => !lot.reserved);
+        const storeLots = lotsResponse.data.filter(
+          (lot) => String(lot.shop?._id || lot.shop) === String(storeId)
+        );
+        console.debug(
+          "[StoreLotsPage] fetched storeLots:",
+          storeLots.map((l) => ({
+            id: l._id,
+            reserved: l.reserved,
+            pickedUp: l.pickedUp,
+          }))
+        ); // debug
+        // Determinar si el usuario actual es el owner de la tienda
+        const storedStore = localStorage.getItem("store");
+        const isOwner = storedStore
+          ? String(
+              JSON.parse(storedStore)?._id || JSON.parse(storedStore)?.id
+            ) === String(storeId)
+          : false;
 
-        setLots(storeLots);
+        // Si es owner mostrar todos los lotes (incluyendo reservados) para que
+        // la tienda pueda ver el estado `pickedUp`. Si no, mostrar solo los no reservados.
+        const visibleLots = isOwner
+          ? storeLots
+          : storeLots.filter((lot) => !lot.reserved);
+
+        setLots(visibleLots);
 
         if (storeLots.length > 0 && typeof storeLots[0].shop === "object") {
           setStore(storeLots[0].shop);
@@ -66,6 +85,45 @@ const StoreLotsPage = () => {
       toast.error("Tienda no seleccionada");
       navigate(-1);
     }
+  }, [storeId]);
+
+  // Polling ligero: refrescar lista cada 5s para reflejar cambios (p.ej. pickedUp)
+  useEffect(() => {
+    if (!storeId) return undefined;
+
+    const interval = setInterval(async () => {
+      try {
+        const lotsResponse = await axios.get(`${API_URL}/lots`);
+        const storeLots = lotsResponse.data.filter(
+          (lot) => String(lot.shop?._id || lot.shop) === String(storeId)
+        );
+        console.debug(
+          "[StoreLotsPage] polling fetched storeLots:",
+          storeLots.map((l) => ({
+            id: l._id,
+            reserved: l.reserved,
+            pickedUp: l.pickedUp,
+          }))
+        ); // debug
+
+        const storedStore = localStorage.getItem("store");
+        const isOwner = storedStore
+          ? String(
+              JSON.parse(storedStore)?._id || JSON.parse(storedStore)?.id
+            ) === String(storeId)
+          : false;
+
+        const visibleLots = isOwner
+          ? storeLots
+          : storeLots.filter((lot) => !lot.reserved);
+        setLots(visibleLots);
+      } catch (err) {
+        // silencioso: no molestar al usuario con errores de polling
+        console.error("Polling error fetching lots:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [storeId]);
 
   // Reservar lote y abrir chat
@@ -193,6 +251,17 @@ const StoreLotsPage = () => {
                         {lot.name}
                       </h3>
                       <p className="text-xs text-gray-500 mt-1">{pickupDate}</p>
+                      <div className="flex gap-2 mt-2">
+                        {!!lot.reserved && !!lot.pickedUp ? (
+                          <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-semibold">
+                            Recogido
+                          </span>
+                        ) : !!lot.reserved ? (
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
+                            Reservado
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="bg-emerald-100 text-emerald-700 rounded-full px-3 py-1 text-xs font-semibold">
@@ -214,7 +283,7 @@ const StoreLotsPage = () => {
                     <span className="material-symbols-outlined text-sm mr-2">
                       bookmark_add
                     </span>
-                    Reserve Lot
+                    Reservar lote
                   </button>
                 </div>
               );

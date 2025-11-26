@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
 
 const StoreProfile = () => {
   const navigate = useNavigate();
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showQR, setShowQR] = useState(false);
+  const handleShowQR = () => setShowQR(true);
+  const handleCloseQR = () => setShowQR(false);
 
   useEffect(() => {
     const storeData = localStorage.getItem("store");
@@ -32,6 +36,24 @@ const StoreProfile = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      {/* Modal QR */}
+      {showQR && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-xl p-6 shadow-lg flex flex-col items-center relative min-w-[300px]">
+            <button
+              onClick={handleCloseQR}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl"
+            >
+              &times;
+            </button>
+            <h3 className="text-lg font-bold mb-4">QR de la tienda</h3>
+            <QRCodeSVG value={store?._id || store?.id || ""} size={200} />
+            <p className="mt-4 text-xs text-gray-500 break-all">
+              {store?._id || store?.id}
+            </p>
+          </div>
+        </div>
+      )}
       {/* Main Content */}
       <main className="flex-1 p-4 flex flex-col pb-20 pt-4">
         {/* Profile Image and Name */}
@@ -50,6 +72,14 @@ const StoreProfile = () => {
             {store.name}
           </h2>
           <p className="text-sm text-gray-600">{store.type}</p>
+          <button
+            className="flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-2 border-none text-sm font-bold text-white cursor-pointer shadow-lg hover:bg-blue-600 transition-colors h-10 mt-4"
+            title="Generate Store QR Code"
+            onClick={handleShowQR}
+          >
+            <span className="material-symbols-outlined">qr_code_2</span>
+            <span className="leading-none">QR</span>
+          </button>
         </div>
 
         {/* Store Details */}

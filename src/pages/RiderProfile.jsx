@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Html5Qrcode } from "html5-qrcode";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const RiderProfile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showScanner, setShowScanner] = useState(false);
+  const scannerRef = useRef(null);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -21,6 +25,84 @@ const RiderProfile = () => {
     localStorage.removeItem("token");
     navigate("/");
   };
+
+  const handleOpenScanner = () => setShowScanner(true);
+  const handleCloseScanner = async () => {
+    setShowScanner(false);
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+      } catch (e) {
+        /* ignore */
+      }
+      scannerRef.current.clear();
+      scannerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    let html5Qr = null;
+    if (showScanner) {
+      const elementId = "qr-reader";
+      html5Qr = new Html5Qrcode(elementId);
+      scannerRef.current = html5Qr;
+
+      const config = { fps: 10, qrbox: 250 };
+
+      html5Qr
+        .start(
+          { facingMode: "environment" },
+          config,
+          async (decodedText, decodedResult) => {
+            // decodedText expected to be storeId encoded in the QR
+            try {
+              // Stop scanner
+              await html5Qr.stop();
+            } catch (e) {
+              console.error("Error stopping scanner:", e);
+            }
+
+            // Call backend to confirm pickup
+            const token = localStorage.getItem("token");
+            try {
+              const base = "http://localhost:4000/api";
+              const res = await axios.post(
+                `${base}/lots/confirm-pickup/${encodeURIComponent(
+                  decodedText
+                )}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+
+              alert(res.data?.message || "Recogida confirmada");
+            } catch (err) {
+              console.error(err);
+              const msg =
+                err?.response?.data?.message || "Error confirmando recogida";
+              alert(msg);
+            } finally {
+              setShowScanner(false);
+              try {
+                html5Qr.clear();
+              } catch (e) {}
+              scannerRef.current = null;
+            }
+          }
+        )
+        .catch((err) => {
+          console.error("QR start error:", err);
+          alert("No se pudo iniciar la cámara. Comprueba permisos.");
+          setShowScanner(false);
+        });
+    }
+
+    return () => {
+      if (html5Qr) {
+        html5Qr.stop().catch(() => {});
+        html5Qr.clear().catch(() => {});
+      }
+    };
+  }, [showScanner]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -47,6 +129,14 @@ const RiderProfile = () => {
             </button>
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">{user.name}</h2>
+          <button
+            onClick={handleOpenScanner}
+            className="flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-2 border-none text-sm font-bold text-white cursor-pointer shadow-lg hover:bg-blue-600 transition-colors h-10 mt-3"
+            title="Scan Store QR"
+          >
+            <span className="material-symbols-outlined">qr_code_scanner</span>
+            <span>Scan QR</span>
+          </button>
         </div>
 
         {/* User Details */}
@@ -93,6 +183,27 @@ const RiderProfile = () => {
           </button>
         </div>
       </main>
+
+      {/* Scanner Modal */}
+      {showScanner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-xl p-4 shadow-lg w-[90%] max-w-xl relative">
+            <button
+              onClick={handleCloseScanner}
+              className="absolute top-2 right-2 text-gray-600 text-2xl"
+            >
+              &times;
+            </button>
+            <h3 className="text-lg font-bold mb-2">
+              Escanea el QR de la tienda
+            </h3>
+            <div id="qr-reader" className="w-full h-[360px]" />
+            <p className="text-xs text-gray-500 mt-2">
+              Permite acceso a la cámara para escanear.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Navigation */}
       <nav className="sticky bottom-0 flex justify-around border-t border-gray-200 bg-white/80 backdrop-blur-sm p-2 gap-2">
