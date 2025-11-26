@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const RiderProfile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -22,6 +27,57 @@ const RiderProfile = () => {
     navigate("/");
   };
 
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validar tamaño (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+
+      const token = localStorage.getItem("token");
+      const userId = user?.id || user?._id;
+
+      const response = await axios.patch(
+        `${API_URL}/users/${userId}/photo`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const updatedUser = response.data.user;
+      
+      // Actualizar estado y localStorage
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      
+      toast.success("Photo updated successfully!");
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      toast.error(error.response?.data?.message || "Error uploading photo");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -36,17 +92,48 @@ const RiderProfile = () => {
       <main className="flex-1 p-4 flex flex-col pb-20 pt-4">
         {/* Profile Image and Name */}
         <div className="flex flex-col items-center mb-8">
-          <div className="relative mb-4">
-            <img
-              src={user.photo || "https://via.placeholder.com/96"}
-              alt="User profile"
-              className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-md"
+          <div className="relative mb-4 group">
+            {user.photo ? (
+              <img
+                src={user.photo}
+                alt="User profile"
+                className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-md"
+              />
+            ) : (
+              <div className="h-24 w-24 rounded-full border-4 border-white bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-md">
+                <span className="material-symbols-outlined text-white text-5xl">
+                  person
+                </span>
+              </div>
+            )}
+            <label
+              htmlFor="photo-upload"
+              className="absolute inset-0 flex items-center justify-center h-24 w-24 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            >
+              {uploading ? (
+                <span className="material-symbols-outlined text-white text-3xl animate-spin">
+                  sync
+                </span>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <span className="material-symbols-outlined text-white text-2xl">
+                    photo_camera
+                  </span>
+                  <span className="text-white text-xs mt-1">{user.photo ? "Change" : "Add"}</span>
+                </div>
+              )}
+            </label>
+            <input
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+              disabled={uploading}
             />
-            <button className="absolute bottom-0 right-0 flex items-center justify-center h-8 w-8 rounded-full bg-emerald-500 text-white border-none cursor-pointer shadow-md hover:bg-emerald-600">
-              <span className="material-symbols-outlined text-sm">edit</span>
-            </button>
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">{user.name}</h2>
+          <p className="text-sm text-gray-500">Click on photo to {user.photo ? "change" : "add"}</p>
         </div>
 
         {/* User Details */}
