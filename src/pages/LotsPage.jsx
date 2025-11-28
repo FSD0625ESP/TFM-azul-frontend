@@ -121,90 +121,102 @@ const LotsPage = () => {
             {lots.map((lot) => (
               <div
                 key={lot._id}
-                className={`rounded-lg p-4 shadow-sm ${
+                className={`rounded-lg overflow-hidden shadow-sm ${
                   lot.reserved
                     ? "bg-blue-50 border border-blue-200"
                     : "bg-white"
                 }`}
               >
-                {/* Lot Header */}
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-lg font-semibold text-gray-900 m-0">
-                        {lot.name}
-                      </h3>
-                      {!!lot.reserved && !!lot.pickedUp ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
-                          <span className="material-symbols-outlined text-sm">
-                            check_circle
-                          </span>
-                          Recogido
-                        </span>
-                      ) : !!lot.reserved ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-200 text-blue-800">
-                          <span className="material-symbols-outlined text-sm">
-                            check_circle
-                          </span>
-                          Reservado
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="text-xs text-gray-400 m-0">
-                      Created:{" "}
-                      {new Date(lot.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
+                {/* Lot Image */}
+                {lot.image && (
+                  <div className="w-full h-48 overflow-hidden">
+                    <img
+                      src={lot.image}
+                      alt={lot.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                  <div className="flex gap-2">
-                    {!lot.reserved && (
-                      <button
-                        onClick={() => {
-                          setSelectedLot(lot);
-                          setIsEditModalOpen(true);
-                        }}
-                        className="bg-transparent border-none text-xl cursor-pointer text-emerald-500 flex items-center justify-center hover:text-emerald-600"
-                      >
-                        <span className="material-symbols-outlined">edit</span>
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleDeleteLot(lot._id)}
-                      className="bg-transparent border-none text-red-600 cursor-pointer text-xl flex items-center justify-center hover:text-red-700"
-                    >
-                      <span className="material-symbols-outlined">delete</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Lot Description */}
-                {lot.description && (
-                  <p className="text-sm text-gray-600 mb-3 leading-relaxed">
-                    {lot.description}
-                  </p>
                 )}
 
-                {/* Pickup Deadline */}
-                <div className="flex items-center gap-2 text-sm text-gray-900 mb-3">
-                  <span className="material-symbols-outlined text-base">
-                    schedule
-                  </span>
-                  <span>
-                    Pickup by:{" "}
-                    {(() => {
-                      const date = new Date(lot.pickupDeadline);
-                      const hours = String(date.getHours()).padStart(2, "0");
-                      const minutes = String(date.getMinutes()).padStart(
-                        2,
-                        "0"
-                      );
-                      return `${hours}:${minutes}`;
-                    })()}
+                <div className="p-4">
+                  {/* Lot Header */}
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-lg font-semibold text-gray-900 m-0">
+                          {lot.name}
+                        </h3>
+                        {!!lot.reserved && !!lot.pickedUp ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                            <span className="material-symbols-outlined text-sm">
+                              check_circle
+                            </span>
+                            Recogido
+                          </span>
+                        ) : !!lot.reserved ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-200 text-blue-800">
+                            <span className="material-symbols-outlined text-sm">
+                              check_circle
+                            </span>
+                            Reservado
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="text-xs text-gray-400 m-0">
+                        Created:{" "}
+                        {new Date(lot.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      {!lot.reserved && (
+                        <button
+                          onClick={() => {
+                            setSelectedLot(lot);
+                            setIsEditModalOpen(true);
+                          }}
+                          className="bg-transparent border-none text-xl cursor-pointer text-emerald-500 flex items-center justify-center hover:text-emerald-600"
+                        >
+                          <span className="material-symbols-outlined">edit</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteLot(lot._id)}
+                        className="bg-transparent border-none text-red-600 cursor-pointer text-xl flex items-center justify-center hover:text-red-700"
+                      >
+                        <span className="material-symbols-outlined">delete</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Lot Description */}
+                  {lot.description && (
+                    <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                      {lot.description}
+                    </p>
+                  )}
+
+                  {/* Pickup Deadline */}
+                  <div className="flex items-center gap-2 text-sm text-gray-900 mb-3">
+                    <span className="material-symbols-outlined text-base">
+                      schedule
+                    </span>
+                    <span>
+                      Pickup by:{" "}
+                      {(() => {
+                        const date = new Date(lot.pickupDeadline);
+                        const hours = String(date.getHours()).padStart(2, "0");
+                        const minutes = String(date.getMinutes()).padStart(
+                          2,
+                          "0"
+                        );
+                        return `${hours}:${minutes}`;
+                      })()}
                   </span>
                 </div>
 
@@ -247,6 +259,7 @@ const LotsPage = () => {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
             ))}
           </div>

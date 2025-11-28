@@ -8,8 +8,27 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [pickupDeadline, setPickupDeadline] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Please select an image file");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image size must be less than 5MB");
+        return;
+      }
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      setError("");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,21 +67,30 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
         parseInt(inputMinutes)
       );
 
-      const payload = {
-        shopId: storeId,
-        name,
-        description,
-        pickupDeadline: pickupDate.toISOString(),
-      };
+      const formData = new FormData();
+      formData.append("shopId", storeId);
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("pickupDeadline", pickupDate.toISOString());
+      
+      if (image) {
+        formData.append("image", image);
+      }
 
-      console.log("Enviando payload:", payload);
+      console.log("Enviando formData");
 
-      const response = await axios.post(`${API_URL}/lots/create`, payload);
+      const response = await axios.post(`${API_URL}/lots/create`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       console.log("Lot created:", response.data);
       setName("");
       setDescription("");
       setPickupDeadline("");
+      setImage(null);
+      setImagePreview("");
       toast.success("Food lot published successfully!");
       onSuccess?.();
       onClose();
@@ -110,6 +138,57 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Lot Image (Optional)
+            </label>
+            <div className="flex flex-col items-center">
+              <div className="relative w-full h-48 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors mb-2">
+                {imagePreview ? (
+                  <>
+                    <img
+                      src={imagePreview}
+                      alt="Lot preview"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImage(null);
+                        setImagePreview("");
+                      }}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center border-none cursor-pointer hover:bg-red-600"
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        close
+                      </span>
+                    </button>
+                  </>
+                ) : (
+                  <label
+                    htmlFor="lot-image"
+                    className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-gray-400 text-5xl mb-2">
+                      add_photo_alternate
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      Click to add an image
+                    </span>
+                  </label>
+                )}
+                <input
+                  id="lot-image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Lot Name */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
