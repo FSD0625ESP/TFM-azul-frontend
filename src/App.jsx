@@ -8,6 +8,9 @@ import { useState, useEffect } from "react";
 import Home from "./pages/Home";
 import LoginNew from "./pages/LoginNew";
 import RegisterNew from "./pages/RegisterNew";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import ChangePassword from "./pages/ChangePassword";
 import RiderProfile from "./pages/RiderProfile";
 import StoreProfile from "./pages/StoreProfile";
 import MainScreen from "./pages/MainScreen";
@@ -135,6 +138,21 @@ function App() {
               element={<LoginNew />}
               isAuthenticated={isAuthenticated}
               userType={userType}
+            />
+          }
+        />
+
+        {/* Password Recovery Routes - accessible to everyone */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
+        {/* Change Password - accessible only to authenticated users */}
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute
+              element={<ChangePassword />}
+              isAuthenticated={isAuthenticated}
             />
           }
         />

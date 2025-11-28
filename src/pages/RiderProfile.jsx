@@ -242,6 +242,15 @@ const RiderProfile = () => {
                 {user.email}
               </p>
             </div>
+            <button
+              onClick={() => navigate("/change-password")}
+              className="flex items-center gap-1 bg-transparent border-none text-xs font-medium text-emerald-600 cursor-pointer hover:text-emerald-700 transition-colors px-2 whitespace-nowrap"
+              title="Change Password"
+            >
+              <span className="material-symbols-outlined text-base">
+                lock_reset
+              </span>
+            </button>
           </div>
 
           {/* Phone */}

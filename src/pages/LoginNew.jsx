@@ -60,7 +60,7 @@ const Login = () => {
   };
 
   const handleForgotPassword = () => {
-    toast.info("Password recovery feature coming soon!");
+    navigate("/forgot-password");
   };
 
   return (
