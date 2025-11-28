@@ -154,6 +154,17 @@ const ReservedLotsPage = () => {
               key={lot._id}
               className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
             >
+              {/* Lot Image */}
+              {lot.image && (
+                <div className="mb-3 rounded-lg overflow-hidden">
+                  <img
+                    src={lot.image}
+                    alt={lot.name}
+                    className="w-full h-40 object-cover"
+                  />
+                </div>
+              )}
+
               {/* Lot Header */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex-1">
