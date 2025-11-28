@@ -42,16 +42,19 @@ const ChangePassword = () => {
 
     try {
       const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+      const store = localStorage.getItem("store");
 
-      // TODO: Tu compañero implementará este endpoint
-      // await axios.patch(
-      //   `${API_URL}/auth/change-password`,
-      //   { currentPassword, newPassword },
-      //   { headers: { Authorization: `Bearer ${token}` } }
-      // );
+      // Determinar el endpoint según el tipo de usuario
+      const endpoint = user
+        ? `${API_URL}/users/change-password`
+        : `${API_URL}/stores/change-password`;
 
-      // Simulación por ahora
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await axios.patch(
+        endpoint,
+        { currentPassword, newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       toast.success("Password changed successfully!");
       navigate(-1); // Volver al perfil
