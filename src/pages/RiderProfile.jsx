@@ -19,7 +19,7 @@ const RiderProfile = () => {
     if (userData) {
       setUser(JSON.parse(userData));
     } else {
-      navigate("/login");
+      navigate("/");
     }
     setLoading(false);
   }, [navigate]);
