@@ -216,6 +216,12 @@ const RiderProfile = () => {
             />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">{user.name}</h2>
+          <button
+            onClick={handleOpenScanner}
+            className="mt-2 px-3 py-1 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700"
+          >
+            Escanear QR
+          </button>
           <p className="text-sm text-gray-500">
             Click on photo to {user.photo ? "change" : "add"}
           </p>

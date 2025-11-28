@@ -11,6 +11,10 @@ const StoreProfile = () => {
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+
+  const handleOpenQR = () => setShowQR(true);
+  const handleCloseQR = () => setShowQR(false);
 
   useEffect(() => {
     const storeData = localStorage.getItem("store");
@@ -157,6 +161,12 @@ const StoreProfile = () => {
             {store.name}
           </h2>
           <p className="text-sm text-gray-600">{store.type}</p>
+          <button
+            onClick={handleOpenQR}
+            className="mt-2 px-3 py-1 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700"
+          >
+            Show QR
+          </button>
           <p className="text-sm text-gray-500 mt-1">
             Click on logo to {store.photo ? "change" : "add"}
           </p>
