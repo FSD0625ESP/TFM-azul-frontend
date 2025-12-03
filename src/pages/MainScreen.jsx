@@ -346,7 +346,7 @@ export default function MainScreen() {
           {/* Puntos de recogida (tiendas) */}
           <div className="mb-4">
             <h3 className="text-sm font-semibold mb-2 text-black">
-              Puntos de recogida
+              Collection Points
             </h3>
 
             <ul>
@@ -369,7 +369,7 @@ export default function MainScreen() {
                   const lotCount = lotCounts[shopId] || 0;
                   if (lotCount === 0) return null;
 
-                  const shopName = mark.name || mark.shop?.name || "Tienda";
+                  const shopName = mark.name || mark.shop?.name || "Shop";
 
                   let distanceKm = null;
                   if (userLocation) {
@@ -431,9 +431,9 @@ export default function MainScreen() {
                       <span>
                         🏪 {shopName}
                         <br />
-                        Lotes: {lotCount}
+                        Lots: {lotCount}
                         <br />
-                        Distancia:{" "}
+                        Distance:{" "}
                         {distanceKm ? `${distanceKm} km` : "Desconocida"}
                       </span>
                     </li>
@@ -445,7 +445,7 @@ export default function MainScreen() {
           {/* Puntos de entrega (homeless) */}
           <div>
             <h3 className="text-sm font-semibold mb-2 text-black">
-              Puntos de entrega
+              Delivery Points
             </h3>
             <ul>
               {marks
@@ -514,7 +514,7 @@ export default function MainScreen() {
                       }}
                     >
                       <span>
-                        📍 Entrega {distanceKm ? `- ${distanceKm} km` : ""}
+                        📍 Delivery {distanceKm ? `- ${distanceKm} km` : ""}
                       </span>
                     </li>
                   );

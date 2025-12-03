@@ -17,6 +17,8 @@ const ReservedLotsPage = () => {
   const [loading, setLoading] = useState(true);
   const [openChatOrderId, setOpenChatOrderId] = useState(null); // orderId del chat abierto
   const [refreshTrigger, setRefreshTrigger] = useState(0); // para forzar refresh
+  const [swipeStartY, setSwipeStartY] = useState(null); // para detectar swipe
+  const [deliveryStates, setDeliveryStates] = useState({}); // { lotId: "pending"|"loading"|"success"|"error" }
 
   // Get current rider from localStorage
   useEffect(() => {
@@ -73,6 +75,9 @@ const ReservedLotsPage = () => {
     if (user) fetchReservedLots();
   }, [user, refreshTrigger]);
 
+  // No necesitamos actualizar distancias continuamente - solo al entregar
+  // Mantener el useEffect vacío para evitar errores de geolocalización
+
   // Función para desreservar un lote
   const handleUnreserveLot = async (lotId) => {
     if (!confirm("¿Estás seguro de que quieres desreservar este lote?")) {
@@ -102,6 +107,127 @@ const ReservedLotsPage = () => {
           (err?.response?.data?.message || err.message)
       );
     }
+  };
+
+  // Función para entregar el lote
+  const handleDeliverLot = async (lotId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("No estás autenticado");
+        return;
+      }
+
+      setDeliveryStates((prev) => ({ ...prev, [lotId]: "loading" }));
+      toast.info("Obteniendo tu ubicación...");
+
+      // Obtener ubicación del rider con estrategia de reintentos y caché
+      let position = null;
+      let attempts = 0;
+      const maxAttempts = 5;
+
+      while (attempts < maxAttempts && !position) {
+        try {
+          position = await new Promise((resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+              reject(new Error("Timeout expired"));
+            }, 60000); // 60 segundos de timeout
+
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                clearTimeout(timeoutId);
+                resolve(pos);
+              },
+              (err) => {
+                clearTimeout(timeoutId);
+                reject(err);
+              },
+              {
+                enableHighAccuracy: false, // Usar ubicación rápida (menos precisa)
+                timeout: 50000, // Timeout más largo
+                maximumAge: 30000, // Permitir ubicación en caché de hasta 30 segundos
+              }
+            );
+          });
+        } catch (err) {
+          attempts++;
+          console.log(
+            `Intento ${attempts}/${maxAttempts} fallido:`,
+            err.message
+          );
+
+          if (attempts < maxAttempts) {
+            toast.info(`Reintentando... (${attempts}/${maxAttempts})`);
+            await new Promise((r) => setTimeout(r, 2000)); // Esperar 2 segundos
+          }
+        }
+      }
+
+      if (!position) {
+        toast.error(
+          "❌ No se pudo obtener tu ubicación después de varios intentos.\n\n✅ Soluciones:\n1. Activa el GPS en tu dispositivo\n2. Da permisos de ubicación al navegador\n3. Abre el navegador en modo ubicación de precisión\n4. Intenta en un lugar abierto (sin techos)\n5. Recarga la página y vuelve a intentar"
+        );
+        setDeliveryStates((prev) => ({ ...prev, [lotId]: "error" }));
+        return;
+      }
+
+      const { latitude, longitude } = position.coords;
+      console.log(
+        `📍 Ubicación obtenida: lat=${latitude}, lng=${longitude}, precisión=${position.coords.accuracy}m`
+      );
+
+      // Enviar solicitud de entrega
+      const res = await axios.post(
+        `${API_URL}/lots/${lotId}/deliver`,
+        {
+          riderLat: latitude,
+          riderLng: longitude,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("¡Lote entregado correctamente!");
+      setDeliveryStates((prev) => ({ ...prev, [lotId]: "success" }));
+
+      // Refrescar después de 2 segundos
+      setTimeout(() => {
+        setRefreshTrigger((prev) => prev + 1);
+      }, 2000);
+    } catch (err) {
+      console.error("Error entregando lote:", err);
+      let errorMsg = "Error entregando el lote";
+
+      if (err?.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      } else if (err?.message) {
+        errorMsg = err.message;
+      }
+
+      toast.error(errorMsg);
+      setDeliveryStates((prev) => ({ ...prev, [lotId]: "error" }));
+    }
+  };
+
+  // Manejo de swipe up
+  const handleTouchStart = (e, lotId) => {
+    const lot = reservedLots.find((l) => l._id === lotId);
+    if (lot?.pickedUp && !lot?.delivered) {
+      setSwipeStartY(e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchEnd = (e, lotId) => {
+    if (swipeStartY === null) return;
+
+    const endY = e.changedTouches[0].clientY;
+    const swipeDistance = swipeStartY - endY; // Positivo si es swipe up
+
+    // Si swipe up >= 50px, intentar entregar
+    if (swipeDistance >= 50) {
+      handleDeliverLot(lotId);
+    }
+
+    setSwipeStartY(null);
   };
 
   if (loading) {
@@ -148,12 +274,29 @@ const ReservedLotsPage = () => {
           );
           const storeName = lot.shop?.name || "Unknown Store";
           const storeType = lot.shop?.type || "Store";
+          const isPickedUp = lot.pickedUp;
+          const isDelivered = lot.delivered;
+          const deliveryState = deliveryStates[lot._id] || "pending";
 
           return (
             <div
               key={lot._id}
               className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+              onTouchStart={(e) => handleTouchStart(e, lot._id)}
+              onTouchEnd={(e) => handleTouchEnd(e, lot._id)}
             >
+              {/* Status Badge */}
+              {isDelivered && (
+                <div className="mb-2 inline-block bg-green-100 text-green-700 rounded-full px-3 py-1 text-xs font-semibold">
+                  ✓ Delivered
+                </div>
+              )}
+              {isPickedUp && !isDelivered && (
+                <div className="mb-2 inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-xs font-semibold">
+                  Swipe up to deliver
+                </div>
+              )}
+
               {/* Lot Image */}
               {lot.image && (
                 <div className="mb-3 rounded-lg overflow-hidden">
@@ -199,8 +342,9 @@ const ReservedLotsPage = () => {
                 {/* Cancel Button - Left */}
                 <button
                   onClick={() => handleUnreserveLot(lot._id)}
-                  className="p-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors flex items-center justify-center"
+                  className="p-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors flex items-center justify-center disabled:opacity-50"
                   title="Cancel reservation"
+                  disabled={isPickedUp}
                 >
                   <span className="material-symbols-outlined text-sm">
                     close
@@ -222,6 +366,46 @@ const ReservedLotsPage = () => {
                     </span>
                   )}
                 </button>
+
+                {/* Deliver Button - Show when picked up and not delivered */}
+                {isPickedUp && !isDelivered && (
+                  <button
+                    onClick={() => handleDeliverLot(lot._id)}
+                    className={`flex items-center justify-center gap-2 px-3 py-2 text-xs rounded transition-colors ${
+                      deliveryState === "loading"
+                        ? "bg-yellow-500 text-white"
+                        : deliveryState === "success"
+                        ? "bg-green-500 text-white"
+                        : deliveryState === "error"
+                        ? "bg-red-500 text-white"
+                        : "bg-blue-500 text-white hover:bg-blue-600"
+                    }`}
+                    disabled={deliveryState === "loading"}
+                  >
+                    {deliveryState === "loading" ? (
+                      <>
+                        <span className="material-symbols-outlined text-sm animate-spin">
+                          sync
+                        </span>
+                        <span>Delivering...</span>
+                      </>
+                    ) : deliveryState === "success" ? (
+                      <>
+                        <span className="material-symbols-outlined text-sm">
+                          check_circle
+                        </span>
+                        <span>Delivered</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined text-sm">
+                          local_shipping
+                        </span>
+                        <span>Deliver</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           );
