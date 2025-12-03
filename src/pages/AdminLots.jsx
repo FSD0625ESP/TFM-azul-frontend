@@ -9,7 +9,7 @@ const AdminLots = () => {
   const navigate = useNavigate();
   const [lots, setLots] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all"); // all, reserved, available
+  const [filter, setFilter] = useState("all"); // all, reserved, available, inDelivery
 
   useEffect(() => {
     fetchLots();
@@ -30,9 +30,26 @@ const AdminLots = () => {
     }
   };
 
+  const deleteLot = async (lotId, lotName) => {
+    if (!window.confirm(`¿Eliminar el lote "${lotName}"?`)) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${API_URL}/admin/lots/${lotId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Lot deleted successfully");
+      fetchLots();
+    } catch (error) {
+      console.error("Error deleting lot:", error);
+      toast.error("Error deleting lot");
+    }
+  };
+
   const filteredLots = lots.filter((lot) => {
-    if (filter === "reserved") return lot.reserved;
+    if (filter === "reserved") return lot.reserved && !lot.pickedUp;
     if (filter === "available") return !lot.reserved;
+    if (filter === "inDelivery") return lot.reserved && lot.pickedUp;
     return true;
   });
 
@@ -92,6 +109,16 @@ const AdminLots = () => {
             >
               Reserved
             </button>
+            <button
+              onClick={() => setFilter("inDelivery")}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                filter === "inDelivery"
+                  ? "bg-emerald-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              In Delivery
+            </button>
           </div>
         </div>
       </header>
@@ -147,7 +174,7 @@ const AdminLots = () => {
                             {lot.shop?.type || "Store"}
                           </p>
                         </div>
-                        <div className="text-right">
+                        <div className="flex items-center gap-2">
                           <div
                             className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
                               lot.reserved && lot.pickedUp
@@ -158,11 +185,20 @@ const AdminLots = () => {
                             }`}
                           >
                             {lot.reserved && lot.pickedUp
-                              ? "Picked Up"
+                              ? "In Delivery"
                               : lot.reserved
                               ? "Reserved"
                               : "Available"}
                           </div>
+                          <button
+                            onClick={() => deleteLot(lot._id, lot.name)}
+                            className="text-red-500 hover:text-red-700 transition-colors p-1"
+                            title="Delete lot"
+                          >
+                            <span className="material-symbols-outlined text-xl">
+                              delete
+                            </span>
+                          </button>
                         </div>
                       </div>
 
