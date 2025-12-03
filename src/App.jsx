@@ -17,6 +17,11 @@ import MainScreen from "./pages/MainScreen";
 import LotsPage from "./pages/LotsPage";
 import StoreLotsPage from "./pages/StoreLotsPage";
 import ReservedLotsPage from "./pages/ReservedLotsPage";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminStores from "./pages/AdminStores";
+import AdminLots from "./pages/AdminLots";
 
 // Protected Route for authenticated users only
 const ProtectedRoute = ({ element, isAuthenticated }) => {
@@ -51,6 +56,9 @@ const PublicRoute = ({ element, isAuthenticated, userType }) => {
     return element;
   }
   // Redirect to appropriate dashboard based on user type
+  if (userType === "admin") {
+    return <Navigate to="/admin/dashboard" />;
+  }
   return userType === "rider" ? (
     <Navigate to="/mainscreen" />
   ) : (
@@ -58,17 +66,29 @@ const PublicRoute = ({ element, isAuthenticated, userType }) => {
   );
 };
 
+// Protected Route for Admin only
+const AdminOnlyRoute = ({ element, userType }) => {
+  if (userType === "admin") {
+    return element;
+  }
+  return <Navigate to="/" />;
+};
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userType, setUserType] = useState(null); // 'rider' or 'store'
+  const [userType, setUserType] = useState(null); // 'rider', 'store', or 'admin'
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAuthStatus = () => {
     const user = localStorage.getItem("user");
     const store = localStorage.getItem("store");
+    const admin = localStorage.getItem("admin");
     const token = localStorage.getItem("token");
 
-    if (token && user) {
+    if (token && admin) {
+      setIsAuthenticated(true);
+      setUserType("admin");
+    } else if (token && user) {
       setIsAuthenticated(true);
       setUserType("rider");
     } else if (token && store) {
@@ -270,6 +290,60 @@ function App() {
                   element={<StoreLotsPage />}
                   userType={userType}
                 />
+              }
+              isAuthenticated={isAuthenticated}
+            />
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute
+              element={
+                <AdminOnlyRoute
+                  element={<AdminDashboard />}
+                  userType={userType}
+                />
+              }
+              isAuthenticated={isAuthenticated}
+            />
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute
+              element={
+                <AdminOnlyRoute element={<AdminUsers />} userType={userType} />
+              }
+              isAuthenticated={isAuthenticated}
+            />
+          }
+        />
+
+        <Route
+          path="/admin/stores"
+          element={
+            <ProtectedRoute
+              element={
+                <AdminOnlyRoute element={<AdminStores />} userType={userType} />
+              }
+              isAuthenticated={isAuthenticated}
+            />
+          }
+        />
+
+        <Route
+          path="/admin/lots"
+          element={
+            <ProtectedRoute
+              element={
+                <AdminOnlyRoute element={<AdminLots />} userType={userType} />
               }
               isAuthenticated={isAuthenticated}
             />
