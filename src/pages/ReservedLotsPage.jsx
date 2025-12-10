@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+// src/pages/ReservedLotsPage.jsx
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import ChatBox from "../components/ChatBox"; // tu ChatBox
-import { useContext } from "react";
+import ChatBox from "../components/ChatBox";
 import { WSContext } from "../context/WebSocketContext";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
@@ -15,10 +15,11 @@ const ReservedLotsPage = () => {
   const [user, setUser] = useState(null);
   const [reservedLots, setReservedLots] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [openChatOrderId, setOpenChatOrderId] = useState(null); // orderId del chat abierto
-  const [refreshTrigger, setRefreshTrigger] = useState(0); // para forzar refresh
-  const [swipeStartY, setSwipeStartY] = useState(null); // para detectar swipe
+  const [openChatOrderId, setOpenChatOrderId] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [swipeStartY, setSwipeStartY] = useState(null);
   const [deliveryStates, setDeliveryStates] = useState({}); // { lotId: "pending"|"loading"|"success"|"error" }
+  const [distanceStates, setDistanceStates] = useState({}); // { lotId: { allowed: true/false, distance: number } }
 
   // Get current rider from localStorage
   useEffect(() => {
@@ -32,7 +33,6 @@ const ReservedLotsPage = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        // La página vuelve a ser visible, refrescar
         setRefreshTrigger((prev) => prev + 1);
       }
     };
@@ -42,27 +42,24 @@ const ReservedLotsPage = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // Fetch reserved lots - se ejecuta cuando user cambia o refreshTrigger cambia
+  // Fetch reserved lots
   useEffect(() => {
     const fetchReservedLots = async () => {
       try {
         if (!user) return;
 
         setLoading(true);
-        const userId = user.id || user._id;
         const res = await axios.get(`${API_URL}/lots`);
         const lots = res.data || [];
 
+        const userId = user.id || user._id;
         const reserved = lots.filter((lot) => {
           if (!lot.reserved) return false;
-
-          // lot.rider puede ser un objeto (populated) o un string (id)
           const lotRiderId =
             typeof lot.rider === "object" ? lot.rider?._id : lot.rider;
           return String(lotRiderId) === String(userId);
         });
 
-        console.log("Reserved lots:", reserved);
         setReservedLots(reserved);
         setLoading(false);
       } catch (err) {
@@ -75,8 +72,103 @@ const ReservedLotsPage = () => {
     if (user) fetchReservedLots();
   }, [user, refreshTrigger]);
 
-  // No necesitamos actualizar distancias continuamente - solo al entregar
-  // Mantener el useEffect vacío para evitar errores de geolocalización
+  // cada vez que cambia reservedLots, comprobar distancia para los que están pickedUp && !delivered
+  useEffect(() => {
+    const checkAll = async () => {
+      for (const lot of reservedLots) {
+        if (lot.pickedUp && !lot.delivered) {
+          // comprobamos distancia (no bloqueante)
+          checkDistanceForLot(lot._id, false);
+        } else {
+          // limpiar estado si no aplica
+          setDistanceStates((prev) => {
+            const copy = { ...prev };
+            delete copy[lot._id];
+            return copy;
+          });
+        }
+      }
+    };
+
+    checkAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reservedLots]);
+
+  // UTIL: obtener la ubicación con reintentos
+  const getPositionWithRetries = async (maxAttempts = 3, options = {}) => {
+    let attempts = 0;
+    let position = null;
+    while (attempts < maxAttempts && !position) {
+      try {
+        position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => resolve(pos),
+            (err) => reject(err),
+            {
+              enableHighAccuracy: false,
+              timeout: 10000,
+              maximumAge: 0,
+              ...options,
+            }
+          );
+        });
+      } catch (err) {
+        attempts++;
+        if (attempts < maxAttempts) {
+          await new Promise((r) => setTimeout(r, 800));
+        }
+      }
+    }
+    return position;
+  };
+
+  // FUNCION: checkDistanceForLot -> consulta backend /lots/:id/check-distance
+  const checkDistanceForLot = async (lotId, showToasts = true) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        if (showToasts) toast.error("No estás autenticado");
+        return;
+      }
+
+      const position = await getPositionWithRetries(2);
+      if (!position) {
+        if (showToasts)
+          toast.error(
+            "No se pudo obtener la ubicación. Activa el GPS y permite permisos."
+          );
+        // marcar como desconocido (no permitido)
+        setDistanceStates((prev) => ({ ...prev, [lotId]: { allowed: false } }));
+        return;
+      }
+
+      const { latitude, longitude } = position.coords;
+
+      const res = await axios.post(
+        `${API_URL}/lots/${lotId}/check-distance`,
+        { riderLat: latitude, riderLng: longitude },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const { allowed, distance } = res.data;
+      setDistanceStates((prev) => ({
+        ...prev,
+        [lotId]: { allowed, distance },
+      }));
+
+      if (!allowed && showToasts) {
+        toast.info(
+          `Estás a ${(distance * 1000).toFixed(0)}m del punto más cercano.`
+        );
+      }
+    } catch (err) {
+      console.error("checkDistanceForLot error:", err);
+      if (showToasts) {
+        toast.error("Error comprobando distancia");
+      }
+      setDistanceStates((prev) => ({ ...prev, [lotId]: { allowed: false } }));
+    }
+  };
 
   // Función para desreservar un lote
   const handleUnreserveLot = async (lotId) => {
@@ -98,7 +190,6 @@ const ReservedLotsPage = () => {
       );
 
       toast.success("Lote desreservado correctamente");
-      // Refrescar la lista
       setRefreshTrigger((prev) => prev + 1);
     } catch (err) {
       console.error("Error desreservando lote:", err);
@@ -109,7 +200,7 @@ const ReservedLotsPage = () => {
     }
   };
 
-  // Función para entregar el lote
+  // Función para entregar el lote (comprueba la distancia de nuevo antes de llamar a deliver)
   const handleDeliverLot = async (lotId) => {
     try {
       const token = localStorage.getItem("token");
@@ -118,81 +209,45 @@ const ReservedLotsPage = () => {
         return;
       }
 
+      // Primero revalidar distancia localmente
+      await checkDistanceForLot(lotId, true);
+      const ds = distanceStates[lotId];
+      // after checkDistanceForLot the state might not be updated immediately,
+      // so fetch current value from distanceStates + fallback: request backend if unknown
+      const current =
+        (distanceStates[lotId] && distanceStates[lotId].allowed) || false;
+
       setDeliveryStates((prev) => ({ ...prev, [lotId]: "loading" }));
-      toast.info("Obteniendo tu ubicación...");
+      toast.info("Obteniendo tu ubicación y registrando entrega...");
 
-      // Obtener ubicación del rider con estrategia de reintentos y caché
-      let position = null;
-      let attempts = 0;
-      const maxAttempts = 5;
-
-      while (attempts < maxAttempts && !position) {
-        try {
-          position = await new Promise((resolve, reject) => {
-            const timeoutId = setTimeout(() => {
-              reject(new Error("Timeout expired"));
-            }, 60000); // 60 segundos de timeout
-
-            navigator.geolocation.getCurrentPosition(
-              (pos) => {
-                clearTimeout(timeoutId);
-                resolve(pos);
-              },
-              (err) => {
-                clearTimeout(timeoutId);
-                reject(err);
-              },
-              {
-                enableHighAccuracy: false, // Usar ubicación rápida (menos precisa)
-                timeout: 50000, // Timeout más largo
-                maximumAge: 30000, // Permitir ubicación en caché de hasta 30 segundos
-              }
-            );
-          });
-        } catch (err) {
-          attempts++;
-          console.log(
-            `Intento ${attempts}/${maxAttempts} fallido:`,
-            err.message
-          );
-
-          if (attempts < maxAttempts) {
-            toast.info(`Reintentando... (${attempts}/${maxAttempts})`);
-            await new Promise((r) => setTimeout(r, 2000)); // Esperar 2 segundos
-          }
-        }
-      }
-
+      // obtener posición y mandar al endpoint /deliver
+      const position = await getPositionWithRetries(3, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+      });
       if (!position) {
         toast.error(
-          "❌ No se pudo obtener tu ubicación después de varios intentos.\n\n✅ Soluciones:\n1. Activa el GPS en tu dispositivo\n2. Da permisos de ubicación al navegador\n3. Abre el navegador en modo ubicación de precisión\n4. Intenta en un lugar abierto (sin techos)\n5. Recarga la página y vuelve a intentar"
+          "No se pudo obtener tu ubicación. Verifica permisos y GPS."
         );
         setDeliveryStates((prev) => ({ ...prev, [lotId]: "error" }));
         return;
       }
 
       const { latitude, longitude } = position.coords;
-      console.log(
-        `📍 Ubicación obtenida: lat=${latitude}, lng=${longitude}, precisión=${position.coords.accuracy}m`
-      );
 
-      // Enviar solicitud de entrega
+      // También podemos revalidar en backend (deliver ya valida)
       const res = await axios.post(
         `${API_URL}/lots/${lotId}/deliver`,
-        {
-          riderLat: latitude,
-          riderLng: longitude,
-        },
+        { riderLat: latitude, riderLng: longitude },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       toast.success("¡Lote entregado correctamente!");
       setDeliveryStates((prev) => ({ ...prev, [lotId]: "success" }));
 
-      // Refrescar después de 2 segundos
       setTimeout(() => {
         setRefreshTrigger((prev) => prev + 1);
-      }, 2000);
+      }, 1000);
     } catch (err) {
       console.error("Error entregando lote:", err);
       let errorMsg = "Error entregando el lote";
@@ -220,9 +275,8 @@ const ReservedLotsPage = () => {
     if (swipeStartY === null) return;
 
     const endY = e.changedTouches[0].clientY;
-    const swipeDistance = swipeStartY - endY; // Positivo si es swipe up
+    const swipeDistance = swipeStartY - endY;
 
-    // Si swipe up >= 50px, intentar entregar
     if (swipeDistance >= 50) {
       handleDeliverLot(lotId);
     }
@@ -243,14 +297,12 @@ const ReservedLotsPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f6f8f7] pb-20">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="flex items-center gap-4 p-4">
           <h1 className="text-lg font-bold text-gray-900 m-0">Reserved Lots</h1>
         </div>
       </header>
 
-      {/* Content */}
       <main className="flex-1 px-4 pt-4 space-y-3">
         {reservedLots.length === 0 && (
           <div className="bg-white rounded-lg p-8 text-center border border-gray-100 mt-4">
@@ -264,10 +316,7 @@ const ReservedLotsPage = () => {
         {reservedLots.map((lot) => {
           const pickupTime = new Date(lot.pickupDeadline).toLocaleTimeString(
             "es-ES",
-            {
-              hour: "2-digit",
-              minute: "2-digit",
-            }
+            { hour: "2-digit", minute: "2-digit" }
           );
           const pickupDate = new Date(lot.pickupDeadline).toLocaleDateString(
             "es-ES"
@@ -277,6 +326,7 @@ const ReservedLotsPage = () => {
           const isPickedUp = lot.pickedUp;
           const isDelivered = lot.delivered;
           const deliveryState = deliveryStates[lot._id] || "pending";
+          const distanceInfo = distanceStates[lot._id]; // { allowed, distance }
 
           return (
             <div
@@ -285,7 +335,6 @@ const ReservedLotsPage = () => {
               onTouchStart={(e) => handleTouchStart(e, lot._id)}
               onTouchEnd={(e) => handleTouchEnd(e, lot._id)}
             >
-              {/* Status Badge */}
               {isDelivered && (
                 <div className="mb-2 inline-block bg-green-100 text-green-700 rounded-full px-3 py-1 text-xs font-semibold">
                   ✓ Delivered
@@ -297,7 +346,6 @@ const ReservedLotsPage = () => {
                 </div>
               )}
 
-              {/* Lot Image */}
               {lot.image && (
                 <div className="mb-3 rounded-lg overflow-hidden">
                   <img
@@ -308,7 +356,6 @@ const ReservedLotsPage = () => {
                 </div>
               )}
 
-              {/* Lot Header */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-900 text-base m-0">
@@ -325,21 +372,17 @@ const ReservedLotsPage = () => {
                 </div>
               </div>
 
-              {/* Date */}
               <p className="text-xs text-gray-400 m-0 mb-2">
                 Pickup: {pickupDate}
               </p>
 
-              {/* Description */}
               {lot.description && (
                 <p className="text-sm text-gray-600 m-0 mb-3 leading-relaxed">
                   {lot.description}
                 </p>
               )}
 
-              {/* Action Buttons */}
               <div className="flex justify-between items-center gap-2 mt-3">
-                {/* Cancel Button - Left */}
                 <button
                   onClick={() => handleUnreserveLot(lot._id)}
                   className="p-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors flex items-center justify-center disabled:opacity-50"
@@ -351,7 +394,6 @@ const ReservedLotsPage = () => {
                   </span>
                 </button>
 
-                {/* Chat Button - Right */}
                 <button
                   onClick={() => setOpenChatOrderId(lot._id)}
                   className="relative flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 text-white text-xs rounded hover:bg-emerald-600 transition-colors"
@@ -367,44 +409,67 @@ const ReservedLotsPage = () => {
                   )}
                 </button>
 
-                {/* Deliver Button - Show when picked up and not delivered */}
+                {/* Deliver Button: SOLO si pickedUp && !delivered */}
                 {isPickedUp && !isDelivered && (
-                  <button
-                    onClick={() => handleDeliverLot(lot._id)}
-                    className={`flex items-center justify-center gap-2 px-3 py-2 text-xs rounded transition-colors ${
-                      deliveryState === "loading"
-                        ? "bg-yellow-500 text-white"
-                        : deliveryState === "success"
-                        ? "bg-green-500 text-white"
-                        : deliveryState === "error"
-                        ? "bg-red-500 text-white"
-                        : "bg-blue-500 text-white hover:bg-blue-600"
-                    }`}
-                    disabled={deliveryState === "loading"}
-                  >
-                    {deliveryState === "loading" ? (
-                      <>
-                        <span className="material-symbols-outlined text-sm animate-spin">
-                          sync
-                        </span>
-                        <span>Delivering...</span>
-                      </>
-                    ) : deliveryState === "success" ? (
-                      <>
-                        <span className="material-symbols-outlined text-sm">
-                          check_circle
-                        </span>
-                        <span>Delivered</span>
-                      </>
+                  <>
+                    {distanceInfo && distanceInfo.allowed ? (
+                      // si el backend dijo allowed true -> mostramos botón activo
+                      <button
+                        onClick={() => handleDeliverLot(lot._id)}
+                        className={`flex items-center justify-center gap-2 px-3 py-2 text-xs rounded transition-colors ${
+                          deliveryState === "loading"
+                            ? "bg-yellow-500 text-white"
+                            : deliveryState === "success"
+                            ? "bg-green-500 text-white"
+                            : deliveryState === "error"
+                            ? "bg-red-500 text-white"
+                            : "bg-blue-500 text-white hover:bg-blue-600"
+                        }`}
+                        disabled={deliveryState === "loading"}
+                      >
+                        {deliveryState === "loading" ? (
+                          <>
+                            <span className="material-symbols-outlined text-sm animate-spin">
+                              sync
+                            </span>
+                            <span>Delivering...</span>
+                          </>
+                        ) : deliveryState === "success" ? (
+                          <>
+                            <span className="material-symbols-outlined text-sm">
+                              check_circle
+                            </span>
+                            <span>Delivered</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="material-symbols-outlined text-sm">
+                              local_shipping
+                            </span>
+                            Acercate a 50 metros del punto
+                            <span>Deliver</span>
+                          </>
+                        )}
+                      </button>
                     ) : (
-                      <>
-                        <span className="material-symbols-outlined text-sm">
-                          local_shipping
-                        </span>
-                        <span>Deliver</span>
-                      </>
+                      // si no está permitido o no conocemos estado -> mostramos aviso y boton reintentar
+                      <div className="flex items-center gap-2">
+                        <div className="text-xs text-red-600">
+                          {distanceInfo && distanceInfo.distance !== undefined
+                            ? `A ${(distanceInfo.distance * 1000).toFixed(
+                                0
+                              )} m — Get within 50 meters of the point.`
+                            : "Come to the location to be able to deliver."}
+                        </div>
+                        <button
+                          onClick={() => checkDistanceForLot(lot._id, true)}
+                          className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200"
+                        >
+                          Reintentar
+                        </button>
+                      </div>
                     )}
-                  </button>
+                  </>
                 )}
               </div>
             </div>
@@ -412,7 +477,6 @@ const ReservedLotsPage = () => {
         })}
       </main>
 
-      {/* Chat Modal */}
       {openChatOrderId && user && (
         <div className="fixed bottom-0 right-0 w-80 h-96 bg-black text-white border shadow-lg rounded-lg p-4 flex flex-col z-50">
           <ChatBox
@@ -429,7 +493,6 @@ const ReservedLotsPage = () => {
         </div>
       )}
 
-      {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 flex justify-around border-t border-gray-200 bg-white/80 backdrop-blur-sm p-2 gap-2">
         <a
           href="/mainscreen"
