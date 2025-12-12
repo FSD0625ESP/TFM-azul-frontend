@@ -11,6 +11,14 @@ import deliveryIcon from "../assets/delivery.png";
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
+// Asegurar que siempre termina con /api
+const getApiUrl = (endpoint) => {
+  const base = API_BASE_URL.endsWith("/api")
+    ? API_BASE_URL
+    : `${API_BASE_URL}/api`;
+  return `${base}${endpoint}`;
+};
+
 export default function MainScreen() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -124,7 +132,7 @@ export default function MainScreen() {
   useEffect(() => {
     const fetchMarks = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/marks`);
+        const response = await axios.get(getApiUrl("/marks"));
         setMarks(response.data);
       } catch (err) {
         console.error("Error fetching marks:", err);
@@ -136,7 +144,7 @@ export default function MainScreen() {
   useEffect(() => {
     const fetchLots = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/lots`);
+        const res = await axios.get(getApiUrl("/lots"));
         const lots = res.data || [];
         const counts = {};
         lots.forEach((lot) => {
