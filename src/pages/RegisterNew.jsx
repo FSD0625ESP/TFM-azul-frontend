@@ -104,7 +104,7 @@ const Register = () => {
 
     try {
       if (userType === "rider") {
-        // Registrar usuario (rider)
+        // Registrar usuario (rider) en tabla Users
         const registerUrl = `${API_URL}/users/register`;
         console.log("Registering rider at:", registerUrl);
 
@@ -143,8 +143,11 @@ const Register = () => {
             },
           });
         }
+
+        toast.success("Registration successful!");
+        navigate("/login");
       } else if (userType === "shop") {
-        // Registrar tienda (store)
+        // Registrar tienda (store) en tabla Stores
         const registerUrl = `${API_URL}/stores/register`;
         console.log("Registering store at:", registerUrl);
 
@@ -186,10 +189,10 @@ const Register = () => {
             },
           });
         }
-      }
 
-      toast.success("Registration successful!");
-      navigate("/login");
+        toast.success("Registration successful!");
+        navigate("/login");
+      }
     } catch (error) {
       console.error("Registration error:", error);
       console.error("Error response:", error.response);
@@ -200,7 +203,6 @@ const Register = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-dvh bg-white flex flex-col items-center justify-center p-4">
       <main className="w-full max-w-md">
