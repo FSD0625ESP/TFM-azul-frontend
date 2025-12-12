@@ -7,7 +7,7 @@ import RiderForm from "../components/RiderForm";
 import StoreForm from "../components/StoreForm";
 import ModalDialog from "../components/ModalDialog";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const mapboxClient = MapboxClient({
   accessToken: import.meta.env.VITE_MAPBOX_TOKEN,
@@ -104,7 +104,7 @@ const Register = () => {
 
     try {
       if (userType === "rider") {
-        // Primero registrar usuario
+        // Registrar usuario (rider)
         const userResponse = await axios.post(`${API_URL}/users/register`, {
           name: `${firstName} ${lastName}`,
           email,
@@ -136,7 +136,7 @@ const Register = () => {
           });
         }
       } else if (userType === "shop") {
-        // Primero registrar tienda
+        // Registrar tienda (store)
         const storeResponse = await axios.post(`${API_URL}/stores/register`, {
           name: shopName,
           address,
