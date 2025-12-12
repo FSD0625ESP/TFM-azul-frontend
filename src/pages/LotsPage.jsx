@@ -6,7 +6,7 @@ import AddFoodLotModal from "../components/AddFoodLotModal";
 import EditFoodLotModal from "../components/EditFoodLotModal";
 import ChatBox from "../components/ChatBox";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const LotsPage = () => {
   const navigate = useNavigate();
@@ -182,14 +182,18 @@ const LotsPage = () => {
                           }}
                           className="bg-transparent border-none text-xl cursor-pointer text-emerald-500 flex items-center justify-center hover:text-emerald-600"
                         >
-                          <span className="material-symbols-outlined">edit</span>
+                          <span className="material-symbols-outlined">
+                            edit
+                          </span>
                         </button>
                       )}
                       <button
                         onClick={() => handleDeleteLot(lot._id)}
                         className="bg-transparent border-none text-red-600 cursor-pointer text-xl flex items-center justify-center hover:text-red-700"
                       >
-                        <span className="material-symbols-outlined">delete</span>
+                        <span className="material-symbols-outlined">
+                          delete
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -217,48 +221,48 @@ const LotsPage = () => {
                         );
                         return `${hours}:${minutes}`;
                       })()}
-                  </span>
-                </div>
-
-                {/* Reserved By - Show rider info if reserved */}
-                {lot.reserved && lot.rider && (
-                  <div className="bg-blue-100 rounded-lg p-3 border border-blue-300">
-                    <p className="text-xs font-medium text-blue-900 mb-2">
-                      Reserved by:
-                    </p>
-                    <div className="text-sm text-blue-800 mb-3">
-                      <p className="font-semibold m-0">{lot.rider.name}</p>
-                      {lot.rider.email && (
-                        <p className="text-xs m-0 mt-1">
-                          <span className="material-symbols-outlined text-xs align-middle mr-1">
-                            email
-                          </span>
-                          {lot.rider.email}
-                        </p>
-                      )}
-                      {lot.rider.phone && (
-                        <p className="text-xs m-0 mt-1">
-                          <span className="material-symbols-outlined text-xs align-middle mr-1">
-                            phone
-                          </span>
-                          {lot.rider.phone}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setOpenChatOrderId(lot._id)}
-                        className="px-3 py-1 bg-emerald-500 text-white rounded text-xs hover:bg-emerald-600"
-                      >
-                        <span className="material-symbols-outlined align-middle mr-1 text-sm">
-                          chat
-                        </span>
-                        Chat with rider
-                      </button>
-                    </div>
+                    </span>
                   </div>
-                )}
+
+                  {/* Reserved By - Show rider info if reserved */}
+                  {lot.reserved && lot.rider && (
+                    <div className="bg-blue-100 rounded-lg p-3 border border-blue-300">
+                      <p className="text-xs font-medium text-blue-900 mb-2">
+                        Reserved by:
+                      </p>
+                      <div className="text-sm text-blue-800 mb-3">
+                        <p className="font-semibold m-0">{lot.rider.name}</p>
+                        {lot.rider.email && (
+                          <p className="text-xs m-0 mt-1">
+                            <span className="material-symbols-outlined text-xs align-middle mr-1">
+                              email
+                            </span>
+                            {lot.rider.email}
+                          </p>
+                        )}
+                        {lot.rider.phone && (
+                          <p className="text-xs m-0 mt-1">
+                            <span className="material-symbols-outlined text-xs align-middle mr-1">
+                              phone
+                            </span>
+                            {lot.rider.phone}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setOpenChatOrderId(lot._id)}
+                          className="px-3 py-1 bg-emerald-500 text-white rounded text-xs hover:bg-emerald-600"
+                        >
+                          <span className="material-symbols-outlined align-middle mr-1 text-sm">
+                            chat
+                          </span>
+                          Chat with rider
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
