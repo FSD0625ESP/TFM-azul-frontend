@@ -4,6 +4,17 @@ import { toast } from "react-toastify";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
+// Determinar URL del WebSocket basado en el entorno
+const getWebSocketUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+  if (apiUrl.includes("localhost")) {
+    return "ws://localhost:4000";
+  }
+  // Si es producción (Render), usa wss:// y extrae el dominio
+  const baseUrl = apiUrl.replace("/api", "").replace("https://", "");
+  return `wss://${baseUrl}`;
+};
+
 export const WSContext = createContext();
 
 export const WSProvider = ({ user, children }) => {
@@ -14,7 +25,7 @@ export const WSProvider = ({ user, children }) => {
   useEffect(() => {
     if (!user) return;
 
-    ws.current = new WebSocket("ws://localhost:4000");
+    ws.current = new WebSocket(getWebSocketUrl());
 
     ws.current.onopen = () => {
       console.log("WS connected");

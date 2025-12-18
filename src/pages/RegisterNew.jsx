@@ -7,7 +7,7 @@ import RiderForm from "../components/RiderForm";
 import StoreForm from "../components/StoreForm";
 import ModalDialog from "../components/ModalDialog";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const mapboxClient = MapboxClient({
   accessToken: import.meta.env.VITE_MAPBOX_TOKEN,
@@ -104,8 +104,11 @@ const Register = () => {
 
     try {
       if (userType === "rider") {
-        // Primero registrar usuario
-        const userResponse = await axios.post(`${API_URL}/users/register`, {
+        // Registrar usuario (rider) en tabla Users
+        const registerUrl = `${API_URL}/users/register`;
+        console.log("Registering rider at:", registerUrl);
+
+        const userResponse = await axios.post(registerUrl, {
           name: `${firstName} ${lastName}`,
           email,
           password,
@@ -121,23 +124,34 @@ const Register = () => {
           formData.append("photo", photo);
 
           // Login para obtener token
-          const loginResponse = await axios.post(`${API_URL}/users/login`, {
+          const loginUrl = `${API_URL}/users/login`;
+          console.log("Logging in rider at:", loginUrl);
+
+          const loginResponse = await axios.post(loginUrl, {
             email,
             password,
           });
 
           const token = loginResponse.data.token;
+          const photoUrl = `${API_URL}/users/${user.id}/photo`;
+          console.log("Uploading photo at:", photoUrl);
 
-          await axios.patch(`${API_URL}/users/${user.id}/photo`, formData, {
+          await axios.patch(photoUrl, formData, {
             headers: {
               "Content-Type": "multipart/form-data",
               Authorization: `Bearer ${token}`,
             },
           });
         }
+
+        toast.success("Registration successful!");
+        navigate("/login");
       } else if (userType === "shop") {
-        // Primero registrar tienda
-        const storeResponse = await axios.post(`${API_URL}/stores/register`, {
+        // Registrar tienda (store) en tabla Stores
+        const registerUrl = `${API_URL}/stores/register`;
+        console.log("Registering store at:", registerUrl);
+
+        const storeResponse = await axios.post(registerUrl, {
           name: shopName,
           address,
           type: shopType,
@@ -156,26 +170,32 @@ const Register = () => {
           formData.append("photo", photo);
 
           // Login para obtener token
-          const loginResponse = await axios.post(`${API_URL}/stores/login`, {
+          const loginUrl = `${API_URL}/stores/login`;
+          console.log("Logging in store at:", loginUrl);
+
+          const loginResponse = await axios.post(loginUrl, {
             email,
             password,
           });
 
           const token = loginResponse.data.token;
+          const photoUrl = `${API_URL}/stores/${store._id}/photo`;
+          console.log("Uploading photo at:", photoUrl);
 
-          await axios.patch(`${API_URL}/stores/${store._id}/photo`, formData, {
+          await axios.patch(photoUrl, formData, {
             headers: {
               "Content-Type": "multipart/form-data",
               Authorization: `Bearer ${token}`,
             },
           });
         }
-      }
 
-      toast.success("Registration successful!");
-      navigate("/login");
+        toast.success("Registration successful!");
+        navigate("/login");
+      }
     } catch (error) {
       console.error("Registration error:", error);
+      console.error("Error response:", error.response);
       toast.error(
         error.response?.data?.message || "An error occurred during registration"
       );
@@ -183,7 +203,6 @@ const Register = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-dvh bg-white flex flex-col items-center justify-center p-4">
       <main className="w-full max-w-md">
