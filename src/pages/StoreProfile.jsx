@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { ProfileAvatar } from "../components/ProfileAvatar";
+import { InfoCard } from "../components/InfoCard";
+import { BottomNav } from "../components/BottomNav";
+import { ROUTES } from "../utils/constants";
+import { clearAuthStorage } from "../utils/authHelpers";
+import {
+  uploadProfilePhoto,
+  updateStoredEntity,
+  getStoredEntity,
+} from "../utils/profileHelpers";
 
 const StoreProfile = () => {
   const navigate = useNavigate();
@@ -16,63 +23,48 @@ const StoreProfile = () => {
   const handleOpenQR = () => setShowQR(true);
   const handleCloseQR = () => setShowQR(false);
 
+  // Cargar datos de la tienda al montar
   useEffect(() => {
-    const storeData = localStorage.getItem("store");
+    const storeData = getStoredEntity("store");
     if (storeData) {
-      setStore(JSON.parse(storeData));
+      setStore(storeData);
     } else {
-      navigate("/login");
+      navigate(ROUTES.LOGIN);
     }
     setLoading(false);
   }, [navigate]);
 
+  /**
+   * Maneja el cierre de sesión
+   */
   const handleLogout = () => {
-    localStorage.removeItem("store");
-    localStorage.removeItem("token");
-    navigate("/");
+    clearAuthStorage();
+    navigate(ROUTES.HOME);
   };
 
+  /**
+   * Maneja el cambio de foto de perfil
+   */
   const handlePhotoChange = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validar tipo de archivo
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-
-    // Validar tamaño (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size must be less than 5MB");
-      return;
-    }
 
     setUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("photo", file);
-
       const token = localStorage.getItem("token");
       const storeId = store?.id || store?._id;
 
-      const response = await axios.patch(
-        `${API_URL}/stores/${storeId}/photo`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const updatedStore = await uploadProfilePhoto(
+        storeId,
+        "stores",
+        file,
+        token
       );
-
-      const updatedStore = response.data.store;
 
       // Actualizar estado y localStorage
       setStore(updatedStore);
-      localStorage.setItem("store", JSON.stringify(updatedStore));
+      updateStoredEntity("store", updatedStore);
 
       toast.success("Photo updated successfully!");
     } catch (error) {
@@ -90,6 +82,12 @@ const StoreProfile = () => {
   if (!store) {
     return null;
   }
+
+  // Configuración de navegación inferior
+  const navItems = [
+    { href: "/lots", icon: "list_alt", label: "Lots" },
+    { href: "#", icon: "person", label: "Profile" },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -111,50 +109,18 @@ const StoreProfile = () => {
           </div>
         </div>
       )}
+
       {/* Main Content */}
       <main className="flex-1 p-4 flex flex-col pb-20 pt-4">
         {/* Profile Image and Name */}
         <div className="flex flex-col items-center mb-8">
-          <div className="relative mb-4 group">
-            {store.photo ? (
-              <img
-                src={store.photo}
-                alt="Store logo"
-                className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-md"
-              />
-            ) : (
-              <div className="h-24 w-24 rounded-full border-4 border-white bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-md">
-                <span className="material-symbols-outlined text-white text-5xl">
-                  storefront
-                </span>
-              </div>
-            )}
-            <label
-              htmlFor="photo-upload"
-              className="absolute inset-0 flex items-center justify-center h-24 w-24 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-            >
-              {uploading ? (
-                <span className="material-symbols-outlined text-white text-3xl animate-spin">
-                  sync
-                </span>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <span className="material-symbols-outlined text-white text-2xl">
-                    photo_camera
-                  </span>
-                  <span className="text-white text-xs mt-1">
-                    {store.photo ? "Change" : "Add"}
-                  </span>
-                </div>
-              )}
-            </label>
-            <input
-              id="photo-upload"
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              className="hidden"
-              disabled={uploading}
+          <div className="mb-4">
+            <ProfileAvatar
+              photoUrl={store.photo}
+              name={store.name}
+              uploading={uploading}
+              onPhotoChange={handlePhotoChange}
+              icon="storefront"
             />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -175,58 +141,32 @@ const StoreProfile = () => {
         {/* Store Details */}
         <div className="flex flex-col gap-6 mb-8">
           {/* Location */}
-          <div className="flex gap-4 rounded-xl bg-white p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-center h-10 w-10 min-w-[40px] rounded-lg bg-gray-100">
-              <span className="material-symbols-outlined text-gray-500">
-                location_on
-              </span>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-400 mb-1">Address</p>
-              <p className="text-base font-medium text-gray-900">
-                {store.address}
-              </p>
-            </div>
-          </div>
+          <InfoCard icon="location_on" label="Address" value={store.address} />
 
           {/* Email */}
-          <div className="flex gap-4 rounded-xl bg-white p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-center h-10 w-10 min-w-[40px] rounded-lg bg-gray-100">
-              <span className="material-symbols-outlined text-gray-500">
-                mail
-              </span>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-400 mb-1">Email</p>
-              <p className="text-base font-medium text-gray-900">
-                {store.email}
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/change-password")}
-              className="flex items-center gap-1 bg-transparent border-none text-xs font-medium text-emerald-600 cursor-pointer hover:text-emerald-700 transition-colors px-2 whitespace-nowrap"
-              title="Change Password"
-            >
-              <span className="material-symbols-outlined text-base">
-                lock_reset
-              </span>
-            </button>
-          </div>
+          <InfoCard
+            icon="mail"
+            label="Email"
+            value={store.email}
+            actionButton={
+              <button
+                onClick={() => navigate(ROUTES.CHANGE_PASSWORD)}
+                className="flex items-center gap-1 bg-transparent border-none text-xs font-medium text-emerald-600 cursor-pointer hover:text-emerald-700 transition-colors px-2 whitespace-nowrap"
+                title="Change Password"
+              >
+                <span className="material-symbols-outlined text-base">
+                  lock_reset
+                </span>
+              </button>
+            }
+          />
 
           {/* Phone */}
-          <div className="flex gap-4 rounded-xl bg-white p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-center h-10 w-10 min-w-[40px] rounded-lg bg-gray-100">
-              <span className="material-symbols-outlined text-gray-500">
-                phone
-              </span>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-400 mb-1">Phone</p>
-              <p className="text-base font-medium text-gray-900">
-                {store.phone ? store.phone : "Not specified"}
-              </p>
-            </div>
-          </div>
+          <InfoCard
+            icon="phone"
+            label="Phone"
+            value={store.phone ? store.phone : "Not specified"}
+          />
         </div>
 
         {/* Logout Button */}
@@ -242,25 +182,7 @@ const StoreProfile = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="sticky bottom-0 flex justify-around border-t border-gray-200 bg-white/80 backdrop-blur-sm p-2 gap-2">
-        {/* Lots */}
-        <a
-          href="/lots"
-          className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg p-2 no-underline text-gray-400 text-xs hover:text-gray-600 transition-colors"
-        >
-          <span className="material-symbols-outlined">list_alt</span>
-          <span>Lots</span>
-        </a>
-
-        {/* Profile (Active) */}
-        <a
-          href="#"
-          className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg bg-emerald-50 p-2 no-underline text-emerald-500 text-xs font-bold"
-        >
-          <span className="material-symbols-outlined">person</span>
-          <span>Profile</span>
-        </a>
-      </nav>
+      <BottomNav items={navItems} activeIndex={1} />
     </div>
   );
 };

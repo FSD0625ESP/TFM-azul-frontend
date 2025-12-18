@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { buildApiUrl } from "../utils/apiConfig";
+import { ROUTES, VALIDATION_MESSAGES } from "../utils/constants";
+import { saveAuthToStorage } from "../utils/authHelpers";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -30,12 +31,13 @@ const AdminLogin = () => {
 
       const { token, admin } = response.data;
 
-      // Guardar en localStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem("admin", JSON.stringify(admin));
+      // Guardar en localStorage usando helper
+      saveAuthToStorage(token, admin, USER_TYPES.ADMIN);
+      console.log("Admin logged in", admin);
 
       toast.success("Welcome, Admin!");
-      navigate("/admin/dashboard");
+      // Forzar recarga completa para que useAuth detecte la autenticación
+      window.location.href = ROUTES.ADMIN_DASHBOARD;
     } catch (error) {
       console.error("Login error:", error);
       toast.error(error.response?.data?.message || "Invalid credentials");

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import axios from "axios";
+import { buildApiUrl } from "../utils/apiConfig";
+import { ROUTES } from "../utils/constants";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -23,15 +24,17 @@ const ForgotPassword = () => {
     try {
       // TODO: Tu compañero implementará este endpoint
       // await axios.post(`${API_URL}/auth/forgot-password`, { email });
-      
+
       // Simulación por ahora
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       setEmailSent(true);
       toast.success("Recovery email sent! Check your inbox.");
     } catch (error) {
       console.error("Error:", error);
-      toast.error(error.response?.data?.message || "Error sending recovery email");
+      toast.error(
+        error.response?.data?.message || "Error sending recovery email"
+      );
     } finally {
       setLoading(false);
     }
@@ -59,12 +62,13 @@ const ForgotPassword = () => {
             {email}
           </p>
           <p className="text-gray-500 text-sm mb-8">
-            Click the link in the email to reset your password. The link will expire in 1 hour.
+            Click the link in the email to reset your password. The link will
+            expire in 1 hour.
           </p>
 
           {/* Back to Login */}
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate(ROUTES.LOGIN)}
             className="w-full py-3 px-4 rounded-lg bg-emerald-500 text-white text-base font-semibold border-none cursor-pointer hover:bg-emerald-600 transition-colors"
           >
             Back to login
@@ -129,7 +133,7 @@ const ForgotPassword = () => {
           {/* Back to Login */}
           <button
             type="button"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate(ROUTES.LOGIN)}
             className="flex items-center justify-center gap-2 text-gray-600 text-sm font-medium bg-none border-none cursor-pointer hover:text-gray-900 transition-colors"
           >
             <span className="material-symbols-outlined text-base">

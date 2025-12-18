@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { buildApiUrl } from "../utils/apiConfig";
 
 const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
   const [name, setName] = useState("");
@@ -72,14 +71,14 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
       formData.append("name", name);
       formData.append("description", description);
       formData.append("pickupDeadline", pickupDate.toISOString());
-      
+
       if (image) {
         formData.append("image", image);
       }
 
       console.log("Enviando formData");
 
-      const response = await axios.post(`${API_URL}/lots/create`, formData, {
+      const response = await axios.post(buildApiUrl("/lots/create"), formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

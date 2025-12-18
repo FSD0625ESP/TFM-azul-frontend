@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { useAdminData } from "../hooks/useAdminData";
+import { AdminCreateModal } from "../components/AdminCreateModal";
+import { ROUTES } from "../utils/constants";
 
 const AdminStores = () => {
   const navigate = useNavigate();
-  const [stores, setStores] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: stores, loading, create, remove } = useAdminData("stores");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newStore, setNewStore] = useState({
     name: "",
@@ -19,23 +18,9 @@ const AdminStores = () => {
     phone: "",
   });
 
-  useEffect(() => {
-    fetchStores();
-  }, []);
-
-  const fetchStores = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_URL}/admin/stores`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setStores(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching stores:", error);
-      toast.error("Error loading stores");
-      setLoading(false);
-    }
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewStore((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCreateStore = async (e) => {
@@ -52,13 +37,8 @@ const AdminStores = () => {
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(`${API_URL}/admin/stores`, newStore, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      toast.success("Store created successfully");
+    const success = await create(newStore);
+    if (success) {
       setShowCreateModal(false);
       setNewStore({
         name: "",
@@ -68,31 +48,44 @@ const AdminStores = () => {
         type: "",
         phone: "",
       });
-      fetchStores();
-    } catch (error) {
-      console.error("Error creating store:", error);
-      toast.error(error.response?.data?.message || "Error creating store");
     }
   };
 
-  const handleDeleteStore = async (storeId, storeName) => {
-    if (!confirm(`Are you sure you want to delete store "${storeName}"?`)) {
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API_URL}/admin/stores/${storeId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      toast.success("Store deleted successfully");
-      fetchStores();
-    } catch (error) {
-      console.error("Error deleting store:", error);
-      toast.error("Error deleting store");
-    }
-  };
+  const storeFields = [
+    { name: "name", label: "Name", placeholder: "Store name", required: true },
+    {
+      name: "type",
+      label: "Type",
+      placeholder: "Restaurant, Bakery, etc.",
+      required: true,
+    },
+    {
+      name: "address",
+      label: "Address",
+      placeholder: "123 Main St, City",
+      required: true,
+    },
+    {
+      name: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "store@example.com",
+      required: true,
+    },
+    {
+      name: "password",
+      label: "Password",
+      type: "password",
+      placeholder: "••••••",
+      required: true,
+    },
+    {
+      name: "phone",
+      label: "Phone",
+      type: "tel",
+      placeholder: "+34 123 456 789",
+    },
+  ];
 
   if (loading) {
     return (
@@ -112,7 +105,7 @@ const AdminStores = () => {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate("/admin/dashboard")}
+              onClick={() => navigate(ROUTES.ADMIN_DASHBOARD)}
               className="text-gray-400 hover:text-gray-600"
             >
               <span className="material-symbols-outlined">arrow_back</span>
@@ -199,7 +192,7 @@ const AdminStores = () => {
                     </td>
                     <td className="p-4">
                       <button
-                        onClick={() => handleDeleteStore(store._id, store.name)}
+                        onClick={() => remove(store._id, store.name)}
                         className="flex items-center gap-1 bg-red-100 text-red-700 px-3 py-1.5 rounded hover:bg-red-200 transition-colors"
                       >
                         <span className="material-symbols-outlined text-sm">
@@ -217,126 +210,25 @@ const AdminStores = () => {
       </main>
 
       {/* Create Store Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Create New Store
-            </h2>
-            <form onSubmit={handleCreateStore} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name *
-                </label>
-                <input
-                  type="text"
-                  value={newStore.name}
-                  onChange={(e) =>
-                    setNewStore({ ...newStore, name: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500"
-                  placeholder="Store name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Type *
-                </label>
-                <input
-                  type="text"
-                  value={newStore.type}
-                  onChange={(e) =>
-                    setNewStore({ ...newStore, type: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500"
-                  placeholder="Restaurant, Bakery, etc."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address *
-                </label>
-                <input
-                  type="text"
-                  value={newStore.address}
-                  onChange={(e) =>
-                    setNewStore({ ...newStore, address: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500"
-                  placeholder="123 Main St, City"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  value={newStore.email}
-                  onChange={(e) =>
-                    setNewStore({ ...newStore, email: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500"
-                  placeholder="store@example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password *
-                </label>
-                <input
-                  type="password"
-                  value={newStore.password}
-                  onChange={(e) =>
-                    setNewStore({ ...newStore, password: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500"
-                  placeholder="••••••"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  value={newStore.phone}
-                  onChange={(e) =>
-                    setNewStore({ ...newStore, phone: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500"
-                  placeholder="+34 123 456 789"
-                />
-              </div>
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setNewStore({
-                      name: "",
-                      email: "",
-                      password: "",
-                      address: "",
-                      type: "",
-                      phone: "",
-                    });
-                  }}
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
-                >
-                  Create
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <AdminCreateModal
+        show={showCreateModal}
+        onClose={() => {
+          setShowCreateModal(false);
+          setNewStore({
+            name: "",
+            email: "",
+            password: "",
+            address: "",
+            type: "",
+            phone: "",
+          });
+        }}
+        onSubmit={handleCreateStore}
+        title="Create New Store"
+        fields={storeFields}
+        formData={newStore}
+        onChange={handleInputChange}
+      />
     </div>
   );
 };

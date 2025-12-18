@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { useAdminData } from "../hooks/useAdminData";
+import { AdminCreateModal } from "../components/AdminCreateModal";
+import { ROUTES } from "../utils/constants";
 
 const AdminUsers = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: users, loading, create, remove } = useAdminData("users");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newUser, setNewUser] = useState({
     name: "",
@@ -17,23 +16,9 @@ const AdminUsers = () => {
     phone: "",
   });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_URL}/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      toast.error("Error loading users");
-      setLoading(false);
-    }
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCreateUser = async (e) => {
@@ -44,40 +29,36 @@ const AdminUsers = () => {
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(`${API_URL}/admin/users`, newUser, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      toast.success("User created successfully");
+    const success = await create(newUser);
+    if (success) {
       setShowCreateModal(false);
       setNewUser({ name: "", email: "", password: "", phone: "" });
-      fetchUsers();
-    } catch (error) {
-      console.error("Error creating user:", error);
-      toast.error(error.response?.data?.message || "Error creating user");
     }
   };
 
-  const handleDeleteUser = async (userId, userName) => {
-    if (!confirm(`Are you sure you want to delete user "${userName}"?`)) {
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API_URL}/admin/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      toast.success("User deleted successfully");
-      fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("Error deleting user");
-    }
-  };
+  const userFields = [
+    { name: "name", label: "Name", placeholder: "John Doe", required: true },
+    {
+      name: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "john@example.com",
+      required: true,
+    },
+    {
+      name: "password",
+      label: "Password",
+      type: "password",
+      placeholder: "••••••",
+      required: true,
+    },
+    {
+      name: "phone",
+      label: "Phone",
+      type: "tel",
+      placeholder: "+34 123 456 789",
+    },
+  ];
 
   if (loading) {
     return (
@@ -97,7 +78,7 @@ const AdminUsers = () => {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate("/admin/dashboard")}
+              onClick={() => navigate(ROUTES.ADMIN_DASHBOARD)}
               className="text-gray-400 hover:text-gray-600"
             >
               <span className="material-symbols-outlined">arrow_back</span>
@@ -172,7 +153,7 @@ const AdminUsers = () => {
                     <td className="p-4 text-gray-600">{user.phone || "N/A"}</td>
                     <td className="p-4">
                       <button
-                        onClick={() => handleDeleteUser(user._id, user.name)}
+                        onClick={() => remove(user._id, user.name)}
                         className="flex items-center gap-1 bg-red-100 text-red-700 px-3 py-1.5 rounded hover:bg-red-200 transition-colors"
                       >
                         <span className="material-symbols-outlined text-sm">
@@ -190,96 +171,18 @@ const AdminUsers = () => {
       </main>
 
       {/* Create User Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Create New User
-            </h2>
-            <form onSubmit={handleCreateUser} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name *
-                </label>
-                <input
-                  type="text"
-                  value={newUser.name}
-                  onChange={(e) =>
-                    setNewUser({ ...newUser, name: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
-                  placeholder="John Doe"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  value={newUser.email}
-                  onChange={(e) =>
-                    setNewUser({ ...newUser, email: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
-                  placeholder="john@example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password *
-                </label>
-                <input
-                  type="password"
-                  value={newUser.password}
-                  onChange={(e) =>
-                    setNewUser({ ...newUser, password: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
-                  placeholder="••••••"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  value={newUser.phone}
-                  onChange={(e) =>
-                    setNewUser({ ...newUser, phone: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
-                  placeholder="+34 123 456 789"
-                />
-              </div>
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setNewUser({
-                      name: "",
-                      email: "",
-                      password: "",
-                      phone: "",
-                    });
-                  }}
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  Create
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <AdminCreateModal
+        show={showCreateModal}
+        onClose={() => {
+          setShowCreateModal(false);
+          setNewUser({ name: "", email: "", password: "", phone: "" });
+        }}
+        onSubmit={handleCreateUser}
+        title="Create New User"
+        fields={userFields}
+        formData={newUser}
+        onChange={handleInputChange}
+      />
     </div>
   );
 };

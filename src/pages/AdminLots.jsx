@@ -1,50 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { useAdminData } from "../hooks/useAdminData";
+import { ROUTES } from "../utils/constants";
 
 const AdminLots = () => {
   const navigate = useNavigate();
-  const [lots, setLots] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: lots, loading, remove } = useAdminData("lots");
   const [filter, setFilter] = useState("all"); // all, reserved, available, inDelivery
-
-  useEffect(() => {
-    fetchLots();
-  }, []);
-
-  const fetchLots = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_URL}/admin/lots`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setLots(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching lots:", error);
-      toast.error("Error loading lots");
-      setLoading(false);
-    }
-  };
-
-  const deleteLot = async (lotId, lotName) => {
-    if (!window.confirm(`¿Eliminar el lote "${lotName}"?`)) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API_URL}/admin/lots/${lotId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Lot deleted successfully");
-      fetchLots();
-    } catch (error) {
-      console.error("Error deleting lot:", error);
-      toast.error("Error deleting lot");
-    }
-  };
 
   const filteredLots = lots.filter((lot) => {
     if (filter === "reserved") return lot.reserved && !lot.pickedUp;
@@ -71,7 +34,7 @@ const AdminLots = () => {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate("/admin/dashboard")}
+              onClick={() => navigate(ROUTES.ADMIN_DASHBOARD)}
               className="text-gray-400 hover:text-gray-600"
             >
               <span className="material-symbols-outlined">arrow_back</span>
@@ -191,7 +154,7 @@ const AdminLots = () => {
                               : "Available"}
                           </div>
                           <button
-                            onClick={() => deleteLot(lot._id, lot.name)}
+                            onClick={() => remove(lot._id, lot.name)}
                             className="text-red-500 hover:text-red-700 transition-colors p-1"
                             title="Delete lot"
                           >

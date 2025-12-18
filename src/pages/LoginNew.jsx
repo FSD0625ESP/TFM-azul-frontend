@@ -2,21 +2,74 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { buildApiUrl } from "../utils/apiConfig";
+import { ROUTES, USER_TYPES } from "../utils/constants";
+import { saveAuthToStorage } from "../utils/authHelpers";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  // Estado del formulario
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  /**
+   * Intenta hacer login como usuario (rider)
+   * @returns {Promise<boolean>} true si el login fue exitoso
+   */
+  const tryLoginAsUser = async () => {
+    try {
+      const response = await axios.post(buildApiUrl("/users/login"), {
+        email,
+        password,
+      });
+
+      const { token, user } = response.data;
+      saveAuthToStorage(token, user, USER_TYPES.RIDER);
+      console.log("User logged in:", user);
+      // Forzar recarga completa para que useAuth detecte la autenticación
+      window.location.href = ROUTES.MAIN_SCREEN;
+      return true;
+    } catch (error) {
+      console.error("User login failed:", error);
+      return false;
+    }
+  };
+
+  /**
+   * Intenta hacer login como tienda
+   * @returns {Promise<boolean>} true si el login fue exitoso
+   */
+  const tryLoginAsStore = async () => {
+    try {
+      const response = await axios.post(buildApiUrl("/stores/login"), {
+        email,
+        password,
+      });
+
+      const { token, store } = response.data;
+      saveAuthToStorage(token, store, USER_TYPES.STORE);
+      console.log("Store logged in:", store);
+      // Forzar recarga completa para que useAuth detecte la autenticación
+      window.location.href = ROUTES.STORE_PROFILE;
+      return true;
+    } catch (error) {
+      console.error("Store login failed:", error);
+      return false;
+    }
+  };
+
+  /**
+   * Maneja el proceso de login
+   */
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
+    // Validar campos
     if (!email || !password) {
       setError("Please fill in all fields");
       return;
@@ -25,42 +78,31 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/users/login`, {
-        email,
-        password,
-      });
+      // Intentar login como usuario primero
+      const userLoginSuccess = await tryLoginAsUser();
 
-      const { token, user } = response.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      console.log("User logged in:", user);
-      navigate("/mainscreen");
-    } catch (userError) {
-      try {
-        const storeResponse = await axios.post(`${API_URL}/stores/login`, {
-          email,
-          password,
-        });
+      // Si falla, intentar como tienda
+      if (!userLoginSuccess) {
+        const storeLoginSuccess = await tryLoginAsStore();
 
-        const { token, store } = storeResponse.data;
-        localStorage.setItem("token", token);
-        localStorage.setItem("store", JSON.stringify(store));
-        console.log("Store logged in:", store);
-        navigate("/store-profile");
-      } catch (storeError) {
-        console.error("Login failed:", storeError);
-        setError(
-          storeError.response?.data?.message ||
-            "Invalid email or password. Please try again."
-        );
+        // Si ambos fallan, mostrar error
+        if (!storeLoginSuccess) {
+          setError("Invalid email or password. Please try again.");
+        }
       }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  /**
+   * Navega a la página de recuperación de contraseña
+   */
   const handleForgotPassword = () => {
-    navigate("/forgot-password");
+    navigate(ROUTES.FORGOT_PASSWORD);
   };
 
   return (
@@ -160,7 +202,7 @@ const Login = () => {
           <p className="text-teal-700 text-sm font-normal m-0">
             Don't have an account?{" "}
             <button
-              onClick={() => navigate("/register")}
+              onClick={() => navigate(ROUTES.REGISTER)}
               className="font-bold text-emerald-500 bg-none border-none cursor-pointer no-underline text-sm hover:underline transition-all"
             >
               Sign up

@@ -2,85 +2,61 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import MapboxClient from "@mapbox/mapbox-sdk/services/geocoding";
 import RiderForm from "../components/RiderForm";
 import StoreForm from "../components/StoreForm";
 import ModalDialog from "../components/ModalDialog";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-
-const mapboxClient = MapboxClient({
-  accessToken: import.meta.env.VITE_MAPBOX_TOKEN,
-});
+import { buildApiUrl } from "../utils/apiConfig";
+import { VALIDATION_MESSAGES, USER_TYPES, ROUTES } from "../utils/constants";
+import { passwordsMatch } from "../utils/validation";
+import { uploadPhoto, loginAndGetToken } from "../utils/authHelpers";
+import { usePhotoUpload } from "../hooks/usePhotoUpload";
+import { useAddressSearch } from "../hooks/useAddressSearch";
 
 const Register = () => {
   const navigate = useNavigate();
-  const [userType, setUserType] = useState("rider");
+
+  // Estado general
+  const [userType, setUserType] = useState(USER_TYPES.RIDER);
   const [loading, setLoading] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
-  // Rider fields
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  // Campos comunes
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [photo, setPhoto] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState("");
 
-  // Store-specific fields
+  // Campos específicos de rider
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  // Campos específicos de store
   const [shopName, setShopName] = useState("");
   const [shopType, setShopType] = useState("");
-  const [address, setAddress] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
 
-  // Search addresses with Mapbox
-  const searchAddress = async (query) => {
-    if (query.length < 3) {
-      setSuggestions([]);
-      return;
-    }
+  // Custom hooks
+  const { photo, photoPreview, setPhoto, setPhotoPreview } = usePhotoUpload();
+  const {
+    address,
+    setAddress,
+    suggestions,
+    selectedCoordinates,
+    searchAddress,
+    handleSelectAddress,
+  } = useAddressSearch();
 
-    try {
-      const response = await mapboxClient
-        .forwardGeocode({
-          query,
-          autocomplete: true,
-          limit: 5,
-        })
-        .send();
-
-      setSuggestions(response.body.features);
-    } catch (err) {
-      console.error("Mapbox error:", err);
-      setSuggestions([]);
-    }
-  };
-
-  // Store selected coordinates
-  const [selectedCoordinates, setSelectedCoordinates] = useState(null);
-
-  // Handle address selection
-  const handleSelectAddress = (feature) => {
-    setAddress(feature.place_name);
-    setSelectedCoordinates({
-      lat: feature.center[1],
-      lng: feature.center[0],
-    });
-    setSuggestions([]);
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-
-    if (userType === "rider") {
+  /**
+   * Valida los campos requeridos según el tipo de usuario
+   * @returns {boolean} true si todos los campos son válidos
+   */
+  const validateFields = () => {
+    if (userType === USER_TYPES.RIDER) {
       if (!firstName || !lastName || !email || !password || !repeatPassword) {
-        toast.error("Please fill in all required fields");
-        return;
+        toast.error(VALIDATION_MESSAGES.REQUIRED_FIELDS);
+        return false;
       }
-    } else if (userType === "shop") {
+    } else if (userType === USER_TYPES.SHOP) {
       if (
         !shopName ||
         !shopType ||
@@ -90,109 +66,99 @@ const Register = () => {
         !password ||
         !repeatPassword
       ) {
-        toast.error("Please fill in all required fields");
-        return;
+        toast.error(VALIDATION_MESSAGES.REQUIRED_FIELDS);
+        return false;
       }
     }
 
-    if (password !== repeatPassword) {
-      toast.error("Passwords do not match");
+    if (!passwordsMatch(password, repeatPassword)) {
+      toast.error(VALIDATION_MESSAGES.PASSWORDS_MISMATCH);
+      return false;
+    }
+
+    return true;
+  };
+
+  /**
+   * Registra un rider en el sistema
+   */
+  const registerRider = async () => {
+    const registerUrl = buildApiUrl("/users/register");
+    console.log("Registering rider at:", registerUrl);
+
+    const response = await axios.post(registerUrl, {
+      name: `${firstName} ${lastName}`,
+      email,
+      password,
+      phone: phone ? parseInt(phone) : null,
+    });
+
+    const user = response.data.user;
+    console.log("User registered:", user);
+
+    // Si hay foto, subirla después del registro
+    if (photo) {
+      const token = await loginAndGetToken(email, password, "users");
+      console.log("Uploading rider photo...");
+      await uploadPhoto(user.id, "users", photo, token);
+    }
+
+    return user;
+  };
+
+  /**
+   * Registra una tienda en el sistema
+   */
+  const registerStore = async () => {
+    const registerUrl = buildApiUrl("/stores/register");
+    console.log("Registering store at:", registerUrl);
+
+    const response = await axios.post(registerUrl, {
+      name: shopName,
+      address,
+      type: shopType,
+      email,
+      password,
+      phone: phone ? parseInt(phone) : null,
+      coordinates: selectedCoordinates,
+    });
+
+    const store = response.data.store;
+    console.log("Store registered:", store);
+
+    // Si hay foto, subirla después del registro
+    if (photo) {
+      const token = await loginAndGetToken(email, password, "stores");
+      console.log("Uploading store photo...");
+      await uploadPhoto(store._id, "stores", photo, token);
+    }
+
+    return store;
+  };
+
+  /**
+   * Maneja el proceso de registro
+   */
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    // Validar campos
+    if (!validateFields()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      if (userType === "rider") {
-        // Registrar usuario (rider) en tabla Users
-        const registerUrl = `${API_URL}/users/register`;
-        console.log("Registering rider at:", registerUrl);
-
-        const userResponse = await axios.post(registerUrl, {
-          name: `${firstName} ${lastName}`,
-          email,
-          password,
-          phone: phone ? parseInt(phone) : null,
-        });
-
-        const user = userResponse.data.user;
-        console.log("User registered:", user);
-
-        // Si hay foto, subirla
-        if (photo) {
-          const formData = new FormData();
-          formData.append("photo", photo);
-
-          // Login para obtener token
-          const loginUrl = `${API_URL}/users/login`;
-          console.log("Logging in rider at:", loginUrl);
-
-          const loginResponse = await axios.post(loginUrl, {
-            email,
-            password,
-          });
-
-          const token = loginResponse.data.token;
-          const photoUrl = `${API_URL}/users/${user.id}/photo`;
-          console.log("Uploading photo at:", photoUrl);
-
-          await axios.patch(photoUrl, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-        }
-
-        toast.success("Registration successful!");
-        navigate("/login");
-      } else if (userType === "shop") {
-        // Registrar tienda (store) en tabla Stores
-        const registerUrl = `${API_URL}/stores/register`;
-        console.log("Registering store at:", registerUrl);
-
-        const storeResponse = await axios.post(registerUrl, {
-          name: shopName,
-          address,
-          type: shopType,
-          email,
-          password,
-          phone: phone ? parseInt(phone) : null,
-          coordinates: selectedCoordinates,
-        });
-
-        const store = storeResponse.data.store;
-        console.log("Store registered:", store);
-
-        // Si hay foto, subirla
-        if (photo) {
-          const formData = new FormData();
-          formData.append("photo", photo);
-
-          // Login para obtener token
-          const loginUrl = `${API_URL}/stores/login`;
-          console.log("Logging in store at:", loginUrl);
-
-          const loginResponse = await axios.post(loginUrl, {
-            email,
-            password,
-          });
-
-          const token = loginResponse.data.token;
-          const photoUrl = `${API_URL}/stores/${store._id}/photo`;
-          console.log("Uploading photo at:", photoUrl);
-
-          await axios.patch(photoUrl, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-        }
-
-        toast.success("Registration successful!");
-        navigate("/login");
+      // Registrar según el tipo de usuario
+      if (userType === USER_TYPES.RIDER) {
+        await registerRider();
+      } else if (userType === USER_TYPES.SHOP) {
+        await registerStore();
       }
+
+      toast.success(VALIDATION_MESSAGES.REGISTRATION_SUCCESS);
+      navigate(ROUTES.LOGIN);
     } catch (error) {
       console.error("Registration error:", error);
       console.error("Error response:", error.response);
@@ -223,7 +189,7 @@ const Register = () => {
 
         {/* Role Selector */}
         <div className="flex h-12 items-center justify-center rounded-xl bg-gray-200 p-1.5 mb-6 gap-1.5">
-          {["rider", "shop"].map((role) => (
+          {[USER_TYPES.RIDER, USER_TYPES.SHOP].map((role) => (
             <label
               key={role}
               onClick={() => setUserType(role)}
@@ -233,7 +199,7 @@ const Register = () => {
                   : "bg-transparent text-gray-500"
               }`}
             >
-              <span>{role === "rider" ? "Rider" : "Store"}</span>
+              <span>{role === USER_TYPES.RIDER ? "Rider" : "Store"}</span>
               <input
                 type="radio"
                 name="role-selector"
@@ -247,7 +213,7 @@ const Register = () => {
         </div>
 
         {/* Forms */}
-        {userType === "rider" && (
+        {userType === USER_TYPES.RIDER && (
           <RiderForm
             firstName={firstName}
             setFirstName={setFirstName}
@@ -270,7 +236,7 @@ const Register = () => {
           />
         )}
 
-        {userType === "shop" && (
+        {userType === USER_TYPES.SHOP && (
           <StoreForm
             shopName={shopName}
             setShopName={setShopName}
@@ -324,7 +290,7 @@ const Register = () => {
           <p className="text-sm text-gray-600 m-0">
             Already have an account?{" "}
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(ROUTES.LOGIN)}
               className="font-bold text-emerald-500 bg-none border-none cursor-pointer no-underline text-sm hover:underline"
             >
               Sign In

@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { buildApiUrl } from "../utils/apiConfig";
+import { VALIDATION_MESSAGES } from "../utils/constants";
+import { passwordsMatch } from "../utils/validation";
 
 const ChangePassword = () => {
   const navigate = useNavigate();
@@ -18,21 +19,25 @@ const ChangePassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validar campos requeridos
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Please fill in all fields");
+      toast.error(VALIDATION_MESSAGES.REQUIRED_FIELDS);
       return;
     }
 
+    // Validar longitud de contraseña
     if (newPassword.length < 6) {
       toast.error("New password must be at least 6 characters");
       return;
     }
 
-    if (newPassword !== confirmPassword) {
+    // Validar que las contraseñas coincidan
+    if (!passwordsMatch(newPassword, confirmPassword)) {
       toast.error("New passwords do not match");
       return;
     }
 
+    // Validar que la nueva contraseña sea diferente
     if (currentPassword === newPassword) {
       toast.error("New password must be different from current password");
       return;
@@ -43,12 +48,11 @@ const ChangePassword = () => {
     try {
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
-      const store = localStorage.getItem("store");
 
       // Determinar el endpoint según el tipo de usuario
       const endpoint = user
-        ? `${API_URL}/users/change-password`
-        : `${API_URL}/stores/change-password`;
+        ? buildApiUrl("/users/change-password")
+        : buildApiUrl("/stores/change-password");
 
       await axios.patch(
         endpoint,

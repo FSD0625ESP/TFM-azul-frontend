@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { AdminHeader, AdminStatsCard } from "../components/AdminComponents";
+import { buildApiUrl } from "../utils/apiConfig";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -31,13 +31,13 @@ const AdminDashboard = () => {
         if (!token) return;
 
         const [usersRes, storesRes, lotsRes] = await Promise.all([
-          axios.get(`${API_URL}/admin/users`, {
+          axios.get(buildApiUrl("/admin/users"), {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${API_URL}/admin/stores`, {
+          axios.get(buildApiUrl("/admin/stores"), {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${API_URL}/admin/lots`, {
+          axios.get(buildApiUrl("/admin/lots"), {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -68,8 +68,8 @@ const AdminDashboard = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading statistics...</p>
         </div>
       </div>
     );
@@ -77,105 +77,40 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-              <span className="material-symbols-outlined text-emerald-600">
-                admin_panel_settings
-              </span>
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-900">Admin Panel</h1>
-              <p className="text-xs text-gray-500">{admin?.email}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate("/change-password")}
-              className="flex items-center gap-1 bg-transparent border-none text-xs font-medium text-emerald-600 cursor-pointer hover:text-emerald-700 transition-colors px-2"
-              title="Change Password"
-            >
-              <span className="material-symbols-outlined text-base">
-                lock_reset
-              </span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-transparent border-none text-sm font-medium text-red-600 cursor-pointer hover:text-red-700 transition-colors"
-            >
-              <span className="material-symbols-outlined text-base">
-                logout
-              </span>
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      <AdminHeader
+        title="Admin Panel"
+        subtitle={admin?.email}
+        onLogout={handleLogout}
+      />
 
-      {/* Main Content */}
       <main className="p-6 max-w-7xl mx-auto">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Users Card */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                <span className="material-symbols-outlined text-blue-600 text-2xl">
-                  group
-                </span>
-              </div>
-              <span className="text-3xl font-bold text-gray-900">
-                {stats.users}
-              </span>
-            </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-1">
-              Total Users
-            </h3>
-            <p className="text-xs text-gray-400">Registered riders</p>
-          </div>
-
-          {/* Stores Card */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <span className="material-symbols-outlined text-emerald-600 text-2xl">
-                  storefront
-                </span>
-              </div>
-              <span className="text-3xl font-bold text-gray-900">
-                {stats.stores}
-              </span>
-            </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-1">
-              Total Stores
-            </h3>
-            <p className="text-xs text-gray-400">Partner stores</p>
-          </div>
-
-          {/* Lots Card */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                <span className="material-symbols-outlined text-purple-600 text-2xl">
-                  inventory_2
-                </span>
-              </div>
-              <span className="text-3xl font-bold text-gray-900">
-                {stats.lots}
-              </span>
-            </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-1">
-              Total Lots
-            </h3>
-            <p className="text-xs text-gray-400">Food lots created</p>
-          </div>
+          <AdminStatsCard
+            icon="group"
+            label="Total Users"
+            value={stats.users}
+            color="blue"
+            onClick={() => navigate("/admin/users")}
+          />
+          <AdminStatsCard
+            icon="storefront"
+            label="Total Stores"
+            value={stats.stores}
+            color="emerald"
+            onClick={() => navigate("/admin/stores")}
+          />
+          <AdminStatsCard
+            icon="inventory_2"
+            label="Total Lots"
+            value={stats.lots}
+            color="purple"
+            onClick={() => navigate("/admin/lots")}
+          />
         </div>
 
         {/* Management Sections */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Manage Users */}
           <button
             onClick={() => navigate("/admin/users")}
             className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer text-center"
@@ -193,7 +128,6 @@ const AdminDashboard = () => {
             </p>
           </button>
 
-          {/* Manage Stores */}
           <button
             onClick={() => navigate("/admin/stores")}
             className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer text-center"
@@ -211,7 +145,6 @@ const AdminDashboard = () => {
             </p>
           </button>
 
-          {/* View Lots */}
           <button
             onClick={() => navigate("/admin/lots")}
             className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer text-center"

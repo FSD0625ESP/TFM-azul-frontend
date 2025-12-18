@@ -4,7 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Home from "./pages/Home";
 import LoginNew from "./pages/LoginNew";
 import RegisterNew from "./pages/RegisterNew";
@@ -22,332 +22,95 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminStores from "./pages/AdminStores";
 import AdminLots from "./pages/AdminLots";
-
-// Protected Route for authenticated users only
-const ProtectedRoute = ({ element, isAuthenticated }) => {
-  return isAuthenticated ? element : <Navigate to="/" />;
-};
-
-// Protected Route for Riders only
-const RiderOnlyRoute = ({ element, userType }) => {
-  if (userType === "rider") {
-    return element;
-  } else if (userType === "store") {
-    // If a store tries to access a rider route, redirect to store profile
-    return <Navigate to="/store-profile" />;
-  }
-  return <Navigate to="/" />;
-};
-
-// Protected Route for Stores only
-const StoreOnlyRoute = ({ element, userType }) => {
-  if (userType === "store") {
-    return element;
-  } else if (userType === "rider") {
-    // If a rider tries to access a store route, redirect to rider profile
-    return <Navigate to="/rider-profile" />;
-  }
-  return <Navigate to="/" />;
-};
-
-// Public Route - redirects to appropriate dashboard if already authenticated
-const PublicRoute = ({ element, isAuthenticated, userType }) => {
-  if (!isAuthenticated) {
-    return element;
-  }
-  // Redirect to appropriate dashboard based on user type
-  if (userType === "admin") {
-    return <Navigate to="/admin/dashboard" />;
-  }
-  return userType === "rider" ? (
-    <Navigate to="/mainscreen" />
-  ) : (
-    <Navigate to="/store-profile" />
-  );
-};
-
-// Protected Route for Admin only
-const AdminOnlyRoute = ({ element, userType }) => {
-  if (userType === "admin") {
-    return element;
-  }
-  return <Navigate to="/" />;
-};
+import {
+  ProtectedRoute,
+  PublicRoute,
+  RiderOnlyRoute,
+  StoreOnlyRoute,
+  AdminOnlyRoute,
+} from "./components/ProtectedRoutes";
+import { useAuth } from "./hooks/useAuth";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userType, setUserType] = useState(null); // 'rider', 'store', or 'admin'
-  const [isLoading, setIsLoading] = useState(true);
-
-  const checkAuthStatus = () => {
-    const user = localStorage.getItem("user");
-    const store = localStorage.getItem("store");
-    const admin = localStorage.getItem("admin");
-    const token = localStorage.getItem("token");
-
-    if (token && admin) {
-      setIsAuthenticated(true);
-      setUserType("admin");
-    } else if (token && user) {
-      setIsAuthenticated(true);
-      setUserType("rider");
-    } else if (token && store) {
-      setIsAuthenticated(true);
-      setUserType("store");
-    } else {
-      setIsAuthenticated(false);
-      setUserType(null);
-    }
-  };
-
-  useEffect(() => {
-    // Check auth status on mount
-    checkAuthStatus();
-    setIsLoading(false);
-
-    // Listen for storage changes (logout or login from another tab/window)
-    const handleStorageChange = () => {
-      checkAuthStatus();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    // Also check auth status periodically in case localStorage changes from same tab
-    const interval = setInterval(() => {
-      checkAuthStatus();
-    }, 500);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
+  const { isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <Router>
       <Routes>
-        {/* Public Routes - accessible only without session */}
-        <Route
-          path="/"
-          element={
-            <PublicRoute
-              element={<Home />}
-              isAuthenticated={isAuthenticated}
-              userType={userType}
-            />
-          }
-        />
+        {/* Public Routes */}
+        <Route path="/" element={<PublicRoute element={<Home />} />} />
         <Route
           path="/register"
-          element={
-            <PublicRoute
-              element={<RegisterNew />}
-              isAuthenticated={isAuthenticated}
-              userType={userType}
-            />
-          }
+          element={<PublicRoute element={<RegisterNew />} />}
         />
-        <Route
-          path="/login"
-          element={
-            <PublicRoute
-              element={<LoginNew />}
-              isAuthenticated={isAuthenticated}
-              userType={userType}
-            />
-          }
-        />
+        <Route path="/login" element={<PublicRoute element={<LoginNew />} />} />
 
-        {/* Password Recovery Routes - accessible to everyone */}
+        {/* Password Recovery Routes */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Change Password - accessible only to authenticated users */}
+        {/* Change Password - authenticated users only */}
         <Route
           path="/change-password"
-          element={
-            <ProtectedRoute
-              element={<ChangePassword />}
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<ProtectedRoute element={<ChangePassword />} />}
         />
 
-        {/* Protected Routes - accessible only with session */}
         {/* Rider-only routes */}
         <Route
           path="/mainscreen"
-          element={
-            <ProtectedRoute
-              element={
-                <RiderOnlyRoute element={<MainScreen />} userType={userType} />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<RiderOnlyRoute element={<MainScreen />} />}
         />
         <Route
           path="/rider-profile"
-          element={
-            <ProtectedRoute
-              element={
-                <RiderOnlyRoute
-                  element={<RiderProfile />}
-                  userType={userType}
-                />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<RiderOnlyRoute element={<RiderProfile />} />}
         />
-
-        {/* Reserved Lots - Rider only route */}
         <Route
           path="/reserved-lots"
-          element={
-            <ProtectedRoute
-              element={
-                <RiderOnlyRoute
-                  element={<ReservedLotsPage />}
-                  userType={userType}
-                />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<RiderOnlyRoute element={<ReservedLotsPage />} />}
+        />
+        <Route
+          path="/store/:storeId/lots"
+          element={<RiderOnlyRoute element={<StoreLotsPage />} />}
         />
 
         {/* Store-only routes */}
         <Route
           path="/store-profile"
-          element={
-            <ProtectedRoute
-              element={
-                <StoreOnlyRoute
-                  element={<StoreProfile />}
-                  userType={userType}
-                />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<StoreOnlyRoute element={<StoreProfile />} />}
         />
         <Route
           path="/lots"
-          element={
-            <ProtectedRoute
-              element={
-                <StoreOnlyRoute element={<LotsPage />} userType={userType} />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
-        />
-
-        {/* Store Lots Page - accessible by riders to view lots from a specific store */}
-        <Route
-          path="/store/:storeId/lots"
-          element={
-            <ProtectedRoute
-              element={
-                <RiderOnlyRoute
-                  element={<StoreLotsPage />}
-                  userType={userType}
-                />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
-        />
-
-        {/* New route without id in URL - storeId passed via location.state or sessionStorage */}
-        <Route
-          path="/store/lots"
-          element={
-            <ProtectedRoute
-              element={
-                <RiderOnlyRoute
-                  element={<StoreLotsPage />}
-                  userType={userType}
-                />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
-        />
-
-        {/* New route without id in URL - storeId passed via location.state or sessionStorage */}
-        <Route
-          path="/store/lots"
-          element={
-            <ProtectedRoute
-              element={
-                <RiderOnlyRoute
-                  element={<StoreLotsPage />}
-                  userType={userType}
-                />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<StoreOnlyRoute element={<LotsPage />} />}
         />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
-
         <Route
           path="/admin/dashboard"
-          element={
-            <ProtectedRoute
-              element={
-                <AdminOnlyRoute
-                  element={<AdminDashboard />}
-                  userType={userType}
-                />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<AdminOnlyRoute element={<AdminDashboard />} />}
         />
-
         <Route
           path="/admin/users"
-          element={
-            <ProtectedRoute
-              element={
-                <AdminOnlyRoute element={<AdminUsers />} userType={userType} />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<AdminOnlyRoute element={<AdminUsers />} />}
         />
-
         <Route
           path="/admin/stores"
-          element={
-            <ProtectedRoute
-              element={
-                <AdminOnlyRoute element={<AdminStores />} userType={userType} />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<AdminOnlyRoute element={<AdminStores />} />}
         />
-
         <Route
           path="/admin/lots"
-          element={
-            <ProtectedRoute
-              element={
-                <AdminOnlyRoute element={<AdminLots />} userType={userType} />
-              }
-              isAuthenticated={isAuthenticated}
-            />
-          }
+          element={<AdminOnlyRoute element={<AdminLots />} />}
         />
 
         {/* Fallback - redirect to home */}

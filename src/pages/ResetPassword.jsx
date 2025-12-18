@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { buildApiUrl } from "../utils/apiConfig";
+import { ROUTES, VALIDATION_MESSAGES } from "../utils/constants";
+import { passwordsMatch } from "../utils/validation";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-  
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -19,25 +20,28 @@ const ResetPassword = () => {
   useEffect(() => {
     if (!token) {
       toast.error("Invalid or missing reset link");
-      navigate("/login", { replace: true });
+      navigate(ROUTES.LOGIN, { replace: true });
     }
   }, [token, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validar campos requeridos
     if (!password || !confirmPassword) {
-      toast.error("Please fill in all fields");
+      toast.error(VALIDATION_MESSAGES.REQUIRED_FIELDS);
       return;
     }
 
+    // Validar longitud de contraseña
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters");
       return;
     }
 
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+    // Validar que las contraseñas coincidan
+    if (!passwordsMatch(password, confirmPassword)) {
+      toast.error(VALIDATION_MESSAGES.PASSWORDS_MISMATCH);
       return;
     }
 
@@ -50,21 +54,19 @@ const ResetPassword = () => {
 
     try {
       // TODO: Tu compañero implementará este endpoint
-      // await axios.post(`${API_URL}/auth/reset-password`, { 
-      //   token, 
-      //   password 
-      // });
-      
+      // const resetUrl = buildApiUrl("/auth/reset-password");
+      // await axios.post(resetUrl, { token, password });
+
       // Simulación por ahora
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       toast.success("Password reset successfully!");
-      navigate("/login");
+      navigate(ROUTES.LOGIN);
     } catch (error) {
       console.error("Error:", error);
       toast.error(
-        error.response?.data?.message || 
-        "Error resetting password. The link may have expired."
+        error.response?.data?.message ||
+          "Error resetting password. The link may have expired."
       );
     } finally {
       setLoading(false);

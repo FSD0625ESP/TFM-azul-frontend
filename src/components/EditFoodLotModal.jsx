@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { buildApiUrl } from "../utils/apiConfig";
 
 const EditFoodLotModal = ({ isOpen, onClose, lot, onSuccess }) => {
   const [name, setName] = useState("");
@@ -61,7 +60,7 @@ const EditFoodLotModal = ({ isOpen, onClose, lot, onSuccess }) => {
         parseInt(inputMinutes)
       );
 
-      const response = await axios.put(`${API_URL}/lots/${lot._id}`, {
+      const response = await axios.put(buildApiUrl(`/lots/${lot._id}`), {
         name,
         description,
         pickupDeadline: pickupDate.toISOString(),
