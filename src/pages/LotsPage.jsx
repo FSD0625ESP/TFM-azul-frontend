@@ -45,7 +45,7 @@ const LotsPage = () => {
       const storeLots = response.data.filter((lot) => {
         const lotShopId = lot.shop?._id || lot.shop?.id;
         console.log(
-          `Comparando lot.shop: ${lotShopId} con store._id: ${storeId}`
+          `Comparando lot.shop: ${lotShopId} con store._id: ${storeId}`,
         );
         return lotShopId === storeId;
       });
@@ -88,16 +88,6 @@ const LotsPage = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Food Lots</h1>
           <div className="flex gap-2 items-center">
-            <button
-              onClick={() => {
-                // QR functionality will be implemented in the future
-              }}
-              className="flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-2 border-none text-sm font-bold text-white cursor-pointer shadow-lg hover:bg-blue-600 transition-colors h-10"
-              title="Generate Store QR Code"
-            >
-              <span className="material-symbols-outlined">qr_code_2</span>
-              <span className="leading-none">QR</span>
-            </button>
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 border-none text-sm font-bold text-white cursor-pointer shadow-lg hover:bg-emerald-600 transition-colors h-10"
@@ -217,7 +207,7 @@ const LotsPage = () => {
                         const hours = String(date.getHours()).padStart(2, "0");
                         const minutes = String(date.getMinutes()).padStart(
                           2,
-                          "0"
+                          "0",
                         );
                         return `${hours}:${minutes}`;
                       })()}
