@@ -1,2 +1,57 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+/* Estilos globales para app mobile-first con soporte desktop */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+}
+
+/* Contenedor responsive adaptativo */
+#root {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* En desktop, limitar ancho para mejor experiencia */
+@media (min-width: 1024px) {
+  #root {
+    max-width: 600px;
+  }
+}
+
+/* Ajustes para desktop */
+@media (min-width: 768px) {
+  /* Hacer que el scroll sea más natural en desktop */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Mejorar la apariencia de los scrollbars en desktop */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f9fafb;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+}
