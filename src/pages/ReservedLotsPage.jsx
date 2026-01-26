@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import ChatBox from "../components/ChatBox";
 import { WSContext } from "../context/WebSocketContext";
+import { BottomNav } from "../components/BottomNav";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
@@ -109,7 +110,7 @@ const ReservedLotsPage = () => {
               timeout: 10000,
               maximumAge: 0,
               ...options,
-            }
+            },
           );
         });
       } catch (err) {
@@ -135,7 +136,7 @@ const ReservedLotsPage = () => {
       if (!position) {
         if (showToasts)
           toast.error(
-            "No se pudo obtener la ubicación. Activa el GPS y permite permisos."
+            "No se pudo obtener la ubicación. Activa el GPS y permite permisos.",
           );
         // marcar como desconocido (no permitido)
         setDistanceStates((prev) => ({ ...prev, [lotId]: { allowed: false } }));
@@ -147,7 +148,7 @@ const ReservedLotsPage = () => {
       const res = await axios.post(
         `${API_URL}/lots/${lotId}/check-distance`,
         { riderLat: latitude, riderLng: longitude },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const { allowed, distance } = res.data;
@@ -158,7 +159,7 @@ const ReservedLotsPage = () => {
 
       if (!allowed && showToasts) {
         toast.info(
-          `Estás a ${(distance * 1000).toFixed(0)}m del punto más cercano.`
+          `Estás a ${(distance * 1000).toFixed(0)}m del punto más cercano.`,
         );
       }
     } catch (err) {
@@ -186,7 +187,7 @@ const ReservedLotsPage = () => {
       await axios.post(
         `${API_URL}/lots/${lotId}/unreserve`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       toast.success("Lote desreservado correctamente");
@@ -195,7 +196,7 @@ const ReservedLotsPage = () => {
       console.error("Error desreservando lote:", err);
       toast.error(
         "Error desreservando lote: " +
-          (err?.response?.data?.message || err.message)
+          (err?.response?.data?.message || err.message),
       );
     }
   };
@@ -227,7 +228,7 @@ const ReservedLotsPage = () => {
       });
       if (!position) {
         toast.error(
-          "No se pudo obtener tu ubicación. Verifica permisos y GPS."
+          "No se pudo obtener tu ubicación. Verifica permisos y GPS.",
         );
         setDeliveryStates((prev) => ({ ...prev, [lotId]: "error" }));
         return;
@@ -239,7 +240,7 @@ const ReservedLotsPage = () => {
       const res = await axios.post(
         `${API_URL}/lots/${lotId}/deliver`,
         { riderLat: latitude, riderLng: longitude },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       toast.success("¡Lote entregado correctamente!");
@@ -316,10 +317,10 @@ const ReservedLotsPage = () => {
         {reservedLots.map((lot) => {
           const pickupTime = new Date(lot.pickupDeadline).toLocaleTimeString(
             "es-ES",
-            { hour: "2-digit", minute: "2-digit" }
+            { hour: "2-digit", minute: "2-digit" },
           );
           const pickupDate = new Date(lot.pickupDeadline).toLocaleDateString(
-            "es-ES"
+            "es-ES",
           );
           const storeName = lot.shop?.name || "Unknown Store";
           const storeType = lot.shop?.type || "Store";
@@ -420,10 +421,10 @@ const ReservedLotsPage = () => {
                           deliveryState === "loading"
                             ? "bg-yellow-500 text-white"
                             : deliveryState === "success"
-                            ? "bg-green-500 text-white"
-                            : deliveryState === "error"
-                            ? "bg-red-500 text-white"
-                            : "bg-blue-500 text-white hover:bg-blue-600"
+                              ? "bg-green-500 text-white"
+                              : deliveryState === "error"
+                                ? "bg-red-500 text-white"
+                                : "bg-blue-500 text-white hover:bg-blue-600"
                         }`}
                         disabled={deliveryState === "loading"}
                       >
@@ -457,7 +458,7 @@ const ReservedLotsPage = () => {
                         <div className="text-xs text-red-600">
                           {distanceInfo && distanceInfo.distance !== undefined
                             ? `A ${(distanceInfo.distance * 1000).toFixed(
-                                0
+                                0,
                               )} m — Get within 50 meters of the point.`
                             : "Come to the location to be able to deliver."}
                         </div>
@@ -493,31 +494,8 @@ const ReservedLotsPage = () => {
         </div>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 flex justify-around border-t border-gray-200 bg-white/80 backdrop-blur-sm p-2 gap-2">
-        <a
-          href="/mainscreen"
-          className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg p-2 no-underline text-gray-400 text-xs hover:text-gray-600 transition-colors"
-        >
-          <span className="material-symbols-outlined">map</span>
-          <span>Map</span>
-        </a>
-
-        <a
-          href="#"
-          className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg bg-emerald-50 p-2 no-underline text-emerald-500 text-xs font-bold"
-        >
-          <span className="material-symbols-outlined">bookmark</span>
-          <span>Reserved</span>
-        </a>
-
-        <a
-          href="/rider-profile"
-          className="flex flex-col items-center justify-center gap-1 flex-1 rounded-lg p-2 no-underline text-gray-400 text-xs hover:text-gray-600 transition-colors"
-        >
-          <span className="material-symbols-outlined">person</span>
-          <span>Profile</span>
-        </a>
-      </nav>
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ProfileAvatar } from "../components/ProfileAvatar";
 import { InfoCard } from "../components/InfoCard";
-import { BottomNav } from "../components/BottomNav";
+import { StoreBottomNav } from "../components/BottomNav";
 import { ROUTES } from "../utils/constants";
 import { clearAuthStorage } from "../utils/authHelpers";
 import {
@@ -59,7 +59,7 @@ const StoreProfile = () => {
         storeId,
         "stores",
         file,
-        token
+        token,
       );
 
       // Actualizar estado y localStorage
@@ -82,12 +82,6 @@ const StoreProfile = () => {
   if (!store) {
     return null;
   }
-
-  // Configuración de navegación inferior
-  const navItems = [
-    { href: "/lots", icon: "list_alt", label: "Lots" },
-    { href: "#", icon: "person", label: "Profile" },
-  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -182,7 +176,7 @@ const StoreProfile = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav items={navItems} activeIndex={1} />
+      <StoreBottomNav />
     </div>
   );
 };

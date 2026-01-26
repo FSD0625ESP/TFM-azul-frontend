@@ -4,7 +4,7 @@ import AddFoodLotModal from "../components/AddFoodLotModal";
 import EditFoodLotModal from "../components/EditFoodLotModal";
 import ChatBox from "../components/ChatBox";
 import { LotCard } from "../components/LotCard";
-import { BottomNav } from "../components/BottomNav";
+import { StoreBottomNav } from "../components/BottomNav";
 import { useLots } from "../hooks/useLots";
 
 const LotsPage = () => {
@@ -87,21 +87,7 @@ const LotsPage = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav
-        items={[
-          {
-            href: "/lots",
-            icon: "list_alt",
-            label: "Lots",
-            active: true,
-          },
-          {
-            href: "/store-profile",
-            icon: "person",
-            label: "Profile",
-          },
-        ]}
-      />
+      <StoreBottomNav />
 
       {/* Modals */}
       <AddFoodLotModal

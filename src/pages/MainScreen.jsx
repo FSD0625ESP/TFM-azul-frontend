@@ -7,6 +7,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import MAPBOX_CONFIG from "../config/mapboxConfig";
 import deliveryIcon from "../assets/delivery.png";
+import { BottomNav } from "../components/BottomNav";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:4000/api";
@@ -51,7 +52,7 @@ export default function MainScreen() {
             navigator.geolocation.getCurrentPosition(
               (pos) => resolve(pos),
               (err) => reject(err),
-              { enableHighAccuracy: true, timeout: 30000 }
+              { enableHighAccuracy: true, timeout: 30000 },
             );
           } catch (err) {
             reject(err);
@@ -65,7 +66,7 @@ export default function MainScreen() {
         console.warn("Geolocation getCurrentPosition failed:", err);
         if (err && err.code === 1) {
           toast.error(
-            "Permiso de ubicación denegado. Activa los permisos de ubicación para la app y vuelve a intentarlo."
+            "Permiso de ubicación denegado. Activa los permisos de ubicación para la app y vuelve a intentarlo.",
           );
           return;
         }
@@ -77,7 +78,7 @@ export default function MainScreen() {
               position = { coords: { latitude: ll.lat, longitude: ll.lng } };
             } else {
               toast.error(
-                "No se pudo obtener la ubicación (timeout) y no hay posición previa."
+                "No se pudo obtener la ubicación (timeout) y no hay posición previa.",
               );
               return;
             }
@@ -87,7 +88,8 @@ export default function MainScreen() {
           }
         } else {
           toast.error(
-            "Error al obtener la ubicación: " + (err.message || "Unknown error")
+            "Error al obtener la ubicación: " +
+              (err.message || "Unknown error"),
           );
           return;
         }
@@ -102,7 +104,7 @@ export default function MainScreen() {
 
       const response = await axios.post(
         `${API_BASE_URL}/createMark/createMark/${userId}`,
-        payload
+        payload,
       );
 
       if (response?.data?.mark) {
@@ -178,9 +180,7 @@ export default function MainScreen() {
 
     (async () => {
       try {
-        await import(
-          "https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-directions@4.1.1/dist/mapbox-gl-directions.js"
-        );
+        await import("https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-directions@4.1.1/dist/mapbox-gl-directions.js");
         const link = document.createElement("link");
         link.rel = "stylesheet";
         link.href =
@@ -231,7 +231,7 @@ export default function MainScreen() {
             }
           },
           (err) => console.warn("Geo error:", err),
-          { enableHighAccuracy: true }
+          { enableHighAccuracy: true },
         );
       }
     });
@@ -267,10 +267,10 @@ export default function MainScreen() {
           const shopId = mark.shop?._id
             ? String(mark.shop._id)
             : mark.shop
-            ? String(mark.shop)
-            : mark.user?._id
-            ? String(mark.user._id)
-            : String(mark.user);
+              ? String(mark.shop)
+              : mark.user?._id
+                ? String(mark.user._id)
+                : String(mark.user);
           const count = lotCounts[shopId] || 0;
           if (count === 0) return;
 
@@ -321,7 +321,7 @@ export default function MainScreen() {
   }
 
   return (
-    <div className="flex flex-col w-full h-dvh bg-white relative overflow-hidden">
+    <div className="flex flex-col w-full h-dvh bg-white relative overflow-hidden pb-16">
       {/* Contenedor del mapa */}
       <div ref={mapContainerRef} className="flex-1 w-full h-full relative" />
 
@@ -336,147 +336,134 @@ export default function MainScreen() {
         </button>
       </div>
 
-      {/* Bottom Navigation */}
-      <footer className="fixed bottom-0 left-0 right-0 flex justify-around items-center h-16 bg-white border-t border-gray-200 z-1000">
-        {/* Map Tab */}
-        <button
-          onClick={() => setActiveTab("map")}
-          className={`flex-1 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors ${
-            activeTab === "map" ? "text-emerald-500" : "text-gray-400"
-          }`}
-        >
-          <span className="material-symbols-outlined text-2xl">map</span>
-          <span className="text-xs font-medium">Map</span>
-        </button>
+      {/* Lista lateral con nombres de tiendas y lotes */}
+      <div className="fixed top-5 left-4 z-50 max-h-[40vh] w-45 overflow-y-auto bg-white/90 rounded-lg shadow-lg p-2">
+        {/* Puntos de recogida (tiendas) */}
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold mb-2 text-black">
+            Collection Points
+          </h3>
 
-        {/* Lista lateral con nombres de tiendas y lotes */}
-        <div className="fixed top-5 left-4 z-50 max-h-[40vh] w-45 overflow-y-auto bg-white/90 rounded-lg shadow-lg p-2">
-          {/* Puntos de recogida (tiendas) */}
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold mb-2 text-black">
-              Collection Points
-            </h3>
+          <ul>
+            {marks
+              .filter((mark) => mark.type_mark === "shop")
+              .map((mark, idx) => {
+                const lat = parseFloat(mark.lat);
+                const long = parseFloat(mark.long);
+                if (isNaN(lat) || isNaN(long)) return null;
 
-            <ul>
-              {marks
-                .filter((mark) => mark.type_mark === "shop")
-                .map((mark, idx) => {
-                  const lat = parseFloat(mark.lat);
-                  const long = parseFloat(mark.long);
-                  if (isNaN(lat) || isNaN(long)) return null;
-
-                  const shopId =
-                    mark.shop && mark.shop._id
-                      ? String(mark.shop._id)
-                      : mark.shop
+                const shopId =
+                  mark.shop && mark.shop._id
+                    ? String(mark.shop._id)
+                    : mark.shop
                       ? String(mark.shop)
                       : mark.user && mark.user._id
-                      ? String(mark.user._id)
-                      : String(mark.user);
+                        ? String(mark.user._id)
+                        : String(mark.user);
 
-                  const lotCount = lotCounts[shopId] || 0;
-                  if (lotCount === 0) return null;
+                const lotCount = lotCounts[shopId] || 0;
+                if (lotCount === 0) return null;
 
-                  const shopName = mark.name || mark.shop?.name || "Shop";
+                const shopName = mark.name || mark.shop?.name || "Shop";
 
-                  let distanceKm = null;
-                  if (userLocation) {
-                    distanceKm = getDistanceFromLatLonInKm(
-                      userLocation.lat,
-                      userLocation.lng,
-                      lat,
-                      long
-                    ).toFixed(1);
-                  }
+                let distanceKm = null;
+                if (userLocation) {
+                  distanceKm = getDistanceFromLatLonInKm(
+                    userLocation.lat,
+                    userLocation.lng,
+                    lat,
+                    long,
+                  ).toFixed(1);
+                }
 
-                  const isActive =
-                    activeDestination &&
-                    activeDestination.lat === lat &&
-                    activeDestination.long === long;
+                const isActive =
+                  activeDestination &&
+                  activeDestination.lat === lat &&
+                  activeDestination.long === long;
 
-                  return (
-                    <li
-                      key={idx}
-                      className={`p-2 mb-1 rounded border cursor-pointer flex justify-between items-center transition-all duration-300
+                return (
+                  <li
+                    key={idx}
+                    className={`p-2 mb-1 rounded border cursor-pointer flex justify-between items-center transition-all duration-300
     ${
       isActive
         ? "bg-red-600 text-white border-red-700 shadow-md"
         : "bg-white text-black border-gray-300 hover:bg-red-800 hover:text-white"
     }
   `}
-                      onClick={() => {
-                        if (
-                          !mapRef.current ||
-                          !mapRef.current.directions ||
-                          !userLocation
-                        )
-                          return;
+                    onClick={() => {
+                      if (
+                        !mapRef.current ||
+                        !mapRef.current.directions ||
+                        !userLocation
+                      )
+                        return;
 
-                        const dest = { lat, long };
+                      const dest = { lat, long };
 
-                        // Si clicas estando activo -> desactiva
-                        if (isActive) {
-                          mapRef.current.directions.removeRoutes();
-                          setActiveDestination(null);
-                          return;
-                        }
+                      // Si clicas estando activo -> desactiva
+                      if (isActive) {
+                        mapRef.current.directions.removeRoutes();
+                        setActiveDestination(null);
+                        return;
+                      }
 
-                        // Activar nueva ruta
-                        mapRef.current.directions.setOrigin([
-                          userLocation.lng,
-                          userLocation.lat,
-                        ]);
-                        mapRef.current.directions.setDestination([long, lat]);
+                      // Activar nueva ruta
+                      mapRef.current.directions.setOrigin([
+                        userLocation.lng,
+                        userLocation.lat,
+                      ]);
+                      mapRef.current.directions.setDestination([long, lat]);
 
-                        mapRef.current.flyTo({
-                          center: [long, lat],
-                          zoom: 16,
-                        });
+                      mapRef.current.flyTo({
+                        center: [long, lat],
+                        zoom: 16,
+                      });
 
-                        setActiveDestination(dest);
-                      }}
-                    >
-                      <span>
-                        🏪 {shopName}
-                        <br />
-                        Lots: {lotCount}
-                        <br />
-                        Distance:{" "}
-                        {distanceKm ? `${distanceKm} km` : "Desconocida"}
-                      </span>
-                    </li>
-                  );
-                })}
-            </ul>
-          </div>
+                      setActiveDestination(dest);
+                    }}
+                  >
+                    <span>
+                      🏪 {shopName}
+                      <br />
+                      Lots: {lotCount}
+                      <br />
+                      Distance:{" "}
+                      {distanceKm ? `${distanceKm} km` : "Desconocida"}
+                    </span>
+                  </li>
+                );
+              })}
+          </ul>
+        </div>
 
-          {/* Puntos de entrega (homeless) */}
-          <div>
-            <h3 className="text-sm font-semibold mb-2 text-black">
-              Delivery Points
-            </h3>
-            <ul>
-              {marks
-                .filter((mark) => mark.type_mark === "homeless")
-                .map((mark, idx) => {
-                  const lat = parseFloat(mark.lat);
-                  const long = parseFloat(mark.long);
-                  if (isNaN(lat) || isNaN(long)) return null;
+        {/* Puntos de entrega (homeless) */}
+        <div>
+          <h3 className="text-sm font-semibold mb-2 text-black">
+            Delivery Points
+          </h3>
+          <ul>
+            {marks
+              .filter((mark) => mark.type_mark === "homeless")
+              .map((mark, idx) => {
+                const lat = parseFloat(mark.lat);
+                const long = parseFloat(mark.long);
+                if (isNaN(lat) || isNaN(long)) return null;
 
-                  let distanceKm = null;
-                  if (userLocation) {
-                    distanceKm = getDistanceFromLatLonInKm(
-                      userLocation.lat,
-                      userLocation.lng,
-                      lat,
-                      long
-                    ).toFixed(1);
-                  }
+                let distanceKm = null;
+                if (userLocation) {
+                  distanceKm = getDistanceFromLatLonInKm(
+                    userLocation.lat,
+                    userLocation.lng,
+                    lat,
+                    long,
+                  ).toFixed(1);
+                }
 
-                  return (
-                    <li
-                      key={idx}
-                      className={`p-2 mb-1 rounded border cursor-pointer flex justify-between items-center transition-all duration-300
+                return (
+                  <li
+                    key={idx}
+                    className={`p-2 mb-1 rounded border cursor-pointer flex justify-between items-center transition-all duration-300
               ${
                 activeDestination &&
                 activeDestination.lat === lat &&
@@ -485,80 +472,54 @@ export default function MainScreen() {
                   : "bg-white text-black border-gray-300 hover:bg-red-800 hover:text-white" // NORMAL
               }
             `}
-                      onClick={() => {
-                        if (
-                          !mapRef.current ||
-                          !mapRef.current.directions ||
-                          !userLocation
-                        )
-                          return;
+                    onClick={() => {
+                      if (
+                        !mapRef.current ||
+                        !mapRef.current.directions ||
+                        !userLocation
+                      )
+                        return;
 
-                        const dest = { lat, long };
+                      const dest = { lat, long };
 
-                        // Si haces click en el mismo → DESACTIVA
-                        if (
-                          activeDestination &&
-                          activeDestination.lat === lat &&
-                          activeDestination.long === long
-                        ) {
-                          mapRef.current.directions.removeRoutes();
-                          setActiveDestination(null);
-                          return;
-                        }
+                      // Si haces click en el mismo → DESACTIVA
+                      if (
+                        activeDestination &&
+                        activeDestination.lat === lat &&
+                        activeDestination.long === long
+                      ) {
+                        mapRef.current.directions.removeRoutes();
+                        setActiveDestination(null);
+                        return;
+                      }
 
-                        // Activar ruta
-                        mapRef.current.directions.setOrigin([
-                          userLocation.lng,
-                          userLocation.lat,
-                        ]);
-                        mapRef.current.directions.setDestination([long, lat]);
+                      // Activar ruta
+                      mapRef.current.directions.setOrigin([
+                        userLocation.lng,
+                        userLocation.lat,
+                      ]);
+                      mapRef.current.directions.setDestination([long, lat]);
 
-                        mapRef.current.flyTo({
-                          center: [long, lat],
-                          zoom: 16,
-                        });
+                      mapRef.current.flyTo({
+                        center: [long, lat],
+                        zoom: 16,
+                      });
 
-                        setActiveDestination(dest);
-                      }}
-                    >
-                      <span>
-                        📍 Delivery {distanceKm ? `- ${distanceKm} km` : ""}
-                      </span>
-                    </li>
-                  );
-                })}
-            </ul>
-          </div>
+                      setActiveDestination(dest);
+                    }}
+                  >
+                    <span>
+                      📍 Delivery {distanceKm ? `- ${distanceKm} km` : ""}
+                    </span>
+                  </li>
+                );
+              })}
+          </ul>
         </div>
+      </div>
 
-        {/* Reserved Lots Tab */}
-        <button
-          onClick={() => {
-            setActiveTab("reserved");
-            navigate("/reserved-lots");
-          }}
-          className={`flex-1 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors ${
-            activeTab === "reserved" ? "text-emerald-500" : "text-gray-400"
-          }`}
-        >
-          <span className="material-symbols-outlined text-2xl">bookmark</span>
-          <span className="text-xs font-medium">Reserved</span>
-        </button>
-
-        {/* Profile Tab */}
-        <button
-          onClick={() => {
-            setActiveTab("profile");
-            navigate("/rider-profile");
-          }}
-          className={`flex-1 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors ${
-            activeTab === "profile" ? "text-emerald-500" : "text-gray-400"
-          }`}
-        >
-          <span className="material-symbols-outlined text-2xl">person</span>
-          <span className="text-xs font-medium">Profile</span>
-        </button>
-      </footer>
+      {/* Bottom Navigation */}
+      <BottomNav />
 
       <style>
         {`

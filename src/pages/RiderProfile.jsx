@@ -136,7 +136,7 @@ const RiderProfile = () => {
         userId,
         "users",
         file,
-        token
+        token,
       );
 
       // Actualizar estado y localStorage
@@ -256,7 +256,7 @@ const RiderProfile = () => {
       )}
 
       {/* Bottom Navigation */}
-      <BottomNav items={navItems} activeIndex={2} />
+      <BottomNav />
     </div>
   );
 };
