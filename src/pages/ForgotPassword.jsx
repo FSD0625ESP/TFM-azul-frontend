@@ -22,18 +22,18 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      // TODO: Tu compañero implementará este endpoint
-      // await axios.post(`${API_URL}/auth/forgot-password`, { email });
-
-      // Simulación por ahora
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await axios.post(buildApiUrl("/auth/forgot-password"), {
+        email,
+      });
 
       setEmailSent(true);
-      toast.success("Recovery email sent! Check your inbox.");
+      toast.success(
+        response.data.message || "Recovery email sent! Check your inbox.",
+      );
     } catch (error) {
       console.error("Error:", error);
       toast.error(
-        error.response?.data?.message || "Error sending recovery email"
+        error.response?.data?.message || "Error sending recovery email",
       );
     } finally {
       setLoading(false);

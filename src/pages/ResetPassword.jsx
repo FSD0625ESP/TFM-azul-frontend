@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import axios from "axios";
 import { buildApiUrl } from "../utils/apiConfig";
 import { ROUTES, VALIDATION_MESSAGES } from "../utils/constants";
 import { passwordsMatch } from "../utils/validation";
@@ -53,20 +54,18 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      // TODO: Tu compañero implementará este endpoint
-      // const resetUrl = buildApiUrl("/auth/reset-password");
-      // await axios.post(resetUrl, { token, password });
+      const response = await axios.post(buildApiUrl("/auth/reset-password"), {
+        token,
+        password,
+      });
 
-      // Simulación por ahora
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      toast.success("Password reset successfully!");
+      toast.success(response.data.message || "Password reset successfully!");
       navigate(ROUTES.LOGIN);
     } catch (error) {
       console.error("Error:", error);
       toast.error(
         error.response?.data?.message ||
-          "Error resetting password. The link may have expired."
+          "Error resetting password. The link may have expired.",
       );
     } finally {
       setLoading(false);
