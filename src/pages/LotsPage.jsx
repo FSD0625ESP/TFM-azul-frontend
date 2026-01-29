@@ -43,13 +43,15 @@ const LotsPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f6f8f7]">
-      <main className="flex-1 p-4 flex flex-col pb-20 pt-4">
+      <main className="flex-1 p-4 md:p-6 lg:p-8 flex flex-col pb-20 pt-4 max-w-7xl mx-auto w-full">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Food Lots</h1>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
+            Food Lots
+          </h1>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 border-none text-sm font-bold text-white cursor-pointer shadow-lg hover:bg-emerald-600 transition-colors h-10"
+            className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 md:px-6 py-2 md:py-3 border-none text-sm md:text-base font-bold text-white cursor-pointer shadow-lg hover:bg-emerald-600 transition-colors h-10 md:h-12"
           >
             <span className="material-symbols-outlined">add_circle</span>
             <span className="leading-none">Add Lot</span>
@@ -68,7 +70,7 @@ const LotsPage = () => {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="grid-responsive">
             {lots.map((lot) => (
               <LotCard
                 key={lot._id}

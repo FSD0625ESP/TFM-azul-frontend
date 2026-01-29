@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-/* Estilos globales para app mobile-first con soporte desktop */
+/* Reset básico */
 * {
   box-sizing: border-box;
 }
@@ -14,44 +14,89 @@ body {
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #ffffff;
+  background-color: #f6f8f7;
 }
 
-/* Contenedor responsive adaptativo */
 #root {
-  max-width: 100%;
-  margin: 0 auto;
+  width: 100%;
+  min-height: 100vh;
 }
 
-/* En desktop, limitar ancho para mejor experiencia */
-@media (min-width: 1024px) {
-  #root {
-    max-width: 600px;
-  }
-}
-
-/* Ajustes para desktop */
+/* Scroll personalizado para desktop */
 @media (min-width: 768px) {
-  /* Hacer que el scroll sea más natural en desktop */
   html {
     scroll-behavior: smooth;
   }
 
-  /* Mejorar la apariencia de los scrollbars en desktop */
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #f9fafb;
+    background: #f1f1f1;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 4px;
+    background: #10b981;
+    border-radius: 5px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    background: #059669;
+  }
+}
+
+/* Utilidades responsive globales */
+.container-responsive {
+  width: 100%;
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .container-responsive {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 3rem;
+  }
+}
+
+/* Grid responsive para listas */
+.grid-responsive {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Cards adaptativas */
+@media (min-width: 768px) {
+  .card-hover {
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
   }
 }
