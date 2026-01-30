@@ -199,7 +199,8 @@ const Register = () => {
       console.error("Registration error:", error);
       console.error("Error response:", error.response);
       toast.error(
-        error.response?.data?.message || "An error occurred during registration"
+        error.response?.data?.message ||
+          "An error occurred during registration",
       );
     } finally {
       setLoading(false);
