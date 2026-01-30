@@ -20,6 +20,8 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
 
   // Campos comunes
   const [email, setEmail] = useState("");
@@ -163,7 +165,8 @@ const Register = () => {
       console.error("Registration error:", error);
       console.error("Error response:", error.response);
       toast.error(
-        error.response?.data?.message || "An error occurred during registration"
+        error.response?.data?.message ||
+          "An error occurred during registration",
       );
     } finally {
       setLoading(false);
@@ -225,8 +228,12 @@ const Register = () => {
             setPhone={setPhone}
             password={password}
             setPassword={setPassword}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
             repeatPassword={repeatPassword}
             setRepeatPassword={setRepeatPassword}
+            showRepeatPassword={showRepeatPassword}
+            setShowRepeatPassword={setShowRepeatPassword}
             photo={photo}
             setPhoto={setPhoto}
             photoPreview={photoPreview}
@@ -253,8 +260,12 @@ const Register = () => {
             setPhone={setPhone}
             password={password}
             setPassword={setPassword}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
             repeatPassword={repeatPassword}
             setRepeatPassword={setRepeatPassword}
+            showRepeatPassword={showRepeatPassword}
+            setShowRepeatPassword={setShowRepeatPassword}
             photo={photo}
             setPhoto={setPhoto}
             photoPreview={photoPreview}
