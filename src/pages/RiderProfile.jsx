@@ -52,11 +52,11 @@ const RiderProfile = () => {
 
       updateTheme(newTheme);
       toast.success(
-        `Tema cambiado a ${newTheme === "dark" ? "oscuro" : "claro"}`,
+        `Theme changed to ${newTheme === "dark" ? "dark" : "light"}`,
       );
     } catch (error) {
       console.error("Error updating theme:", error);
-      toast.error("Error al cambiar el tema");
+      toast.error("Error changing theme");
     }
   };
 
