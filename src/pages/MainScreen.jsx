@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import MAPBOX_CONFIG from "../config/mapboxConfig";
 import deliveryIcon from "../assets/delivery.png";
 import { BottomNav } from "../components/BottomNav";
+import { useTheme } from "../context/ThemeContext";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:4000/api";
@@ -21,6 +22,7 @@ const getApiUrl = (endpoint) => {
 };
 
 export default function MainScreen() {
+  const { theme } = useTheme();
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const [openChat, setOpenChat] = useState(false);
@@ -209,7 +211,8 @@ export default function MainScreen() {
     mapboxgl.accessToken = MAPBOX_CONFIG.accessToken;
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: MAPBOX_CONFIG.defaultStyle,
+      style:
+        theme === "dark" ? MAPBOX_CONFIG.darkStyle : MAPBOX_CONFIG.lightStyle,
       center: MAPBOX_CONFIG.defaultCenter,
       zoom: MAPBOX_CONFIG.defaultZoom,
       projection: MAPBOX_CONFIG.projection,
@@ -295,6 +298,15 @@ export default function MainScreen() {
     };
   }, []);
 
+  // Cambiar estilo del mapa cuando cambia el tema
+  useEffect(() => {
+    if (mapRef.current) {
+      const newStyle =
+        theme === "dark" ? MAPBOX_CONFIG.darkStyle : MAPBOX_CONFIG.lightStyle;
+      mapRef.current.setStyle(newStyle);
+    }
+  }, [theme]);
+
   useEffect(() => {
     if (!mapLoaded || !mapRef.current) return;
     if (!mapRef.current.markers) mapRef.current.markers = [];
@@ -371,7 +383,7 @@ export default function MainScreen() {
   }
 
   return (
-    <div className="flex flex-col w-full h-dvh bg-white relative overflow-hidden pb-16">
+    <div className="flex flex-col w-full h-dvh bg-white dark:bg-gray-900 relative overflow-hidden pb-16">
       {/* Contenedor del mapa */}
       <div ref={mapContainerRef} className="flex-1 w-full h-full relative" />
 
@@ -388,7 +400,7 @@ export default function MainScreen() {
 
       {/* Bottom Sheet Deslizable */}
       <div
-        className={`fixed left-0 right-0 bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out z-40 ${
+        className={`fixed left-0 right-0 bg-white dark:bg-gray-800 rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out z-40 ${
           sheetExpanded ? "bottom-16 h-[70vh]" : "bottom-16 h-28"
         }`}
         onTouchStart={(e) => setStartY(e.touches[0].clientY)}
@@ -405,7 +417,7 @@ export default function MainScreen() {
           onClick={() => setSheetExpanded(!sheetExpanded)}
           className="w-full flex justify-center pt-3 pb-2"
         >
-          <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+          <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
         </button>
 
         {/* Tabs */}
@@ -415,7 +427,7 @@ export default function MainScreen() {
             className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all ${
               selectedTab === "shops"
                 ? "bg-emerald-500 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
             }`}
           >
             Collection Points
@@ -425,7 +437,7 @@ export default function MainScreen() {
             className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all ${
               selectedTab === "delivery"
                 ? "bg-red-500 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
             }`}
           >
             Delivery Points
@@ -487,7 +499,7 @@ export default function MainScreen() {
 
                   if (!closest) {
                     return (
-                      <div className="text-center py-4 text-gray-400 text-sm">
+                      <div className="text-center py-4 text-gray-400 dark:text-gray-500 text-sm">
                         No lots available
                       </div>
                     );
@@ -539,8 +551,8 @@ export default function MainScreen() {
                       }}
                       className={`p-3 rounded-xl border cursor-pointer transition-all ${
                         isActive
-                          ? "bg-emerald-50 border-emerald-400"
-                          : "bg-white border-gray-200 hover:border-emerald-300"
+                          ? "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-400"
+                          : "bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-500"
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -551,17 +563,17 @@ export default function MainScreen() {
                             className="w-14 h-14 rounded-lg object-cover"
                           />
                         ) : (
-                          <div className="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center">
-                            <span className="material-symbols-outlined text-gray-400">
+                          <div className="w-14 h-14 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                            <span className="material-symbols-outlined text-gray-400 dark:text-gray-300">
                               restaurant
                             </span>
                           </div>
                         )}
                         <div className="flex-1">
-                          <h4 className="font-bold text-gray-900 text-sm">
+                          <h4 className="font-bold text-gray-900 dark:text-white text-sm">
                             {closest.lot.name}
                           </h4>
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             {closest.distanceKm
                               ? `${closest.distanceKm.toFixed(1)} km away`
                               : "—"}
@@ -648,8 +660,8 @@ export default function MainScreen() {
                       }}
                       className={`p-3 rounded-xl border cursor-pointer transition-all ${
                         isActive
-                          ? "bg-emerald-50 border-emerald-400"
-                          : "bg-white border-gray-200 hover:border-emerald-300"
+                          ? "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-400"
+                          : "bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-500"
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -660,17 +672,17 @@ export default function MainScreen() {
                             className="w-12 h-12 rounded-lg object-cover"
                           />
                         ) : (
-                          <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                            <span className="material-symbols-outlined text-gray-400">
+                          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                            <span className="material-symbols-outlined text-gray-400 dark:text-gray-300">
                               restaurant
                             </span>
                           </div>
                         )}
                         <div className="flex-1">
-                          <h4 className="font-bold text-gray-900 text-sm">
+                          <h4 className="font-bold text-gray-900 dark:text-white text-sm">
                             {lot.name}
                           </h4>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             {distanceKm ? `${distanceKm} km` : "—"}
                           </p>
                         </div>
@@ -744,21 +756,21 @@ export default function MainScreen() {
                       }}
                       className={`p-3 rounded-xl border cursor-pointer transition-all ${
                         isActive
-                          ? "bg-red-50 border-red-400"
-                          : "bg-white border-gray-200 hover:bg-gray-50"
+                          ? "bg-red-50 dark:bg-red-900/30 border-red-400"
+                          : "bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                          <span className="material-symbols-outlined text-red-600">
+                        <div className="w-12 h-12 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center">
+                          <span className="material-symbols-outlined text-red-600 dark:text-red-400">
                             person_pin_circle
                           </span>
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-bold text-gray-900 text-sm">
+                          <h4 className="font-bold text-gray-900 dark:text-white text-sm">
                             Delivery Point
                           </h4>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             {distanceKm ? `${distanceKm} km away` : "—"}
                           </p>
                         </div>

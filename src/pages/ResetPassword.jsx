@@ -73,20 +73,20 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col items-center justify-center p-4">
+    <div className="min-h-dvh bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md flex flex-col items-center">
         {/* Icon */}
-        <div className="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center mb-6">
-          <span className="material-symbols-outlined text-emerald-500 text-4xl">
+        <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-6">
+          <span className="material-symbols-outlined text-emerald-500 dark:text-emerald-400 text-4xl">
             vpn_key
           </span>
         </div>
 
         {/* Headline */}
-        <h1 className="text-gray-900 text-3xl font-bold text-center mb-3">
+        <h1 className="text-gray-900 dark:text-white text-3xl font-bold text-center mb-3">
           Set new password
         </h1>
-        <p className="text-gray-600 text-base text-center mb-8">
+        <p className="text-gray-600 dark:text-gray-300 text-base text-center mb-8">
           Your new password must be different from previously used passwords.
         </p>
 

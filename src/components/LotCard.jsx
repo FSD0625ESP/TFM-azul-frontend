@@ -35,7 +35,9 @@ export const LotCard = ({
   return (
     <div
       className={`rounded-lg overflow-hidden shadow-sm ${
-        lot.reserved ? "bg-blue-50 border border-blue-200" : "bg-white"
+        lot.reserved
+          ? "bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800"
+          : "bg-white dark:bg-gray-800"
       }`}
     >
       {/* Lot Image */}
@@ -54,7 +56,7 @@ export const LotCard = ({
         <div className="flex justify-between items-start mb-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-lg font-semibold text-gray-900 m-0">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white m-0">
                 {lot.name}
               </h3>
               <span
@@ -64,21 +66,23 @@ export const LotCard = ({
                   {status === "delivered"
                     ? "check_circle"
                     : status === "picked_up"
-                    ? "shopping_bag"
-                    : status === "reserved"
-                    ? "schedule"
-                    : "radio_button_unchecked"}
+                      ? "shopping_bag"
+                      : status === "reserved"
+                        ? "schedule"
+                        : "radio_button_unchecked"}
                 </span>
                 {label}
               </span>
             </div>
-            <p className="text-sm text-gray-600 m-0">{lot.description}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 m-0">
+              {lot.description}
+            </p>
           </div>
         </div>
 
         {/* Lot Info */}
         <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-          <div className="flex items-center gap-1 text-gray-600">
+          <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
             <span className="material-symbols-outlined text-sm">
               inventory_2
             </span>
@@ -86,7 +90,7 @@ export const LotCard = ({
               {lot.quantity} {lot.quantity === 1 ? "unidad" : "unidades"}
             </span>
           </div>
-          <div className="flex items-center gap-1 text-gray-600">
+          <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
             <span className="material-symbols-outlined text-sm">schedule</span>
             <span>
               {new Date(lot.expiryDate).toLocaleDateString("es-ES", {
@@ -99,16 +103,18 @@ export const LotCard = ({
 
         {/* Store Info (for rider view) */}
         {userType === "rider" && lot.shop && (
-          <div className="flex items-center gap-2 mb-3 p-2 bg-gray-50 rounded">
-            <span className="material-symbols-outlined text-gray-600">
+          <div className="flex items-center gap-2 mb-3 p-2 bg-gray-50 dark:bg-gray-700 rounded">
+            <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
               store
             </span>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900 m-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-white m-0">
                 {lot.shop.name || lot.shop.shopName || "Tienda"}
               </p>
               {lot.shop.address && (
-                <p className="text-xs text-gray-600 m-0">{lot.shop.address}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 m-0">
+                  {lot.shop.address}
+                </p>
               )}
             </div>
           </div>
@@ -116,12 +122,12 @@ export const LotCard = ({
 
         {/* Rider Info (for store view) */}
         {userType === "store" && lot.rider && (
-          <div className="flex items-center gap-2 mb-3 p-2 bg-blue-50 rounded">
-            <span className="material-symbols-outlined text-blue-600">
+          <div className="flex items-center gap-2 mb-3 p-2 bg-blue-50 dark:bg-blue-900/30 rounded">
+            <span className="material-symbols-outlined text-blue-600 dark:text-blue-400">
               person
             </span>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900 m-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-white m-0">
                 {lot.rider.name || "Rider"}
               </p>
             </div>
@@ -132,22 +138,26 @@ export const LotCard = ({
         {distanceState && (
           <div
             className={`flex items-center gap-2 mb-3 p-2 rounded ${
-              distanceState.allowed ? "bg-green-50" : "bg-amber-50"
+              distanceState.allowed
+                ? "bg-green-50 dark:bg-green-900/30"
+                : "bg-amber-50 dark:bg-amber-900/30"
             }`}
           >
             <span
               className={`material-symbols-outlined ${
-                distanceState.allowed ? "text-green-600" : "text-amber-600"
+                distanceState.allowed
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-amber-600 dark:text-amber-400"
               }`}
             >
               location_on
             </span>
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-gray-700 dark:text-gray-300">
               {distanceState.distance
                 ? `${distanceState.distance.toFixed(0)}m de la tienda`
                 : distanceState.allowed
-                ? "Cerca de la tienda"
-                : "Lejos de la tienda"}
+                  ? "Cerca de la tienda"
+                  : "Lejos de la tienda"}
             </span>
           </div>
         )}

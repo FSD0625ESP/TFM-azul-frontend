@@ -30,10 +30,10 @@ const ChatBox = ({ orderId }) => {
   const messages = chats[orderId] || [];
 
   return (
-    <div className="flex flex-col h-full w-full bg-gradient-to-b from-slate-50 to-slate-100">
+    <div className="flex flex-col h-full w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-gray-800 dark:to-gray-900">
       <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 scroll-smooth min-h-0">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-slate-400">
+          <div className="flex items-center justify-center h-full text-slate-400 dark:text-gray-500">
             <p className="text-sm">No messages yet. Start the conversation!</p>
           </div>
         ) : (
@@ -55,7 +55,7 @@ const ChatBox = ({ orderId }) => {
                   className={`max-w-[70%] break-words px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 ${
                     isMine
                       ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-br-none"
-                      : "bg-white text-slate-800 border border-slate-200 rounded-bl-none"
+                      : "bg-white dark:bg-gray-700 text-slate-800 dark:text-gray-200 border border-slate-200 dark:border-gray-600 rounded-bl-none"
                   }`}
                 >
                   <div className="text-sm leading-relaxed font-medium">
@@ -63,7 +63,9 @@ const ChatBox = ({ orderId }) => {
                   </div>
                   <div
                     className={`text-[11px] mt-2 font-light ${
-                      isMine ? "text-emerald-100/80" : "text-slate-500"
+                      isMine
+                        ? "text-emerald-100/80"
+                        : "text-slate-500 dark:text-gray-400"
                     } text-right`}
                   >
                     {time}
@@ -75,12 +77,12 @@ const ChatBox = ({ orderId }) => {
         )}
       </div>
 
-      <div className="flex gap-2 px-4 py-3 bg-white border-t border-slate-200 shadow-lg flex-shrink-0">
+      <div className="flex gap-2 px-4 py-3 bg-white dark:bg-gray-800 border-t border-slate-200 dark:border-gray-700 shadow-lg flex-shrink-0">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 px-4 py-2 rounded-full bg-slate-100 text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all text-sm"
+          className="flex-1 px-4 py-2 rounded-full bg-slate-100 dark:bg-gray-700 text-slate-800 dark:text-gray-200 placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-gray-600 transition-all text-sm"
           onKeyDown={(e) => e.key === "Enter" && onSend()}
         />
         <button

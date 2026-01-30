@@ -41,7 +41,7 @@ const PhotoInput = ({
         <img
           src={photoPreview || PLACEHOLDER_IMAGE}
           alt="Profile preview"
-          className="h-24 w-24 rounded-full object-cover border-4 border-gray-200"
+          className="h-24 w-24 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
         />
         <label
           htmlFor={inputId}
@@ -57,7 +57,7 @@ const PhotoInput = ({
           className="hidden"
         />
       </div>
-      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
     </div>
   );
 };

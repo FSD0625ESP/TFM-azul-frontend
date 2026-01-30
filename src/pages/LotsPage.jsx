@@ -32,21 +32,21 @@ const LotsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#f6f8f7]">
+      <div className="flex items-center justify-center min-h-screen bg-[#f6f8f7] dark:bg-gray-900">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading lots...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading lots...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f6f8f7]">
+    <div className="flex flex-col min-h-screen bg-[#f6f8f7] dark:bg-gray-900">
       <main className="flex-1 p-4 md:p-6 lg:p-8 flex flex-col pb-20 pt-4 max-w-7xl mx-auto w-full">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
             Food Lots
           </h1>
           <button

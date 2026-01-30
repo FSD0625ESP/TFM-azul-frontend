@@ -57,7 +57,7 @@ const EditFoodLotModal = ({ isOpen, onClose, lot, onSuccess }) => {
         today.getMonth(),
         today.getDate(),
         parseInt(inputHours),
-        parseInt(inputMinutes)
+        parseInt(inputMinutes),
       );
 
       const response = await axios.put(buildApiUrl(`/lots/${lot._id}`), {
@@ -88,14 +88,14 @@ const EditFoodLotModal = ({ isOpen, onClose, lot, onSuccess }) => {
       onClick={onClose}
     >
       <div
-        className="w-full bg-[#f6f8f7] rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto"
+        className="w-full bg-[#f6f8f7] dark:bg-gray-800 rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={onClose}
-            className="bg-transparent border-none text-2xl cursor-pointer text-gray-500 flex items-center justify-center"
+            className="bg-transparent border-none text-2xl cursor-pointer text-gray-500 dark:text-gray-400 flex items-center justify-center"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>

@@ -1,11 +1,12 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@variant dark (&:where(.dark, .dark *));
 
 /* Reset básico */
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
   padding: 0;
@@ -14,7 +15,14 @@ body {
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f6f8f7;
+  background-color: #ffffff;
+  color: #111827;
+}
+
+html.dark,
+html.dark body {
+  background-color: #111827;
+  color: #f9fafb;
 }
 
 #root {
