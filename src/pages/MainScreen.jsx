@@ -115,12 +115,12 @@ export default function MainScreen() {
           ])
           .addTo(mapRef.current);
         setMarks((prev) => [...prev, createdMark]);
-        toast.success("Marca creada en tu ubicación.");
+        toast.success("Marker created at your location..");
       } else {
-        toast.error("No se pudo crear la marca. Intenta de nuevo.");
+        toast.error("The Marker could not be created. Please try again.");
       }
     } catch (err) {
-      toast.error("Error creando la marca: " + (err.message || err));
+      toast.error("Error creating marker: " + (err.message || err));
     }
   };
 
