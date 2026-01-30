@@ -308,7 +308,7 @@ const LotsPage = () => {
       />
       {/* Chat Modal for store to reply to rider */}
       {openChatOrderId && store && (
-        <div className="fixed bottom-0 right-0 w-80 h-96 bg-black text-white border shadow-lg rounded-lg p-4 flex flex-col z-50">
+        <div className="fixed bottom-0 right-0 w-80 h-96 bg-black text-white border border-slate-600 shadow-lg rounded-lg p-4 flex flex-col z-50">
           <ChatBox
             orderId={openChatOrderId}
             userType={"store"}
@@ -316,9 +316,9 @@ const LotsPage = () => {
           />
           <button
             onClick={() => setOpenChatOrderId(null)}
-            className="absolute top-1 right-1 text-white bg-gray-800 px-2 rounded hover:bg-gray-700 text-xs"
+            className="absolute top-4 left-4 w-10 h-10 bg-red-100 rounded-none border border-red-300 flex items-center justify-center text-red-500 text-lg font-bold hover:bg-red-200 hover:text-red-700 transition-colors"
           >
-            Close
+            ✕
           </button>
         </div>
       )}

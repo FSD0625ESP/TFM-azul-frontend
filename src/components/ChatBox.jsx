@@ -30,56 +30,64 @@ const ChatBox = ({ orderId }) => {
   const messages = chats[orderId] || [];
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-auto mb-2 p-2 bg-gray-900 rounded flex flex-col gap-2">
-        {messages.map((msg, idx) => {
-          const isMine =
-            msg.fromId && String(msg.fromId) === String(currentUserId);
-          const time = msg.timestamp
-            ? new Date(msg.timestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "";
-          return (
-            <div
-              key={idx}
-              className={`${isMine ? "justify-end" : "justify-start"} flex`}
-            >
+    <div className="flex flex-col h-full w-full bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 scroll-smooth min-h-0">
+        {messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-slate-400">
+            <p className="text-sm">No messages yet. Start the conversation!</p>
+          </div>
+        ) : (
+          messages.map((msg, idx) => {
+            const isMine =
+              msg.fromId && String(msg.fromId) === String(currentUserId);
+            const time = msg.timestamp
+              ? new Date(msg.timestamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "";
+            return (
               <div
-                className={`max-w-[80%] break-words px-3 py-2 rounded-lg ${
-                  isMine
-                    ? "bg-emerald-500 text-emerald-900"
-                    : "bg-gray-700 text-white"
-                }`}
+                key={idx}
+                className={`flex ${isMine ? "justify-end" : "justify-start"} animate-fadeIn`}
               >
-                <div className="text-sm leading-relaxed">{msg.content}</div>
                 <div
-                  className={`text-[10px] mt-1 ${
-                    isMine ? "text-emerald-900/70" : "text-gray-300/70"
-                  } text-right`}
+                  className={`max-w-[70%] break-words px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 ${
+                    isMine
+                      ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-br-none"
+                      : "bg-white text-slate-800 border border-slate-200 rounded-bl-none"
+                  }`}
                 >
-                  {time}
+                  <div className="text-sm leading-relaxed font-medium">
+                    {msg.content}
+                  </div>
+                  <div
+                    className={`text-[11px] mt-2 font-light ${
+                      isMine ? "text-emerald-100/80" : "text-slate-500"
+                    } text-right`}
+                  >
+                    {time}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 px-4 py-3 bg-white border-t border-slate-200 shadow-lg flex-shrink-0">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Escribe un mensaje..."
-          className="flex-1 p-2 rounded bg-gray-800 text-white"
+          placeholder="Type a message..."
+          className="flex-1 px-4 py-2 rounded-full bg-slate-100 text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all text-sm"
           onKeyDown={(e) => e.key === "Enter" && onSend()}
         />
         <button
           onClick={onSend}
-          className="bg-emerald-500 px-4 rounded hover:bg-emerald-600"
+          className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2 rounded-full hover:shadow-lg hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 font-medium text-sm flex-shrink-0 whitespace-nowrap"
         >
-          Enviar
+          Send
         </button>
       </div>
     </div>

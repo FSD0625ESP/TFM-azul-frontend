@@ -109,7 +109,7 @@ const ReservedLotsPage = () => {
               timeout: 10000,
               maximumAge: 0,
               ...options,
-            }
+            },
           );
         });
       } catch (err) {
@@ -135,7 +135,7 @@ const ReservedLotsPage = () => {
       if (!position) {
         if (showToasts)
           toast.error(
-            "No se pudo obtener la ubicación. Activa el GPS y permite permisos."
+            "No se pudo obtener la ubicación. Activa el GPS y permite permisos.",
           );
         // marcar como desconocido (no permitido)
         setDistanceStates((prev) => ({ ...prev, [lotId]: { allowed: false } }));
@@ -147,7 +147,7 @@ const ReservedLotsPage = () => {
       const res = await axios.post(
         `${API_URL}/lots/${lotId}/check-distance`,
         { riderLat: latitude, riderLng: longitude },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const { allowed, distance } = res.data;
@@ -158,7 +158,7 @@ const ReservedLotsPage = () => {
 
       if (!allowed && showToasts) {
         toast.info(
-          `Estás a ${(distance * 1000).toFixed(0)}m del punto más cercano.`
+          `Estás a ${(distance * 1000).toFixed(0)}m del punto más cercano.`,
         );
       }
     } catch (err) {
@@ -186,7 +186,7 @@ const ReservedLotsPage = () => {
       await axios.post(
         `${API_URL}/lots/${lotId}/unreserve`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       toast.success("Lote desreservado correctamente");
@@ -195,7 +195,7 @@ const ReservedLotsPage = () => {
       console.error("Error desreservando lote:", err);
       toast.error(
         "Error desreservando lote: " +
-          (err?.response?.data?.message || err.message)
+          (err?.response?.data?.message || err.message),
       );
     }
   };
@@ -227,7 +227,7 @@ const ReservedLotsPage = () => {
       });
       if (!position) {
         toast.error(
-          "No se pudo obtener tu ubicación. Verifica permisos y GPS."
+          "No se pudo obtener tu ubicación. Verifica permisos y GPS.",
         );
         setDeliveryStates((prev) => ({ ...prev, [lotId]: "error" }));
         return;
@@ -239,7 +239,7 @@ const ReservedLotsPage = () => {
       const res = await axios.post(
         `${API_URL}/lots/${lotId}/deliver`,
         { riderLat: latitude, riderLng: longitude },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       toast.success("¡Lote entregado correctamente!");
@@ -316,10 +316,10 @@ const ReservedLotsPage = () => {
         {reservedLots.map((lot) => {
           const pickupTime = new Date(lot.pickupDeadline).toLocaleTimeString(
             "es-ES",
-            { hour: "2-digit", minute: "2-digit" }
+            { hour: "2-digit", minute: "2-digit" },
           );
           const pickupDate = new Date(lot.pickupDeadline).toLocaleDateString(
-            "es-ES"
+            "es-ES",
           );
           const storeName = lot.shop?.name || "Unknown Store";
           const storeType = lot.shop?.type || "Store";
@@ -420,10 +420,10 @@ const ReservedLotsPage = () => {
                           deliveryState === "loading"
                             ? "bg-yellow-500 text-white"
                             : deliveryState === "success"
-                            ? "bg-green-500 text-white"
-                            : deliveryState === "error"
-                            ? "bg-red-500 text-white"
-                            : "bg-blue-500 text-white hover:bg-blue-600"
+                              ? "bg-green-500 text-white"
+                              : deliveryState === "error"
+                                ? "bg-red-500 text-white"
+                                : "bg-blue-500 text-white hover:bg-blue-600"
                         }`}
                         disabled={deliveryState === "loading"}
                       >
@@ -457,7 +457,7 @@ const ReservedLotsPage = () => {
                         <div className="text-xs text-red-600">
                           {distanceInfo && distanceInfo.distance !== undefined
                             ? `A ${(distanceInfo.distance * 1000).toFixed(
-                                0
+                                0,
                               )} m — Get within 50 meters of the point.`
                             : "Come to the location to be able to deliver."}
                         </div>
@@ -478,7 +478,7 @@ const ReservedLotsPage = () => {
       </main>
 
       {openChatOrderId && user && (
-        <div className="fixed bottom-0 right-0 w-80 h-96 bg-black text-white border shadow-lg rounded-lg p-4 flex flex-col z-50">
+        <div className="fixed bottom-0 right-0 w-80 h-96 bg-black text-white border border-slate-600 shadow-lg rounded-lg p-4 flex flex-col z-50">
           <ChatBox
             orderId={openChatOrderId}
             userType={user.role || "rider"}
@@ -486,9 +486,9 @@ const ReservedLotsPage = () => {
           />
           <button
             onClick={() => setOpenChatOrderId(null)}
-            className="absolute top-1 right-1 text-white bg-gray-800 px-2 rounded hover:bg-gray-700 text-xs"
+            className="absolute top-4 left-4 w-10 h-10 bg-red-100 rounded-none border border-red-300 flex items-center justify-center text-red-500 text-lg font-bold hover:bg-red-200 hover:text-red-700 transition-colors"
           >
-            Close
+            ✕
           </button>
         </div>
       )}

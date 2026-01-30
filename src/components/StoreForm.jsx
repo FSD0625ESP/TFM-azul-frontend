@@ -16,8 +16,12 @@ const StoreForm = ({
   setPhone,
   password,
   setPassword,
+  showPassword,
+  setShowPassword,
   repeatPassword,
   setRepeatPassword,
+  showRepeatPassword,
+  setShowRepeatPassword,
   photo,
   setPhoto,
   photoPreview,
@@ -169,12 +173,21 @@ const StoreForm = ({
           lock
         </span>
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-12 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-lg">
+            {showPassword ? "visibility" : "visibility_off"}
+          </span>
+        </button>
       </div>
 
       {/* Repeat Password */}
@@ -183,12 +196,21 @@ const StoreForm = ({
           lock
         </span>
         <input
-          type="password"
+          type={showRepeatPassword ? "text" : "password"}
           value={repeatPassword}
           onChange={(e) => setRepeatPassword(e.target.value)}
           placeholder="Repeat password"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-12 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
         />
+        <button
+          type="button"
+          onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-lg">
+            {showRepeatPassword ? "visibility" : "visibility_off"}
+          </span>
+        </button>
       </div>
 
       {/* Submit Button */}

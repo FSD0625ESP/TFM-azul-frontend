@@ -33,7 +33,7 @@ export const WSProvider = ({ user, children }) => {
       // Identify this connection so server can notify this user even
       // if they don't have a room open
       ws.current.send(
-        JSON.stringify({ type: "identify", userId, userType: user.role })
+        JSON.stringify({ type: "identify", userId, userType: user.role }),
       );
     };
 
@@ -41,16 +41,22 @@ export const WSProvider = ({ user, children }) => {
       const data = JSON.parse(event.data);
       if (data.type === "message") {
         const orderId = data.orderId || "general";
+        const myId = user._id || user.id || null;
+        const isFromMe = String(data.fromId) === String(myId);
+
         setChats((prev) => ({
           ...prev,
           [orderId]: [...(prev[orderId] || []), data],
         }));
-        // Increase unread count for order (user can clear it by joining room)
-        setUnread((prev) => ({ ...prev, [orderId]: (prev[orderId] || 0) + 1 }));
 
-        // Notify user with a toast if the message is not from current user
-        const myId = user._id || user.id || null;
-        if (String(data.fromId) !== String(myId)) {
+        // Increase unread count only if message is not from current user
+        if (!isFromMe) {
+          setUnread((prev) => ({
+            ...prev,
+            [orderId]: (prev[orderId] || 0) + 1,
+          }));
+
+          // Notify user with a toast only if message is not from current user
           toast.info(`${data.from || "Nuevo mensaje"}: ${data.content}`, {
             onClick: () => {
               try {
@@ -85,7 +91,7 @@ export const WSProvider = ({ user, children }) => {
   const joinRoom = (orderId) => {
     const userId = user._id || user.id || null;
     ws.current?.send(
-      JSON.stringify({ type: "join", orderId, userType: user.role, userId })
+      JSON.stringify({ type: "join", orderId, userType: user.role, userId }),
     );
 
     // Fetch history from server and clear unread for this order
@@ -112,7 +118,7 @@ export const WSProvider = ({ user, children }) => {
         content,
         userId,
         userType: user.role,
-      })
+      }),
     );
   };
 

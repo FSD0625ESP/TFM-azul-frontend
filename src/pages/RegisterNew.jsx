@@ -19,6 +19,8 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
 
   // Rider fields
   const [firstName, setFirstName] = useState("");
@@ -259,8 +261,12 @@ const Register = () => {
             setPhone={setPhone}
             password={password}
             setPassword={setPassword}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
             repeatPassword={repeatPassword}
             setRepeatPassword={setRepeatPassword}
+            showRepeatPassword={showRepeatPassword}
+            setShowRepeatPassword={setShowRepeatPassword}
             photo={photo}
             setPhoto={setPhoto}
             photoPreview={photoPreview}
@@ -287,8 +293,12 @@ const Register = () => {
             setPhone={setPhone}
             password={password}
             setPassword={setPassword}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
             repeatPassword={repeatPassword}
             setRepeatPassword={setRepeatPassword}
+            showRepeatPassword={showRepeatPassword}
+            setShowRepeatPassword={setShowRepeatPassword}
             photo={photo}
             setPhoto={setPhoto}
             photoPreview={photoPreview}

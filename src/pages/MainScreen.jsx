@@ -51,7 +51,7 @@ export default function MainScreen() {
             navigator.geolocation.getCurrentPosition(
               (pos) => resolve(pos),
               (err) => reject(err),
-              { enableHighAccuracy: true, timeout: 30000 }
+              { enableHighAccuracy: true, timeout: 30000 },
             );
           } catch (err) {
             reject(err);
@@ -65,7 +65,7 @@ export default function MainScreen() {
         console.warn("Geolocation getCurrentPosition failed:", err);
         if (err && err.code === 1) {
           toast.error(
-            "Permiso de ubicación denegado. Activa los permisos de ubicación para la app y vuelve a intentarlo."
+            "Permiso de ubicación denegado. Activa los permisos de ubicación para la app y vuelve a intentarlo.",
           );
           return;
         }
@@ -77,7 +77,7 @@ export default function MainScreen() {
               position = { coords: { latitude: ll.lat, longitude: ll.lng } };
             } else {
               toast.error(
-                "No se pudo obtener la ubicación (timeout) y no hay posición previa."
+                "No se pudo obtener la ubicación (timeout) y no hay posición previa.",
               );
               return;
             }
@@ -87,7 +87,8 @@ export default function MainScreen() {
           }
         } else {
           toast.error(
-            "Error al obtener la ubicación: " + (err.message || "Unknown error")
+            "Error al obtener la ubicación: " +
+              (err.message || "Unknown error"),
           );
           return;
         }
@@ -102,7 +103,7 @@ export default function MainScreen() {
 
       const response = await axios.post(
         `${API_BASE_URL}/createMark/createMark/${userId}`,
-        payload
+        payload,
       );
 
       if (response?.data?.mark) {
@@ -178,9 +179,7 @@ export default function MainScreen() {
 
     (async () => {
       try {
-        await import(
-          "https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-directions@4.1.1/dist/mapbox-gl-directions.js"
-        );
+        await import("https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-directions@4.1.1/dist/mapbox-gl-directions.js");
         const link = document.createElement("link");
         link.rel = "stylesheet";
         link.href =
@@ -231,7 +230,7 @@ export default function MainScreen() {
             }
           },
           (err) => console.warn("Geo error:", err),
-          { enableHighAccuracy: true }
+          { enableHighAccuracy: true },
         );
       }
     });
@@ -267,10 +266,10 @@ export default function MainScreen() {
           const shopId = mark.shop?._id
             ? String(mark.shop._id)
             : mark.shop
-            ? String(mark.shop)
-            : mark.user?._id
-            ? String(mark.user._id)
-            : String(mark.user);
+              ? String(mark.shop)
+              : mark.user?._id
+                ? String(mark.user._id)
+                : String(mark.user);
           const count = lotCounts[shopId] || 0;
           if (count === 0) return;
 
@@ -341,7 +340,7 @@ export default function MainScreen() {
         {/* Map Tab */}
         <button
           onClick={() => setActiveTab("map")}
-          className={`flex-1 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors ${
+          className={`flex-1 flex flex-col items-center justify-center gap-2 bg-transparent border-none cursor-pointer px-3 py-3 transition-colors ${
             activeTab === "map" ? "text-emerald-500" : "text-gray-400"
           }`}
         >
@@ -369,10 +368,10 @@ export default function MainScreen() {
                     mark.shop && mark.shop._id
                       ? String(mark.shop._id)
                       : mark.shop
-                      ? String(mark.shop)
-                      : mark.user && mark.user._id
-                      ? String(mark.user._id)
-                      : String(mark.user);
+                        ? String(mark.shop)
+                        : mark.user && mark.user._id
+                          ? String(mark.user._id)
+                          : String(mark.user);
 
                   const lotCount = lotCounts[shopId] || 0;
                   if (lotCount === 0) return null;
@@ -385,7 +384,7 @@ export default function MainScreen() {
                       userLocation.lat,
                       userLocation.lng,
                       lat,
-                      long
+                      long,
                     ).toFixed(1);
                   }
 
@@ -469,7 +468,7 @@ export default function MainScreen() {
                       userLocation.lat,
                       userLocation.lng,
                       lat,
-                      long
+                      long,
                     ).toFixed(1);
                   }
 
