@@ -190,7 +190,7 @@ export const LotCard = ({
                 <span className="material-symbols-outlined text-lg">
                   shopping_cart
                 </span>
-                <span>Reservar</span>
+                <span>Reserve</span>
               </button>
             )}
 

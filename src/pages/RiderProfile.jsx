@@ -88,6 +88,7 @@ const RiderProfile = () => {
       scannerRef.current.clear();
       scannerRef.current = null;
     }
+    window.location.reload();
   };
 
   /**
@@ -116,11 +117,12 @@ const RiderProfile = () => {
           const token = localStorage.getItem("token");
           try {
             const response = await confirmPickup(decodedText, token);
-            alert(response?.message || "Recogida confirmada");
+            alert(response?.message || "Pickup confirmed");
+            window.location.reload();
           } catch (err) {
             console.error(err);
             const msg =
-              err?.response?.data?.message || "Error confirmando recogida";
+              err?.response?.data?.message || "Error confirming pickup";
             alert(msg);
           } finally {
             setShowScanner(false);
@@ -134,7 +136,7 @@ const RiderProfile = () => {
         })
         .catch((err) => {
           console.error("QR start error:", err);
-          alert("No se pudo iniciar la cámara. Comprueba permisos.");
+          alert("Could not start camera. Check permissions.");
           setShowScanner(false);
         });
     }
@@ -217,7 +219,7 @@ const RiderProfile = () => {
             onClick={handleOpenScanner}
             className="mt-2 px-3 py-1 bg-emerald-600 dark:bg-emerald-700 text-white rounded-md text-sm hover:bg-emerald-700 dark:hover:bg-emerald-800"
           >
-            Escanear QR
+            Scan QR
           </button>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Click on photo to {user.photo ? "change" : "add"}
@@ -293,11 +295,11 @@ const RiderProfile = () => {
               &times;
             </button>
             <h3 className="text-lg font-bold mb-2 dark:text-white">
-              Escanea el QR de la tienda
+              SCAN QR OF STORE
             </h3>
             <div id="qr-reader" className="w-full h-[360px]" />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              Permite acceso a la cámara para escanear.
+              Allows camera access to scan QR.
             </p>
           </div>
         </div>

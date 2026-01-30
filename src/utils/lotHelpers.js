@@ -76,7 +76,7 @@ export const reserveLot = async (lotId) => {
     const response = await axios.post(
       buildApiUrl(`/lots/${lotId}/reserve`),
       {},
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
 
     if (response?.data?.lot) {
@@ -111,7 +111,7 @@ export const cancelReservation = async (lotId) => {
     const response = await axios.post(
       buildApiUrl(`/lots/${lotId}/cancel`),
       {},
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
 
     if (response?.data?.lot) {
@@ -147,7 +147,7 @@ export const getPositionWithRetries = async (maxAttempts = 3, options = {}) => {
             timeout: 10000,
             maximumAge: 0,
             ...options,
-          }
+          },
         );
       });
     } catch (err) {
@@ -170,7 +170,7 @@ export const checkDistanceForPickup = async (lotId, showToasts = true) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
-      if (showToasts) toast.error("No estás autenticado");
+      if (showToasts) toast.error("You are not authenticated");
       return { allowed: false };
     }
 
@@ -178,7 +178,7 @@ export const checkDistanceForPickup = async (lotId, showToasts = true) => {
     if (!position) {
       if (showToasts)
         toast.error(
-          "No se pudo obtener la ubicación. Activa el GPS y permite permisos."
+          "Could not get location. Enable GPS and allow permissions.",
         );
       return { allowed: false };
     }
@@ -188,7 +188,7 @@ export const checkDistanceForPickup = async (lotId, showToasts = true) => {
     const response = await axios.post(
       buildApiUrl(`/lots/${lotId}/check-distance`),
       { riderLat: latitude, riderLng: longitude },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
 
     const { allowed, distance } = response.data;
@@ -199,8 +199,8 @@ export const checkDistanceForPickup = async (lotId, showToasts = true) => {
       } else {
         toast.error(
           `Debes estar a menos de 100m de la tienda. Distancia actual: ${distance?.toFixed(
-            0
-          )}m`
+            0,
+          )}m`,
         );
       }
     }
@@ -234,7 +234,7 @@ export const markAsDelivered = async (lotId) => {
     const response = await axios.post(
       buildApiUrl(`/lots/${lotId}/deliver`),
       {},
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
 
     if (response?.data?.lot) {
