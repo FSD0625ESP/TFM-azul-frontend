@@ -452,6 +452,17 @@ export default function MainScreen() {
                 {(() => {
                   console.log("🔍 Combining lots with marks. Lots:", lots);
                   console.log("🔍 Marks:", marks);
+
+                  // Log para ver estructura de las marcas
+                  marks.forEach((m, i) => {
+                    console.log(`🔍 Mark ${i}:`, {
+                      type_mark: m.type_mark,
+                      user: m.user,
+                      userId: m.user?._id,
+                      userString: String(m.user?._id || m.user),
+                    });
+                  });
+
                   // Combinar lotes con marks para obtener ubicación
                   const lotsWithLocation = lots
                     .map((lot) => {
