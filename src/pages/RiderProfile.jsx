@@ -187,7 +187,7 @@ const RiderProfile = () => {
             onClick={handleOpenScanner}
             className="mt-2 px-3 py-1 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700"
           >
-            Escanear QR
+            Scan QR
           </button>
           <p className="text-sm text-gray-500 mt-1">
             Click on photo to {user.photo ? "change" : "add"}
@@ -244,12 +244,12 @@ const RiderProfile = () => {
             >
               &times;
             </button>
-            <h3 className="text-lg font-bold mb-2">
-              Escanea el QR de la tienda
+            <h3 className="text-lg font-bold text-black mx-auto mb-2">
+              SCAN QR OF STORE
             </h3>
             <div id="qr-reader" className="w-full h-[360px]" />
-            <p className="text-xs text-gray-500 mt-2">
-              Permite acceso a la cámara para escanear.
+            <p className="text-xs text-black mt-2">
+              Allows camera access to scan QR.
             </p>
           </div>
         </div>
