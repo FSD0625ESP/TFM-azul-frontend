@@ -60,6 +60,7 @@ const RiderProfile = () => {
       scannerRef.current.clear();
       scannerRef.current = null;
     }
+    window.location.reload();
   };
 
   /**
@@ -89,6 +90,7 @@ const RiderProfile = () => {
           try {
             const response = await confirmPickup(decodedText, token);
             alert(response?.message || "Pickup confirmed");
+            window.location.reload();
           } catch (err) {
             console.error(err);
             const msg =

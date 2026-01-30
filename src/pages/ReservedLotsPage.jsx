@@ -450,7 +450,7 @@ const ReservedLotsPage = () => {
                               <span className="material-symbols-outlined text-sm">
                                 local_shipping
                               </span>
-                              Acercate a 50 metros del punto
+                              Get within 50 meters of the point
                               <span>Deliver</span>
                             </>
                           )}
@@ -469,7 +469,7 @@ const ReservedLotsPage = () => {
                             onClick={() => checkDistanceForLot(lot._id, true)}
                             className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200"
                           >
-                            Reintentar
+                            Retry
                           </button>
                         </div>
                       )}
