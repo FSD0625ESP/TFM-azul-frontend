@@ -42,7 +42,7 @@ const StoreLotsPage = () => {
       try {
         const lotsResponse = await axios.get(`${API_URL}/lots`);
         const storeLots = lotsResponse.data.filter(
-          (lot) => String(lot.shop?._id || lot.shop) === String(storeId)
+          (lot) => String(lot.shop?._id || lot.shop) === String(storeId),
         );
         console.debug(
           "[StoreLotsPage] fetched storeLots:",
@@ -50,13 +50,13 @@ const StoreLotsPage = () => {
             id: l._id,
             reserved: l.reserved,
             pickedUp: l.pickedUp,
-          }))
+          })),
         ); // debug
         // Determinar si el usuario actual es el owner de la tienda
         const storedStore = localStorage.getItem("store");
         const isOwner = storedStore
           ? String(
-              JSON.parse(storedStore)?._id || JSON.parse(storedStore)?.id
+              JSON.parse(storedStore)?._id || JSON.parse(storedStore)?.id,
             ) === String(storeId)
           : false;
 
@@ -95,7 +95,7 @@ const StoreLotsPage = () => {
       try {
         const lotsResponse = await axios.get(`${API_URL}/lots`);
         const storeLots = lotsResponse.data.filter(
-          (lot) => String(lot.shop?._id || lot.shop) === String(storeId)
+          (lot) => String(lot.shop?._id || lot.shop) === String(storeId),
         );
         console.debug(
           "[StoreLotsPage] polling fetched storeLots:",
@@ -103,13 +103,13 @@ const StoreLotsPage = () => {
             id: l._id,
             reserved: l.reserved,
             pickedUp: l.pickedUp,
-          }))
+          })),
         ); // debug
 
         const storedStore = localStorage.getItem("store");
         const isOwner = storedStore
           ? String(
-              JSON.parse(storedStore)?._id || JSON.parse(storedStore)?.id
+              JSON.parse(storedStore)?._id || JSON.parse(storedStore)?.id,
             ) === String(storeId)
           : false;
 
@@ -138,7 +138,7 @@ const StoreLotsPage = () => {
       const resp = await axios.post(
         `${API_URL}/lots/${lotId}/reserve`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (resp?.data?.lot) {
@@ -147,21 +147,20 @@ const StoreLotsPage = () => {
           setLots((prev) => prev.filter((l) => l._id !== updatedLot._id));
         } else {
           setLots((prev) =>
-            prev.map((l) => (l._id === updatedLot._id ? updatedLot : l))
+            prev.map((l) => (l._id === updatedLot._id ? updatedLot : l)),
           );
         }
 
-        toast.success("Lote reservado correctamente");
+        toast.success("Correctly reserved lot");
         // No abrir chat automáticamente al reservar. El chat se usa desde
         // la sección "Reserved Lots".
       } else {
-        toast.error("No se pudo reservar el lote");
+        toast.error("Could not reserve the lot");
       }
     } catch (err) {
-      console.error("Error reservando lote:", err);
+      console.error("Error reserving lot:", err);
       toast.error(
-        "Error reservando lote: " +
-          (err?.response?.data?.message || err.message)
+        "Error reserving lot: " + (err?.response?.data?.message || err.message),
       );
     }
   };
@@ -231,13 +230,13 @@ const StoreLotsPage = () => {
           <div className="space-y-3">
             {lots.map((lot) => {
               const pickupTime = new Date(
-                lot.pickupDeadline
+                lot.pickupDeadline,
               ).toLocaleTimeString("es-ES", {
                 hour: "2-digit",
                 minute: "2-digit",
               });
               const pickupDate = new Date(
-                lot.pickupDeadline
+                lot.pickupDeadline,
               ).toLocaleDateString("es-ES");
 
               return (
@@ -265,11 +264,11 @@ const StoreLotsPage = () => {
                       <div className="flex gap-2 mt-2">
                         {!!lot.reserved && !!lot.pickedUp ? (
                           <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-semibold">
-                            Recogido
+                            Picked up
                           </span>
                         ) : !!lot.reserved ? (
                           <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
-                            Reservado
+                            Reserved
                           </span>
                         ) : null}
                       </div>
@@ -294,7 +293,7 @@ const StoreLotsPage = () => {
                     <span className="material-symbols-outlined text-sm mr-2">
                       bookmark_add
                     </span>
-                    Reservar lote
+                    Reserve lot
                   </button>
                 </div>
               );

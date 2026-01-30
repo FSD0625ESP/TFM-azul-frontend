@@ -127,7 +127,7 @@ const ReservedLotsPage = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        if (showToasts) toast.error("No estás autenticado");
+        if (showToasts) toast.error("You are not authenticated");
         return;
       }
 
@@ -135,7 +135,7 @@ const ReservedLotsPage = () => {
       if (!position) {
         if (showToasts)
           toast.error(
-            "No se pudo obtener la ubicación. Activa el GPS y permite permisos.",
+            "Could not get location. Enable GPS and allow permissions.",
           );
         // marcar como desconocido (no permitido)
         setDistanceStates((prev) => ({ ...prev, [lotId]: { allowed: false } }));
@@ -158,13 +158,13 @@ const ReservedLotsPage = () => {
 
       if (!allowed && showToasts) {
         toast.info(
-          `Estás a ${(distance * 1000).toFixed(0)}m del punto más cercano.`,
+          `You are ${(distance * 1000).toFixed(0)}m from the nearest point.`,
         );
       }
     } catch (err) {
       console.error("checkDistanceForLot error:", err);
       if (showToasts) {
-        toast.error("Error comprobando distancia");
+        toast.error("Error checking distance");
       }
       setDistanceStates((prev) => ({ ...prev, [lotId]: { allowed: false } }));
     }
@@ -172,7 +172,7 @@ const ReservedLotsPage = () => {
 
   // Función para desreservar un lote
   const handleUnreserveLot = async (lotId) => {
-    if (!confirm("¿Estás seguro de que quieres desreservar este lote?")) {
+    if (!confirm("Are you sure you want to unreserve this lot?")) {
       return;
     }
 
@@ -189,12 +189,12 @@ const ReservedLotsPage = () => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      toast.success("Lote desreservado correctamente");
+      toast.success("Lot unreserved successfully");
       setRefreshTrigger((prev) => prev + 1);
     } catch (err) {
       console.error("Error desreservando lote:", err);
       toast.error(
-        "Error desreservando lote: " +
+        "Error unreserving lot: " +
           (err?.response?.data?.message || err.message),
       );
     }
@@ -205,7 +205,7 @@ const ReservedLotsPage = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        toast.error("No estás autenticado");
+        toast.error("You are not authenticated");
         return;
       }
 
@@ -218,7 +218,7 @@ const ReservedLotsPage = () => {
         (distanceStates[lotId] && distanceStates[lotId].allowed) || false;
 
       setDeliveryStates((prev) => ({ ...prev, [lotId]: "loading" }));
-      toast.info("Obteniendo tu ubicación y registrando entrega...");
+      toast.info("Getting your location and registering delivery...");
 
       // obtener posición y mandar al endpoint /deliver
       const position = await getPositionWithRetries(3, {
@@ -226,9 +226,7 @@ const ReservedLotsPage = () => {
         timeout: 15000,
       });
       if (!position) {
-        toast.error(
-          "No se pudo obtener tu ubicación. Verifica permisos y GPS.",
-        );
+        toast.error("Could not get your location. Check permissions and GPS.");
         setDeliveryStates((prev) => ({ ...prev, [lotId]: "error" }));
         return;
       }
@@ -242,7 +240,7 @@ const ReservedLotsPage = () => {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      toast.success("¡Lote entregado correctamente!");
+      toast.success("Lot delivered successfully!");
       setDeliveryStates((prev) => ({ ...prev, [lotId]: "success" }));
 
       setTimeout(() => {
@@ -250,7 +248,7 @@ const ReservedLotsPage = () => {
       }, 1000);
     } catch (err) {
       console.error("Error entregando lote:", err);
-      let errorMsg = "Error entregando el lote";
+      let errorMsg = "Error delivering the lot";
 
       if (err?.response?.data?.message) {
         errorMsg = err.response.data.message;
@@ -446,7 +444,7 @@ const ReservedLotsPage = () => {
                             <span className="material-symbols-outlined text-sm">
                               local_shipping
                             </span>
-                            Acercate a 50 metros del punto
+                            Get within 50 meters of the point
                             <span>Deliver</span>
                           </>
                         )}
@@ -465,7 +463,7 @@ const ReservedLotsPage = () => {
                           onClick={() => checkDistanceForLot(lot._id, true)}
                           className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200"
                         >
-                          Reintentar
+                          Retry
                         </button>
                       </div>
                     )}
