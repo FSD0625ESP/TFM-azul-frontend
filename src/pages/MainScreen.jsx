@@ -313,6 +313,12 @@ export default function MainScreen() {
     mapRef.current.markers.forEach((m) => m.remove());
     mapRef.current.markers = [];
 
+    console.log(
+      "📍 ALL MARKS:",
+      marks.map((m) => ({ type: m.type_mark, user: m.user })),
+    );
+    console.log("📦 LOT COUNTS:", lotCounts);
+
     marks.forEach((mark) => {
       const lat = parseFloat(mark.lat);
       const long = parseFloat(mark.long);
