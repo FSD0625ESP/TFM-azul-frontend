@@ -163,10 +163,9 @@ export default function MainScreen() {
         const availableLots = lotsData.filter((lot) => !lot.reserved);
         setLots(availableLots);
 
-        // Calcular lotCounts para los marcadores del mapa
-        // Contar TODOS los lotes (reservados y disponibles) para que las tiendas no desaparezcan
+        // Calcular lotCounts solo con lotes DISPONIBLES (no reservados)
         const counts = {};
-        lotsData.forEach((lot) => {
+        availableLots.forEach((lot) => {
           const shopId = lot.shop?._id
             ? String(lot.shop._id)
             : String(lot.shop);
@@ -175,7 +174,7 @@ export default function MainScreen() {
         setLotCounts(counts);
 
         console.log("Available lots:", availableLots);
-        console.log("Total lot counts (including reserved):", counts);
+        console.log("Available lot counts per store:", counts);
       } catch (err) {
         console.error("Error fetching lots:", err);
       }
