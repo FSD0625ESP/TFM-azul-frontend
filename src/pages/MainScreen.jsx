@@ -450,32 +450,17 @@ export default function MainScreen() {
               // Vista colapsada: solo el más cercano
               <div className="pb-4">
                 {(() => {
-                  console.log("🔍 Combining lots with marks. Lots:", lots);
-                  console.log("🔍 Marks:", marks);
-
-                  // Log para ver estructura de las marcas
-                  marks.forEach((m, i) => {
-                    console.log(`🔍 Mark ${i}:`, {
-                      type_mark: m.type_mark,
-                      user: m.user,
-                      userId: m.user?._id,
-                      userString: String(m.user?._id || m.user),
-                    });
-                  });
-
                   // Combinar lotes con marks para obtener ubicación
                   const lotsWithLocation = lots
                     .map((lot) => {
                       const shopId = lot.shop?._id
                         ? String(lot.shop._id)
                         : String(lot.shop);
-                      console.log("🔍 Looking for mark with shopId:", shopId);
                       const mark = marks.find(
                         (m) =>
                           m.type_mark === "shop" &&
                           String(m.user?._id || m.user) === shopId,
                       );
-                      console.log("🔍 Found mark:", mark);
 
                       if (!mark) return null;
 
@@ -508,7 +493,6 @@ export default function MainScreen() {
                         (a.distanceKm || Infinity) - (b.distanceKm || Infinity),
                     );
 
-                  console.log("🔍 Lots with location:", lotsWithLocation);
                   const closest = lotsWithLocation[0];
 
                   if (!closest) {

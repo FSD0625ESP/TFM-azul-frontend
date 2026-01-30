@@ -22,6 +22,7 @@ const StoreProfile = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [updatingLocation, setUpdatingLocation] = useState(false);
 
   const handleOpenQR = () => setShowQR(true);
   const handleCloseQR = () => setShowQR(false);
@@ -68,6 +69,52 @@ const StoreProfile = () => {
   const handleLogout = () => {
     clearAuthStorage();
     navigate(ROUTES.HOME);
+  };
+
+  /**
+   * Maneja la actualización de ubicación en el mapa
+   */
+  const handleUpdateLocation = async () => {
+    if (!navigator.geolocation) {
+      toast.error("Tu navegador no soporta geolocalización");
+      return;
+    }
+
+    setUpdatingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const API_URL =
+          import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+        const token = localStorage.getItem("token");
+
+        try {
+          // Crear o actualizar la marca de la tienda
+          await axios.post(
+            `${API_URL}/createMark`,
+            {
+              user: store?.id || store?._id,
+              lat: latitude.toString(),
+              long: longitude.toString(),
+            },
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
+
+          toast.success("Ubicación actualizada en el mapa");
+        } catch (error) {
+          console.error("Error updating location:", error);
+          toast.error("Error al actualizar la ubicación");
+        } finally {
+          setUpdatingLocation(false);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        toast.error("No se pudo obtener tu ubicación");
+        setUpdatingLocation(false);
+      },
+    );
   };
 
   /**
@@ -208,6 +255,31 @@ const StoreProfile = () => {
                 <span className="material-symbols-outlined text-base">
                   {theme === "dark" ? "light_mode" : "dark_mode"}
                 </span>
+              </button>
+            }
+          />
+
+          {/* Map Location */}
+          <InfoCard
+            icon="pin_drop"
+            label="Ubicación en el mapa"
+            value="Actualiza tu ubicación para que los usuarios te encuentren"
+            actionButton={
+              <button
+                onClick={handleUpdateLocation}
+                disabled={updatingLocation}
+                className="flex items-center gap-1 bg-transparent border-none text-xs font-medium text-emerald-600 cursor-pointer hover:text-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors px-2 whitespace-nowrap"
+                title="Update Location"
+              >
+                {updatingLocation ? (
+                  <span className="material-symbols-outlined text-base animate-spin">
+                    progress_activity
+                  </span>
+                ) : (
+                  <span className="material-symbols-outlined text-base">
+                    my_location
+                  </span>
+                )}
               </button>
             }
           />
