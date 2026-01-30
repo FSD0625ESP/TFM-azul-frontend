@@ -69,7 +69,7 @@ export const reserveLot = async (lotId) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Necesitas iniciar sesión para reservar");
+      toast.error("You need to be logged in to reserve a lot");
       throw new Error("No authentication token");
     }
 
@@ -104,7 +104,7 @@ export const cancelReservation = async (lotId) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("No estás autenticado");
+      toast.error("You are not authenticated");
       throw new Error("No authentication token");
     }
 
@@ -195,10 +195,10 @@ export const checkDistanceForPickup = async (lotId, showToasts = true) => {
 
     if (showToasts) {
       if (allowed) {
-        toast.success(`Estás cerca de la tienda (${distance?.toFixed(0)}m)`);
+        toast.success(`You are close to the store (${distance?.toFixed(0)}m)`);
       } else {
         toast.error(
-          `Debes estar a menos de 100m de la tienda. Distancia actual: ${distance?.toFixed(
+          `You must be within 50m of the store. Current distance: ${distance?.toFixed(
             0,
           )}m`,
         );
@@ -208,7 +208,7 @@ export const checkDistanceForPickup = async (lotId, showToasts = true) => {
     return { allowed, distance };
   } catch (error) {
     console.error("Error checking distance:", error);
-    if (showToasts) toast.error("Error verificando la distancia");
+    if (showToasts) toast.error("Error verifying distance");
     return { allowed: false };
   }
 };
@@ -222,7 +222,7 @@ export const markAsDelivered = async (lotId) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("No estás autenticado");
+      toast.error("You are not authenticated");
       throw new Error("No authentication token");
     }
 
@@ -238,14 +238,14 @@ export const markAsDelivered = async (lotId) => {
     );
 
     if (response?.data?.lot) {
-      toast.success("Lote marcado como entregado");
+      toast.success("Lot marked as delivered");
       return response.data.lot;
     }
     throw new Error("Invalid response");
   } catch (error) {
     console.error("Error marking as delivered:", error);
     if (error.message !== "Not within delivery range") {
-      toast.error("Error al marcar como entregado");
+      toast.error("Error marking lot as delivered");
     }
     throw error;
   }
@@ -260,27 +260,27 @@ export const getLotStatus = (lot) => {
   if (lot.delivered) {
     return {
       status: "delivered",
-      label: "Entregado",
+      label: "Delivered",
       color: "bg-emerald-100 text-emerald-700",
     };
   }
   if (lot.pickedUp) {
     return {
       status: "picked_up",
-      label: "Recogido",
+      label: "Picked up",
       color: "bg-purple-100 text-purple-700",
     };
   }
   if (lot.reserved) {
     return {
       status: "reserved",
-      label: "Reservado",
+      label: "Reserved",
       color: "bg-blue-100 text-blue-700",
     };
   }
   return {
     status: "available",
-    label: "Disponible",
+    label: "Available",
     color: "bg-green-100 text-green-700",
   };
 };
