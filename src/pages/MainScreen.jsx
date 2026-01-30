@@ -313,6 +313,12 @@ export default function MainScreen() {
     mapRef.current.markers.forEach((m) => m.remove());
     mapRef.current.markers = [];
 
+    console.log(
+      "📍 ALL MARKS:",
+      marks.map((m) => ({ type: m.type_mark, user: m.user })),
+    );
+    console.log("📦 LOT COUNTS:", lotCounts);
+
     marks.forEach((mark) => {
       const lat = parseFloat(mark.lat);
       const long = parseFloat(mark.long);
@@ -322,14 +328,15 @@ export default function MainScreen() {
         try {
           const el = document.createElement("div");
           el.className = "shop-marker";
-          const shopId = mark.shop?._id
-            ? String(mark.shop._id)
-            : mark.shop
-              ? String(mark.shop)
-              : mark.user?._id
-                ? String(mark.user._id)
-                : String(mark.user);
+
+          // El user de la marca ES el ID de la tienda
+          const shopId = mark.user?._id
+            ? String(mark.user._id)
+            : String(mark.user);
+
+          console.log("🏪 Shop mark found:", { shopId, mark });
           const count = lotCounts[shopId] || 0;
+          console.log("🏪 Lot count for this shop:", count);
 
           // No mostrar tienda si no tiene lotes
           if (count === 0) return;
