@@ -97,8 +97,7 @@ export default function MainScreen() {
           }
         } else {
           toast.error(
-            "Error getting location: " +
-              (err.message || "Unknown error"),
+            "Error getting location: " + (err.message || "Unknown error"),
           );
           return;
         }
