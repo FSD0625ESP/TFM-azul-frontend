@@ -287,20 +287,20 @@ const ReservedLotsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#f6f8f7]">
+      <div className="flex items-center justify-center min-h-screen bg-[#f6f8f7] dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f6f8f7] pb-20">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <div className="flex flex-col min-h-screen bg-[#f6f8f7] dark:bg-gray-900 pb-20">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="flex items-center gap-4 p-4 max-w-7xl mx-auto">
-          <h1 className="text-lg md:text-2xl font-bold text-gray-900 m-0">
+          <h1 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white m-0">
             Reserved Lots
           </h1>
         </div>
@@ -308,11 +308,13 @@ const ReservedLotsPage = () => {
 
       <main className="flex-1 px-4 md:px-6 lg:px-8 pt-4 max-w-7xl mx-auto w-full">
         {reservedLots.length === 0 && (
-          <div className="bg-white rounded-lg p-8 text-center border border-gray-100 mt-4">
-            <span className="material-symbols-outlined text-4xl text-gray-300 block mb-2">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center border border-gray-100 dark:border-gray-700 mt-4">
+            <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 block mb-2">
               inventory_2
             </span>
-            <p className="text-gray-500 text-sm">No reserved lots yet</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              No reserved lots yet
+            </p>
           </div>
         )}
 
@@ -335,17 +337,17 @@ const ReservedLotsPage = () => {
             return (
               <div
                 key={lot._id}
-                className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow card-hover"
+                className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow card-hover"
                 onTouchStart={(e) => handleTouchStart(e, lot._id)}
                 onTouchEnd={(e) => handleTouchEnd(e, lot._id)}
               >
                 {isDelivered && (
-                  <div className="mb-2 inline-block bg-green-100 text-green-700 rounded-full px-3 py-1 text-xs font-semibold">
+                  <div className="mb-2 inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full px-3 py-1 text-xs font-semibold">
                     ✓ Delivered
                   </div>
                 )}
                 {isPickedUp && !isDelivered && (
-                  <div className="mb-2 inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-xs font-semibold">
+                  <div className="mb-2 inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full px-3 py-1 text-xs font-semibold">
                     Swipe up to deliver
                   </div>
                 )}
@@ -362,15 +364,15 @@ const ReservedLotsPage = () => {
 
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 text-base m-0">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base m-0">
                       {lot.name}
                     </h3>
-                    <p className="text-xs text-gray-500 m-0 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 m-0 mt-1">
                       {storeName} • {storeType}
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="bg-emerald-100 text-emerald-700 rounded-full px-3 py-1 text-xs font-semibold">
+                    <div className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full px-3 py-1 text-xs font-semibold">
                       {pickupTime}
                     </div>
                   </div>

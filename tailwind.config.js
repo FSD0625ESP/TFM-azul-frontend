@@ -1,4 +1,6 @@
 module.exports = {
+  darkMode: "class", // Habilitar modo oscuro con clase
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -17,5 +19,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("daisyui"), require("@tailwindcss/forms")],
+  plugins: [require("@tailwindcss/forms")],
 };

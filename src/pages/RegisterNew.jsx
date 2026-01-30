@@ -173,33 +173,33 @@ const Register = () => {
     }
   };
   return (
-    <div className="min-h-dvh bg-white flex flex-col items-center justify-center p-4">
+    <div className="min-h-dvh bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-4">
       <main className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mb-4">
-            <span className="material-symbols-outlined text-emerald-500 text-4xl">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-4">
+            <span className="material-symbols-outlined text-emerald-500 dark:text-emerald-400 text-4xl">
               volunteer_activism
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mt-0 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-0 mb-2">
             Create your account
           </h1>
-          <p className="text-base text-gray-600 mt-2 mb-0">
+          <p className="text-base text-gray-600 dark:text-gray-300 mt-2 mb-0">
             Select your account type to continue.
           </p>
         </div>
 
         {/* Role Selector */}
-        <div className="flex h-12 items-center justify-center rounded-xl bg-gray-200 p-1.5 mb-6 gap-1.5">
+        <div className="flex h-12 items-center justify-center rounded-xl bg-gray-200 dark:bg-gray-700 p-1.5 mb-6 gap-1.5">
           {[USER_TYPES.RIDER, USER_TYPES.SHOP].map((role) => (
             <label
               key={role}
               onClick={() => setUserType(role)}
               className={`flex-1 flex items-center justify-center h-full rounded-lg px-2 text-sm font-medium cursor-pointer transition-all ${
                 userType === role
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "bg-transparent text-gray-500"
+                  ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                  : "bg-transparent text-gray-500 dark:text-gray-400"
               }`}
             >
               <span>{role === USER_TYPES.RIDER ? "Rider" : "Store"}</span>

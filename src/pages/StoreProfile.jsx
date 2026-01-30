@@ -7,6 +7,8 @@ import { InfoCard } from "../components/InfoCard";
 import { StoreBottomNav } from "../components/BottomNav";
 import { ROUTES } from "../utils/constants";
 import { clearAuthStorage } from "../utils/authHelpers";
+import { useTheme } from "../context/ThemeContext";
+import axios from "axios";
 import {
   uploadProfilePhoto,
   updateStoredEntity,
@@ -15,6 +17,7 @@ import {
 
 const StoreProfile = () => {
   const navigate = useNavigate();
+  const { theme, updateTheme } = useTheme();
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -33,6 +36,31 @@ const StoreProfile = () => {
     }
     setLoading(false);
   }, [navigate]);
+
+  /**
+   * Maneja el cambio de tema
+   */
+  const handleThemeToggle = async () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    const token = localStorage.getItem("token");
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+
+    try {
+      await axios.patch(
+        `${API_URL}/stores/theme`,
+        { theme: newTheme },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      updateTheme(newTheme);
+      toast.success(
+        `Tema cambiado a ${newTheme === "dark" ? "oscuro" : "claro"}`,
+      );
+    } catch (error) {
+      console.error("Error updating theme:", error);
+      toast.error("Error al cambiar el tema");
+    }
+  };
 
   /**
    * Maneja el cierre de sesión
@@ -84,20 +112,22 @@ const StoreProfile = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Modal QR */}
       {showQR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-xl p-6 shadow-lg flex flex-col items-center relative min-w-[300px]">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg flex flex-col items-center relative min-w-[300px]">
             <button
               onClick={handleCloseQR}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl"
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white text-2xl"
             >
               &times;
             </button>
-            <h3 className="text-lg font-bold mb-4">QR de la tienda</h3>
+            <h3 className="text-lg font-bold mb-4 dark:text-white">
+              QR de la tienda
+            </h3>
             <QRCodeSVG value={store?._id || store?.id || ""} size={200} />
-            <p className="mt-4 text-xs text-gray-500 break-all">
+            <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 break-all">
               {store?._id || store?.id}
             </p>
           </div>
@@ -117,17 +147,19 @@ const StoreProfile = () => {
               icon="storefront"
             />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {store.name}
           </h2>
-          <p className="text-sm text-gray-600">{store.type}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            {store.type}
+          </p>
           <button
             onClick={handleOpenQR}
             className="mt-2 px-3 py-1 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700"
           >
             Show QR
           </button>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Click on logo to {store.photo ? "change" : "add"}
           </p>
         </div>
@@ -160,6 +192,24 @@ const StoreProfile = () => {
             icon="phone"
             label="Phone"
             value={store.phone ? store.phone : "Not specified"}
+          />
+
+          {/* Theme Toggle */}
+          <InfoCard
+            icon={theme === "dark" ? "dark_mode" : "light_mode"}
+            label="Theme"
+            value={theme === "dark" ? "Dark Mode" : "Light Mode"}
+            actionButton={
+              <button
+                onClick={handleThemeToggle}
+                className="flex items-center gap-1 bg-transparent border-none text-xs font-medium text-emerald-600 cursor-pointer hover:text-emerald-700 transition-colors px-2 whitespace-nowrap"
+                title="Toggle Theme"
+              >
+                <span className="material-symbols-outlined text-base">
+                  {theme === "dark" ? "light_mode" : "dark_mode"}
+                </span>
+              </button>
+            }
           />
         </div>
 

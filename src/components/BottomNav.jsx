@@ -10,9 +10,9 @@ import { useNavigate, useLocation } from "react-router-dom";
  */
 const NavItem = ({ path, icon, label, isActive = false, onClick }) => {
   const activeClasses =
-    "flex-col items-center justify-center gap-1 flex-1 rounded-lg bg-emerald-50 p-2 text-emerald-500 text-xs font-bold cursor-pointer transition-colors";
+    "flex-col items-center justify-center gap-1 flex-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 p-2 text-emerald-500 dark:text-emerald-400 text-xs font-bold cursor-pointer transition-colors";
   const inactiveClasses =
-    "flex-col items-center justify-center gap-1 flex-1 rounded-lg p-2 text-gray-400 text-xs hover:text-gray-600 transition-colors cursor-pointer";
+    "flex-col items-center justify-center gap-1 flex-1 rounded-lg p-2 text-gray-400 dark:text-gray-500 text-xs hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer";
 
   return (
     <button
@@ -57,7 +57,7 @@ export const BottomNav = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 flex justify-around border-t border-gray-200 bg-white/80 backdrop-blur-sm p-2 gap-2 z-40">
+    <nav className="fixed bottom-0 left-0 right-0 flex justify-around border-t border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-2 gap-2 z-40">
       {navItems.map((item, index) => (
         <NavItem
           key={index}
@@ -99,7 +99,7 @@ export const StoreBottomNav = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 flex justify-around border-t border-gray-200 bg-white/80 backdrop-blur-sm p-2 gap-2 z-40">
+    <nav className="fixed bottom-0 left-0 right-0 flex justify-around border-t border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-2 gap-2 z-40">
       {navItems.map((item, index) => (
         <NavItem
           key={index}

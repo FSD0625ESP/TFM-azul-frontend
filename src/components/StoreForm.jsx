@@ -60,7 +60,7 @@ const StoreForm = ({
 
       {/* Address */}
       <div className="relative">
-        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none z-10">
           location_on
         </span>
         <input
@@ -71,19 +71,19 @@ const StoreForm = ({
             searchAddress(e.target.value);
           }}
           placeholder="Address"
-          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 text-sm focus:outline-none focus:border-emerald-500"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500"
         />
 
         {/* Address suggestions dropdown */}
         {suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 bg-white border border-t-0 border-gray-300 rounded-b-lg max-h-50 overflow-y-auto z-20 shadow-md">
+          <div className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-t-0 border-gray-300 dark:border-gray-600 rounded-b-lg max-h-50 overflow-y-auto z-20 shadow-md">
             {suggestions.map((suggestion, index) => (
               <div
                 key={index}
                 onClick={() => handleSelectAddress(suggestion)}
-                className={`px-4 py-3 cursor-pointer text-gray-900 text-sm transition-colors hover:bg-gray-100 ${
+                className={`px-4 py-3 cursor-pointer text-gray-900 dark:text-gray-200 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 ${
                   index < suggestions.length - 1
-                    ? "border-b border-gray-100"
+                    ? "border-b border-gray-100 dark:border-gray-700"
                     : ""
                 }`}
               >

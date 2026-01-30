@@ -7,6 +7,8 @@ import { InfoCard } from "../components/InfoCard";
 import { BottomNav } from "../components/BottomNav";
 import { ROUTES } from "../utils/constants";
 import { clearAuthStorage } from "../utils/authHelpers";
+import { useTheme } from "../context/ThemeContext";
+import axios from "axios";
 import {
   uploadProfilePhoto,
   updateStoredEntity,
@@ -16,6 +18,7 @@ import {
 
 const RiderProfile = () => {
   const navigate = useNavigate();
+  const { theme, updateTheme } = useTheme();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
@@ -33,7 +36,32 @@ const RiderProfile = () => {
     setLoading(false);
   }, [navigate]);
 
+  /**ambio de tema
+   */
+  const handleThemeToggle = async () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    const token = localStorage.getItem("token");
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+
+    try {
+      await axios.patch(
+        `${API_URL}/users/theme`,
+        { theme: newTheme },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      updateTheme(newTheme);
+      toast.success(
+        `Tema cambiado a ${newTheme === "dark" ? "oscuro" : "claro"}`,
+      );
+    } catch (error) {
+      console.error("Error updating theme:", error);
+      toast.error("Error al cambiar el tema");
+    }
+  };
+
   /**
+   * Maneja el c
    * Maneja el cierre de sesión
    */
   const handleLogout = () => {
@@ -168,7 +196,7 @@ const RiderProfile = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Main Content */}
       <main className="flex-1 p-4 flex flex-col pb-20 pt-4">
         {/* Profile Image and Name */}
@@ -182,14 +210,16 @@ const RiderProfile = () => {
               icon="person"
             />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">{user.name}</h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            {user.name}
+          </h2>
           <button
             onClick={handleOpenScanner}
-            className="mt-2 px-3 py-1 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700"
+            className="mt-2 px-3 py-1 bg-emerald-600 dark:bg-emerald-700 text-white rounded-md text-sm hover:bg-emerald-700 dark:hover:bg-emerald-800"
           >
             Escanear QR
           </button>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Click on photo to {user.photo ? "change" : "add"}
           </p>
         </div>
@@ -197,6 +227,24 @@ const RiderProfile = () => {
         {/* User Details */}
         <div className="flex flex-col gap-6 mb-8">
           {/* Email */}
+
+          {/* Theme Toggle */}
+          <InfoCard
+            icon={theme === "dark" ? "dark_mode" : "light_mode"}
+            label="Theme"
+            value={theme === "dark" ? "Dark Mode" : "Light Mode"}
+            actionButton={
+              <button
+                onClick={handleThemeToggle}
+                className="flex items-center gap-1 bg-transparent border-none text-xs font-medium text-emerald-600 dark:text-emerald-400 cursor-pointer hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors px-2 whitespace-nowrap"
+                title="Toggle Theme"
+              >
+                <span className="material-symbols-outlined text-base">
+                  {theme === "dark" ? "light_mode" : "dark_mode"}
+                </span>
+              </button>
+            }
+          />
           <InfoCard
             icon="mail"
             label="Email"
@@ -204,7 +252,7 @@ const RiderProfile = () => {
             actionButton={
               <button
                 onClick={() => navigate(ROUTES.CHANGE_PASSWORD)}
-                className="flex items-center gap-1 bg-transparent border-none text-xs font-medium text-emerald-600 cursor-pointer hover:text-emerald-700 transition-colors px-2 whitespace-nowrap"
+                className="flex items-center gap-1 bg-transparent border-none text-xs font-medium text-emerald-600 dark:text-emerald-400 cursor-pointer hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors px-2 whitespace-nowrap"
                 title="Change Password"
               >
                 <span className="material-symbols-outlined text-base">
@@ -226,7 +274,7 @@ const RiderProfile = () => {
         <div className="flex justify-center mb-8">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 bg-transparent border-none text-base font-medium text-red-600 cursor-pointer hover:text-red-700 transition-colors"
+            className="flex items-center gap-2 bg-transparent border-none text-base font-medium text-red-600 dark:text-red-400 cursor-pointer hover:text-red-700 dark:hover:text-red-300 transition-colors"
           >
             <span className="material-symbols-outlined">logout</span>
             <span>Logout</span>
@@ -237,18 +285,18 @@ const RiderProfile = () => {
       {/* Scanner Modal */}
       {showScanner && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-xl p-4 shadow-lg w-[90%] max-w-xl relative">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg w-[90%] max-w-xl relative">
             <button
               onClick={handleCloseScanner}
-              className="absolute top-2 right-2 text-gray-600 text-2xl"
+              className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 text-2xl"
             >
               &times;
             </button>
-            <h3 className="text-lg font-bold mb-2">
+            <h3 className="text-lg font-bold mb-2 dark:text-white">
               Escanea el QR de la tienda
             </h3>
             <div id="qr-reader" className="w-full h-[360px]" />
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Permite acceso a la cámara para escanear.
             </p>
           </div>

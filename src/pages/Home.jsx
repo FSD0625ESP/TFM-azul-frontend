@@ -6,14 +6,16 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col">
+    <div className="min-h-dvh bg-white dark:bg-gray-900 flex flex-col">
       {/* Header with Logo */}
       <header className="w-full px-4 pt-8 pb-4 flex justify-center">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-emerald-500 text-4xl">
             local_mall
           </span>
-          <span className="font-bold text-2xl text-gray-800">SoulBites</span>
+          <span className="font-bold text-2xl text-gray-800 dark:text-white">
+            SoulBites
+          </span>
         </div>
       </header>
 
@@ -28,14 +30,14 @@ const Home = () => {
         ></div>
 
         {/* Content Section */}
-        <div className="bg-white rounded-t-3xl -mt-8 pt-8 pb-5 flex-shrink-0">
+        <div className="bg-white dark:bg-gray-900 rounded-t-3xl -mt-8 pt-8 pb-5 flex-shrink-0">
           {/* Headline */}
-          <h1 className="text-4xl font-bold leading-tight text-gray-900 text-center pb-3 px-6 m-0">
+          <h1 className="text-4xl font-bold leading-tight text-gray-900 dark:text-white text-center pb-3 px-6 m-0">
             Connecting hearts, one plate at a time.
           </h1>
 
           {/* Description */}
-          <p className="text-base font-normal leading-relaxed text-gray-600 text-center pb-6 pt-1 px-6 m-0">
+          <p className="text-base font-normal leading-relaxed text-gray-600 dark:text-gray-300 text-center pb-6 pt-1 px-6 m-0">
             Join our community of stores, riders and volunteers to rescue
             delicious food and bring it to those who need it most in your city.
           </p>
@@ -51,7 +53,7 @@ const Home = () => {
               </button>
               <button
                 onClick={() => navigate("/login")}
-                className="h-12 rounded-xl px-5 py-3 bg-transparent text-gray-800 border-2 border-gray-800 font-bold text-base cursor-pointer transition-colors hover:bg-gray-100 active:bg-gray-200"
+                className="h-12 rounded-xl px-5 py-3 bg-transparent text-gray-800 dark:text-white border-2 border-gray-800 dark:border-gray-300 font-bold text-base cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700"
               >
                 Sign In
               </button>

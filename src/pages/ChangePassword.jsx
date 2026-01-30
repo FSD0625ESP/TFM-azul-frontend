@@ -57,7 +57,7 @@ const ChangePassword = () => {
       await axios.patch(
         endpoint,
         { currentPassword, newPassword },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       toast.success("Password changed successfully!");
@@ -66,7 +66,7 @@ const ChangePassword = () => {
       console.error("Error:", error);
       toast.error(
         error.response?.data?.message ||
-          "Error changing password. Please check your current password."
+          "Error changing password. Please check your current password.",
       );
     } finally {
       setLoading(false);
@@ -74,20 +74,20 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col items-center justify-center p-4">
+    <div className="min-h-dvh bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md flex flex-col items-center">
         {/* Icon */}
-        <div className="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center mb-6">
-          <span className="material-symbols-outlined text-emerald-500 text-4xl">
+        <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-6">
+          <span className="material-symbols-outlined text-emerald-500 dark:text-emerald-400 text-4xl">
             lock_reset
           </span>
         </div>
 
         {/* Headline */}
-        <h1 className="text-gray-900 text-3xl font-bold text-center mb-3">
+        <h1 className="text-gray-900 dark:text-white text-3xl font-bold text-center mb-3">
           Change Password
         </h1>
-        <p className="text-gray-600 text-base text-center mb-8">
+        <p className="text-gray-600 dark:text-gray-300 text-base text-center mb-8">
           Enter your current password and choose a new one.
         </p>
 
@@ -95,7 +95,7 @@ const ChangePassword = () => {
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
           {/* Current Password */}
           <div className="flex flex-col w-full">
-            <label className="text-gray-900 text-base font-medium mb-2">
+            <label className="text-gray-900 dark:text-gray-200 text-base font-medium mb-2">
               Current Password
             </label>
             <div className="flex w-full items-stretch rounded-lg">
@@ -104,13 +104,13 @@ const ChangePassword = () => {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Enter current password"
-                className="flex-1 px-4 py-4 rounded-l-lg border border-gray-200 border-r-0 bg-white text-gray-900 text-base focus:outline-none focus:border-emerald-500"
+                className="flex-1 px-4 py-4 rounded-l-lg border border-gray-200 dark:border-gray-700 border-r-0 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base focus:outline-none focus:border-emerald-500"
                 disabled={loading}
               />
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="flex border border-l-0 border-gray-200 bg-white items-center justify-center pr-4 rounded-r-lg cursor-pointer text-teal-700 hover:text-emerald-500 transition-colors"
+                className="flex border border-l-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 items-center justify-center pr-4 rounded-r-lg cursor-pointer text-teal-700 dark:text-emerald-400 hover:text-emerald-500 transition-colors"
               >
                 <span className="material-symbols-outlined">
                   {showCurrentPassword ? "visibility_off" : "visibility"}

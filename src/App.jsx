@@ -30,93 +30,99 @@ import {
   AdminOnlyRoute,
 } from "./components/ProtectedRoutes";
 import { useAuth } from "./hooks/useAuth";
+import { ThemeProvider } from "./context/ThemeContext";
 
 function App() {
   const { isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando...</p>
+          <p className="text-gray-600 dark:text-gray-300">Cargando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<PublicRoute element={<Home />} />} />
-        <Route
-          path="/register"
-          element={<PublicRoute element={<RegisterNew />} />}
-        />
-        <Route path="/login" element={<PublicRoute element={<LoginNew />} />} />
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<PublicRoute element={<Home />} />} />
+          <Route
+            path="/register"
+            element={<PublicRoute element={<RegisterNew />} />}
+          />
+          <Route
+            path="/login"
+            element={<PublicRoute element={<LoginNew />} />}
+          />
 
-        {/* Password Recovery Routes */}
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+          {/* Password Recovery Routes */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Change Password - authenticated users only */}
-        <Route
-          path="/change-password"
-          element={<ProtectedRoute element={<ChangePassword />} />}
-        />
+          {/* Change Password - authenticated users only */}
+          <Route
+            path="/change-password"
+            element={<ProtectedRoute element={<ChangePassword />} />}
+          />
 
-        {/* Rider-only routes */}
-        <Route
-          path="/mainscreen"
-          element={<RiderOnlyRoute element={<MainScreen />} />}
-        />
-        <Route
-          path="/rider-profile"
-          element={<RiderOnlyRoute element={<RiderProfile />} />}
-        />
-        <Route
-          path="/reserved-lots"
-          element={<RiderOnlyRoute element={<ReservedLotsPage />} />}
-        />
-        <Route
-          path="/store/:storeId/lots"
-          element={<RiderOnlyRoute element={<StoreLotsPage />} />}
-        />
+          {/* Rider-only routes */}
+          <Route
+            path="/mainscreen"
+            element={<RiderOnlyRoute element={<MainScreen />} />}
+          />
+          <Route
+            path="/rider-profile"
+            element={<RiderOnlyRoute element={<RiderProfile />} />}
+          />
+          <Route
+            path="/reserved-lots"
+            element={<RiderOnlyRoute element={<ReservedLotsPage />} />}
+          />
+          <Route
+            path="/store/:storeId/lots"
+            element={<RiderOnlyRoute element={<StoreLotsPage />} />}
+          />
 
-        {/* Store-only routes */}
-        <Route
-          path="/store-profile"
-          element={<StoreOnlyRoute element={<StoreProfile />} />}
-        />
-        <Route
-          path="/lots"
-          element={<StoreOnlyRoute element={<LotsPage />} />}
-        />
+          {/* Store-only routes */}
+          <Route
+            path="/store-profile"
+            element={<StoreOnlyRoute element={<StoreProfile />} />}
+          />
+          <Route
+            path="/lots"
+            element={<StoreOnlyRoute element={<LotsPage />} />}
+          />
 
-        {/* Admin Routes */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route
-          path="/admin/dashboard"
-          element={<AdminOnlyRoute element={<AdminDashboard />} />}
-        />
-        <Route
-          path="/admin/users"
-          element={<AdminOnlyRoute element={<AdminUsers />} />}
-        />
-        <Route
-          path="/admin/stores"
-          element={<AdminOnlyRoute element={<AdminStores />} />}
-        />
-        <Route
-          path="/admin/lots"
-          element={<AdminOnlyRoute element={<AdminLots />} />}
-        />
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin/dashboard"
+            element={<AdminOnlyRoute element={<AdminDashboard />} />}
+          />
+          <Route
+            path="/admin/users"
+            element={<AdminOnlyRoute element={<AdminUsers />} />}
+          />
+          <Route
+            path="/admin/stores"
+            element={<AdminOnlyRoute element={<AdminStores />} />}
+          />
+          <Route
+            path="/admin/lots"
+            element={<AdminOnlyRoute element={<AdminLots />} />}
+          />
 
-        {/* Fallback - redirect to home */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </Router>
+          {/* Fallback - redirect to home */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }
 

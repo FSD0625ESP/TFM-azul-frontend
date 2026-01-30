@@ -106,7 +106,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col items-center justify-center overflow-auto p-4">
+    <div className="min-h-dvh bg-white dark:bg-gray-900 flex flex-col items-center justify-center overflow-auto p-4">
       <div className="w-full max-w-md flex flex-col items-center">
         {/* Logo */}
         <div className="h-16 w-16 rounded-2xl bg-emerald-500 flex items-center justify-center mb-6">
@@ -116,14 +116,16 @@ const Login = () => {
         </div>
 
         {/* Headline */}
-        <h1 className="text-gray-900 text-4xl font-bold leading-tight text-center pb-8 m-0">
+        <h1 className="text-gray-900 dark:text-white text-4xl font-bold leading-tight text-center pb-8 m-0">
           Welcome back
         </h1>
 
         {/* Error Message */}
         {error && (
-          <div className="w-full mb-4 p-4 bg-red-100 border border-red-400 rounded-lg">
-            <p className="text-red-900 text-sm m-0">{error}</p>
+          <div className="w-full mb-4 p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 rounded-lg">
+            <p className="text-red-900 dark:text-red-300 text-sm m-0">
+              {error}
+            </p>
           </div>
         )}
 
@@ -132,7 +134,7 @@ const Login = () => {
           {/* Email */}
           <div className="flex w-full flex-wrap items-end gap-4 pb-3">
             <label className="flex flex-col w-full">
-              <p className="text-gray-900 text-base font-medium leading-relaxed pb-2">
+              <p className="text-gray-900 dark:text-gray-200 text-base font-medium leading-relaxed pb-2">
                 Email
               </p>
               <input
@@ -140,7 +142,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full px-4 py-4 rounded-lg border border-gray-200 bg-white text-gray-900 text-base focus:outline-none focus:border-emerald-500"
+                className="w-full px-4 py-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base focus:outline-none focus:border-emerald-500"
               />
             </label>
           </div>
@@ -148,7 +150,7 @@ const Login = () => {
           {/* Password */}
           <div className="flex w-full flex-wrap items-end gap-4 pt-3">
             <label className="flex flex-col w-full">
-              <p className="text-gray-900 text-base font-medium leading-relaxed pb-2">
+              <p className="text-gray-900 dark:text-gray-200 text-base font-medium leading-relaxed pb-2">
                 Password
               </p>
               <div className="flex w-full items-stretch rounded-lg">
@@ -157,12 +159,12 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="flex-1 px-4 py-4 rounded-l-lg border border-gray-200 border-r-0 bg-white text-gray-900 text-base focus:outline-none focus:border-emerald-500"
+                  className="flex-1 px-4 py-4 rounded-l-lg border border-gray-200 dark:border-gray-700 border-r-0 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base focus:outline-none focus:border-emerald-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="flex border border-l-0 border-gray-200 bg-white items-center justify-center pr-4 rounded-r-lg border-r cursor-pointer text-teal-700 hover:text-emerald-500 transition-colors"
+                  className="flex border border-l-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 items-center justify-center pr-4 rounded-r-lg border-r cursor-pointer text-teal-700 dark:text-emerald-400 hover:text-emerald-500 transition-colors"
                 >
                   <span className="material-symbols-outlined">
                     {showPassword ? "visibility_off" : "visibility"}

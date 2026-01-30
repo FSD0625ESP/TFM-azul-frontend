@@ -63,7 +63,7 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
         today.getMonth(),
         today.getDate(),
         parseInt(inputHours),
-        parseInt(inputMinutes)
+        parseInt(inputMinutes),
       );
 
       const formData = new FormData();
@@ -111,18 +111,18 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
       onClick={onClose}
     >
       <div
-        className="w-full bg-[#f6f8f7] rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto"
+        className="w-full bg-[#f6f8f7] dark:bg-gray-800 rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={onClose}
-            className="bg-transparent border-none text-2xl cursor-pointer text-gray-500 flex items-center justify-center"
+            className="bg-transparent border-none text-2xl cursor-pointer text-gray-500 dark:text-gray-400 flex items-center justify-center"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
-          <h2 className="text-lg font-bold text-gray-900 flex-1 text-center">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white flex-1 text-center">
             Add Food Lot
           </h2>
           <div className="w-6"></div>
@@ -130,7 +130,7 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-100 border border-red-400 rounded-lg p-3 mb-4 text-red-900 text-sm">
+          <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 rounded-lg p-3 mb-4 text-red-900 dark:text-red-300 text-sm">
             {error}
           </div>
         )}
@@ -139,11 +139,11 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Image Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-gray-900 dark:text-gray-200 mb-2">
               Lot Image (Optional)
             </label>
             <div className="flex flex-col items-center">
-              <div className="relative w-full h-48 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors mb-2">
+              <div className="relative w-full h-48 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors mb-2">
                 {imagePreview ? (
                   <>
                     <img
@@ -169,10 +169,10 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
                     htmlFor="lot-image"
                     className="w-full h-full flex flex-col items-center justify-center cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-gray-400 text-5xl mb-2">
+                    <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-5xl mb-2">
                       add_photo_alternate
                     </span>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
                       Click to add an image
                     </span>
                   </label>
@@ -190,7 +190,7 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
 
           {/* Lot Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-gray-900 dark:text-gray-200 mb-2">
               Lot Name
             </label>
             <input
@@ -198,26 +198,26 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="E.g: Monday Bakery Pack"
-              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-gray-900 dark:text-gray-200 mb-2">
               Description
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add details about the content, possible allergens, pickup time, etc."
-              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:border-emerald-500 min-h-[120px] resize-vertical"
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-emerald-500 min-h-[120px] resize-vertical"
             />
           </div>
 
           {/* Pickup Deadline */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-gray-900 dark:text-gray-200 mb-2">
               Pickup Deadline
             </label>
             <input
@@ -230,7 +230,7 @@ const AddFoodLotModal = ({ isOpen, onClose, storeId, onSuccess }) => {
                 const minutes = String(now.getMinutes()).padStart(2, "0");
                 return `${hours}:${minutes}`;
               })()}
-              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
             />
           </div>
 

@@ -168,48 +168,54 @@ const StoreLotsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#f6f8f7]">
+      <div className="flex items-center justify-center min-h-screen bg-[#f6f8f7] dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f8f7] pb-8">
+    <div className="min-h-screen bg-[#f6f8f7] dark:bg-gray-900 pb-8">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="flex items-center gap-4 p-4">
           <button
             onClick={() => navigate(-1)}
-            className="text-gray-400 hover:text-gray-600 text-2xl"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-2xl"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-bold text-gray-900">
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
               {store?.name || "Store"}
             </h1>
-            <p className="text-xs text-gray-500">{store?.address}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {store?.address}
+            </p>
           </div>
         </div>
       </header>
 
       {/* Store Info */}
       {store && (
-        <div className="bg-white mx-4 mt-4 rounded-lg p-4 shadow-sm border border-gray-100">
+        <div className="bg-white dark:bg-gray-800 mx-4 mt-4 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="flex gap-3">
-            <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
-              <span className="material-symbols-outlined text-emerald-600">
+            <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+              <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400">
                 store
               </span>
             </div>
             <div className="flex-1">
-              <h2 className="font-bold text-gray-900 text-sm">{store.name}</h2>
-              <p className="text-xs text-gray-600">{store.type}</p>
-              <p className="text-xs text-gray-500 flex items-center gap-1">
+              <h2 className="font-bold text-gray-900 dark:text-white text-sm">
+                {store.name}
+              </h2>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {store.type}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                 <span className="material-symbols-outlined text-xs">phone</span>
                 {store.phone || "No phone available"}
               </p>
@@ -221,11 +227,13 @@ const StoreLotsPage = () => {
       {/* Lots List */}
       <div className="px-4 mt-4">
         {lots.length === 0 ? (
-          <div className="bg-white rounded-lg p-8 text-center border border-gray-100">
-            <span className="material-symbols-outlined text-4xl text-gray-300 block mb-2">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center border border-gray-100 dark:border-gray-700">
+            <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 block mb-2">
               inventory_2
             </span>
-            <p className="text-gray-500 text-sm">No food lots available</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              No food lots available
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -243,7 +251,7 @@ const StoreLotsPage = () => {
               return (
                 <div
                   key={lot._id}
-                  className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                  className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow"
                 >
                   {/* Lot Image */}
                   {lot.image && (
@@ -258,10 +266,12 @@ const StoreLotsPage = () => {
 
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-base">
+                      <h3 className="font-bold text-gray-900 dark:text-white text-base">
                         {lot.name}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-1">{pickupDate}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {pickupDate}
+                      </p>
                       <div className="flex gap-2 mt-2">
                         {!!lot.reserved && !!lot.pickedUp ? (
                           <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-semibold">
