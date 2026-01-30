@@ -47,11 +47,11 @@ export default function MainScreen() {
     try {
       const userId = user?.id || user?._id || null;
       if (!user || !userId) {
-        toast.error("Usuario no autenticado");
+        toast.error("User not authenticated");
         return;
       }
       if (typeof navigator === "undefined" || !navigator.geolocation) {
-        toast.error("Geolocalización no disponible en este navegador.");
+        toast.error("Geolocation not available in this browser.");
         return;
       }
 
@@ -75,7 +75,7 @@ export default function MainScreen() {
         console.warn("Geolocation getCurrentPosition failed:", err);
         if (err && err.code === 1) {
           toast.error(
-            "Permiso de ubicación denegado. Activa los permisos de ubicación para la app y vuelve a intentarlo.",
+            "Location permission denied. Enable location permissions for the app and try again.",
           );
           return;
         }
@@ -87,17 +87,17 @@ export default function MainScreen() {
               position = { coords: { latitude: ll.lat, longitude: ll.lng } };
             } else {
               toast.error(
-                "No se pudo obtener la ubicación (timeout) y no hay posición previa.",
+                "Could not get location (timeout) and no previous position.",
               );
               return;
             }
           } catch {
-            toast.error("No se pudo obtener la ubicación. Comprueba el GPS.");
+            toast.error("Could not get location. Check GPS.");
             return;
           }
         } else {
           toast.error(
-            "Error al obtener la ubicación: " +
+            "Error getting location: " +
               (err.message || "Unknown error"),
           );
           return;
@@ -514,7 +514,7 @@ export default function MainScreen() {
                           mapRef.current.directions.removeRoutes();
                           setActiveDestination(null);
                           localStorage.removeItem("activeDestination");
-                          toast.info("Ruta eliminada");
+                          toast.info("Route deleted");
                           return;
                         }
 
@@ -535,7 +535,7 @@ export default function MainScreen() {
                           "activeDestination",
                           JSON.stringify(dest),
                         );
-                        toast.success("¡Ruta creada!");
+                        toast.success("Route created successfully!");
                       }}
                       className={`p-3 rounded-xl border cursor-pointer transition-all ${
                         isActive
@@ -643,7 +643,7 @@ export default function MainScreen() {
                           JSON.stringify(dest),
                         );
                         toast.success(
-                          "¡Ruta creada! Ve a la tienda para reservar el lote",
+                          "Route created! Go to the store to reserve the bundle.",
                         );
                       }}
                       className={`p-3 rounded-xl border cursor-pointer transition-all ${

@@ -64,10 +64,10 @@ export const LotCard = ({
                   {status === "delivered"
                     ? "check_circle"
                     : status === "picked_up"
-                    ? "shopping_bag"
-                    : status === "reserved"
-                    ? "schedule"
-                    : "radio_button_unchecked"}
+                      ? "shopping_bag"
+                      : status === "reserved"
+                        ? "schedule"
+                        : "radio_button_unchecked"}
                 </span>
                 {label}
               </span>
@@ -146,8 +146,8 @@ export const LotCard = ({
               {distanceState.distance
                 ? `${distanceState.distance.toFixed(0)}m de la tienda`
                 : distanceState.allowed
-                ? "Cerca de la tienda"
-                : "Lejos de la tienda"}
+                  ? "Cerca de la tienda"
+                  : "Lejos de la tienda"}
             </span>
           </div>
         )}
@@ -180,7 +180,7 @@ export const LotCard = ({
                 <span className="material-symbols-outlined text-lg">
                   shopping_cart
                 </span>
-                <span>Reservar</span>
+                <span>Reserve</span>
               </button>
             )}
 

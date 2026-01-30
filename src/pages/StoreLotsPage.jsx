@@ -131,7 +131,7 @@ const StoreLotsPage = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        toast.error("Necesitas iniciar sesión para reservar");
+        toast.error("You need to log in to book");
         return;
       }
 
@@ -152,16 +152,15 @@ const StoreLotsPage = () => {
         }
 
         toast.success(
-          "Lote reservado correctamente. Ve al mapa para ver la ruta",
+          "Lot reserved successfully. Go to the map to see the route.",
         );
       } else {
-        toast.error("No se pudo reservar el lote");
+        toast.error("Failed to reserve lot");
       }
     } catch (err) {
-      console.error("Error reservando lote:", err);
+      console.error("Error reserve lot:", err);
       toast.error(
-        "Error reservando lote: " +
-          (err?.response?.data?.message || err.message),
+        "Error reserving lot: " + (err?.response?.data?.message || err.message),
       );
     }
   };
@@ -294,7 +293,7 @@ const StoreLotsPage = () => {
                     <span className="material-symbols-outlined text-sm mr-2">
                       bookmark_add
                     </span>
-                    Reservar lote
+                    Reserve lot
                   </button>
                 </div>
               );

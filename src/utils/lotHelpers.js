@@ -170,7 +170,7 @@ export const checkDistanceForPickup = async (lotId, showToasts = true) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
-      if (showToasts) toast.error("No estás autenticado");
+      if (showToasts) toast.error("You are not authenticated");
       return { allowed: false };
     }
 
@@ -178,7 +178,7 @@ export const checkDistanceForPickup = async (lotId, showToasts = true) => {
     if (!position) {
       if (showToasts)
         toast.error(
-          "No se pudo obtener la ubicación. Activa el GPS y permite permisos."
+          "Could not get location. Enable GPS and allow permissions."
         );
       return { allowed: false };
     }

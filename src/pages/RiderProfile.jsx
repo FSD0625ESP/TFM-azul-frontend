@@ -88,11 +88,11 @@ const RiderProfile = () => {
           const token = localStorage.getItem("token");
           try {
             const response = await confirmPickup(decodedText, token);
-            alert(response?.message || "Recogida confirmada");
+            alert(response?.message || "Pickup confirmed");
           } catch (err) {
             console.error(err);
             const msg =
-              err?.response?.data?.message || "Error confirmando recogida";
+              err?.response?.data?.message || "Error confirming pickup";
             alert(msg);
           } finally {
             setShowScanner(false);
@@ -106,7 +106,7 @@ const RiderProfile = () => {
         })
         .catch((err) => {
           console.error("QR start error:", err);
-          alert("No se pudo iniciar la cámara. Comprueba permisos.");
+          alert("Could not start camera. Check permissions.");
           setShowScanner(false);
         });
     }
